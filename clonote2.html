@@ -28,28 +28,25 @@
     }
 
     html, body {
-      background: #e8e4dc;
+      background: transparent;
       font-family: 'Helvetica Neue', Arial, sans-serif;
       color: var(--text);
       min-height: 100vh;
     }
 
-    /* ══════════════════════════════
-       BOOK WRAPPER
-    ══════════════════════════════ */
     .book-outer {
-      max-width: 1440px;
+      max-width: 100%;
+      width: 100%;
       margin: 0 auto;
-      padding: 16px 12px 20px;
+      padding: 8px 0 12px;
     }
 
-    /* Top bar: 월 이동 + 유저 */
     .book-topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 8px;
-      padding: 0 4px;
+      padding: 0 12px;
     }
 
     .book-nav { display: flex; align-items: center; gap: 6px; }
@@ -95,9 +92,7 @@
     ══════════════════════════════ */
     .book-spread {
       display: flex;
-      border-radius: 6px;
       overflow: hidden;
-      box-shadow: 0 6px 32px rgba(0,0,0,0.18), 0 1px 4px rgba(0,0,0,0.10);
     }
 
     /* 왼쪽 페이지 */
@@ -292,10 +287,12 @@
     .book-footer { text-align: right; font-size: 10px; color: #999; margin-top: 5px; padding-right: 4px; }
 
     /* ═══ MOBILE: 세로로 쌓기 ═══ */
-    @media (max-width: 640px) {
+    @media (max-width: 700px) {
       :root { --row-h: 24px; --left-date: 42px; --left-margin: 50px; --right-date: 40px; --right-margin: 48px; --total-w: 22px; }
       .book-spread { flex-direction: column; }
-      .spine { width: 100%; height: 14px; flex-direction: row; justify-content: space-around; align-items: center; padding: 0 8px; gap: 0; }
+      .page-left  { padding: 0 10px 10px 12px; }
+      .page-right { padding: 0 12px 10px 10px; }
+      .spine { width: 100%; height: 12px; flex-direction: row; justify-content: space-around; align-items: center; padding: 0 8px; gap: 0; }
       .spine::before { top: 2px; bottom: 2px; left: 0; right: 0; background: repeating-linear-gradient(to right, transparent 0, transparent 10px, rgba(0,0,0,0.06) 10px, rgba(0,0,0,0.06) 11px); }
       .ring { width: 9px; height: 9px; }
     }
@@ -372,7 +369,7 @@
 </div><!-- /book-outer -->
 
 <script>
-const API_URL      = 'https://script.google.com/macros/s/AKfycby1Js1WksAxW7DT-Wj7zNcuPOqY1Xm5RtC46a54_dDkPBeSP8tPfGWlqks_nUlc25lA/exec';
+const API_URL      = 'https://script.google.com/macros/s/AKfycby0aP8-jDB8fZZ1426UD-OgA0dX6zX8H6EqrKv2kknhCIlFRGp_N_w8xpO3Vx8vKD_7/exec';
 const TOK_KEY      = 'clonote_token';
 const USER_KEY     = 'clonote_user';
 const CACHE_PFX    = 'clonote_c2';
@@ -696,11 +693,22 @@ function onCheck(e){
   saveCache();
   if(rightTab==='habit-home') renderGraph();
 
+  // 디바운스: 연속 체크해도 마지막 상태 1번만 저장
   clearTimeout(checkTimers[d]);
-  checkTimers[d]=setTimeout(async()=>{
-    try{ await pj({action:'saveCheck',userId:curUser.userId,yearMonth:ym(),day:d,checks:checks[d]}); }
-    catch{ setStatus('체크 저장 오류',true); }
-  }, DEBOUNCE);
+  checkTimers[d] = setTimeout(async () => {
+    try {
+      const r = await pj({
+        action: 'saveCheck',
+        userId: curUser.userId,
+        yearMonth: ym(),
+        day: d,
+        checks: checks[d]
+      });
+      if (!r.success) setStatus('체크 저장 실패: ' + (r.message||''), true);
+    } catch(err) {
+      setStatus('체크 저장 오류: ' + (err.message||''), true);
+    }
+  }, 800);
 }
 
 /* ══════════════════════════════
