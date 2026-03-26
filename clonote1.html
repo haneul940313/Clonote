@@ -19,13 +19,12 @@
       --accent:      #5d86c8;
       --spine:       #d8d4cc;
 
-      --row-h:       24px;
-      --left-date:   48px;   /* 왼쪽 날짜 열 */
-      --left-margin: 56px;   /* 왼쪽 빨간줄 */
-      --right-date:  44px;   /* 오른쪽 날짜 열 */
-      --right-margin:52px;   /* 오른쪽 빨간줄 */
-      --cb-w:        26px;   /* 체크박스 열 */
-      --total-w:     22px;
+      --row-h:       28px;
+      --left-date:   52px;
+      --left-margin: 60px;
+      --right-date:  48px;
+      --right-margin:56px;
+      --total-w:     28px;
     }
 
     html, body {
@@ -39,9 +38,9 @@
        BOOK WRAPPER
     ══════════════════════════════ */
     .book-outer {
-      max-width: 1080px;
+      max-width: 1440px;
       margin: 0 auto;
-      padding: 12px 8px 16px;
+      padding: 16px 12px 20px;
     }
 
     /* Top bar: 월 이동 + 유저 */
@@ -106,8 +105,7 @@
       flex: 1;
       min-width: 0;
       background: var(--paper);
-      padding: 10px 10px 10px 12px;
-      /* 노트 줄 + 빨간줄 */
+      padding: 0 14px 14px 16px;
       background-image:
         linear-gradient(to right,
           transparent 0,
@@ -164,7 +162,7 @@
       flex: 1;
       min-width: 0;
       background: var(--paper-r);
-      padding: 10px 12px 10px 10px;
+      padding: 0 16px 14px 14px;
       background-image:
         linear-gradient(to right,
           transparent 0,
@@ -189,7 +187,8 @@
       align-items: center;
       justify-content: space-between;
       height: var(--row-h);
-      margin-bottom: 2px;
+      padding: 0 2px;
+      margin-bottom: 0;
     }
     .page-title {
       font-size: 11px;
@@ -213,7 +212,7 @@
     .day-cell {
       height: var(--row-h);
       display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700; color: #777;
+      font-size: 12px; font-weight: 700; color: #777;
       white-space: nowrap; flex-shrink: 0;
     }
     .day-cell.sat { color: var(--sat); }
@@ -229,7 +228,7 @@
     .memo-cell { display: flex; align-items: center; height: var(--row-h); padding: 0 6px; position: relative; overflow: hidden; min-width: 0; }
     .memo-input {
       width: 100%; height: 100%; border: none; outline: none; background: transparent;
-      padding: 0; font-size: 11px; color: var(--text); line-height: 1;
+      padding: 0; font-size: 12px; color: var(--text); line-height: 1;
       overflow-x: auto; overflow-y: hidden; white-space: nowrap;
     }
     .memo-input:disabled { color: rgba(0,0,0,0.38); cursor: default; }
@@ -243,11 +242,12 @@
       height: var(--row-h);
     }
     .hdr-cell {
-      width: var(--cb-w);
       font-size: 9px; font-weight: 700; color: var(--muted);
       text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+      padding: 0 2px;
+      display: flex; align-items: center; justify-content: center;
     }
-    .hdr-total { width: var(--total-w); font-size: 9px; font-weight: 700; color: var(--accent); text-align: center; }
+    .hdr-total { width: var(--total-w); font-size: 9px; font-weight: 700; color: var(--accent); text-align: center; display: flex; align-items: center; justify-content: center; }
 
     /* ── Check row ── */
     .check-row {
@@ -255,8 +255,8 @@
       align-items: center;
       height: var(--row-h);
     }
-    .cb-wrap { width: var(--cb-w); display: flex; align-items: center; justify-content: center; }
-    .cb-wrap input[type="checkbox"] { width: 12px; height: 12px; cursor: pointer; accent-color: var(--accent); }
+    .cb-wrap { display: flex; align-items: center; justify-content: center; }
+    .cb-wrap input[type="checkbox"] { width: 13px; height: 13px; cursor: pointer; accent-color: var(--accent); flex-shrink: 0; }
     .cb-wrap input[type="checkbox"]:disabled { opacity: 0.3; cursor: default; }
     .total-cell { width: var(--total-w); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--accent); height: var(--row-h); }
 
@@ -269,8 +269,8 @@
     .setup-inp:disabled { color: rgba(0,0,0,0.35); cursor: default; }
 
     /* ── Graph ── */
-    .graph-wrap { padding: 6px 2px 4px; }
-    canvas.graph { width: 100%; display: block; }
+    .graph-wrap { padding: 4px 0; overflow: hidden; }
+    canvas.graph { display: block; max-width: 100%; }
 
     /* ── Week nav ── */
     .week-nav { display: flex; align-items: center; justify-content: space-between; height: var(--row-h); }
@@ -293,7 +293,7 @@
 
     /* ═══ MOBILE: 세로로 쌓기 ═══ */
     @media (max-width: 640px) {
-      :root { --row-h: 22px; --left-date: 42px; --left-margin: 50px; --right-date: 40px; --right-margin: 48px; --cb-w: 24px; --total-w: 20px; }
+      :root { --row-h: 24px; --left-date: 42px; --left-margin: 50px; --right-date: 40px; --right-margin: 48px; --total-w: 22px; }
       .book-spread { flex-direction: column; }
       .spine { width: 100%; height: 14px; flex-direction: row; justify-content: space-around; align-items: center; padding: 0 8px; gap: 0; }
       .spine::before { top: 2px; bottom: 2px; left: 0; right: 0; background: repeating-linear-gradient(to right, transparent 0, transparent 10px, rgba(0,0,0,0.06) 10px, rgba(0,0,0,0.06) 11px); }
@@ -566,7 +566,7 @@ function buildHabitHome(){
   const nextDis=maxD>=lastDay?'disabled':'';
   const lbl=days.length?`${days[0]}일 — ${days[days.length-1]}일`:'';
 
-  let html=`<div class="graph-wrap"><canvas class="graph" id="graphCanvas" height="140"></canvas></div>`;
+  let html=`<div class="graph-wrap"><canvas class="graph" id="graphCanvas"></canvas></div>`;
   html+=`<div class="week-nav">
     <button class="w-arrow" id="wPrev" ${prevDis}>‹</button>
     <div class="week-lbl">${lbl}</div>
@@ -589,19 +589,19 @@ function buildHabitAll(){
 /* ── 체크 헤더 ── */
 function buildCheckHeader(src){
   const cnt=hcnt();
-  const col=`var(--right-date) repeat(${cnt},var(--cb-w)) var(--total-w)`;
+  const col=`var(--right-date) repeat(${cnt},1fr) var(--total-w)`;
   let cells='';
-  habits.slice(0,cnt).forEach(n=>{ cells+=`<div class="hdr-cell">${esc(n||'—')}</div>`; });
-  return `<div class="habit-hdr" style="grid-template-columns:${col};">
-    <div style="width:var(--right-date);"></div>${cells}
-    <div class="hdr-total">합</div>
+  habits.slice(0,cnt).forEach(n=>{ cells+=`<div class="hdr-cell" style="min-width:0;">${esc(n||'—')}</div>`; });
+  return `<div class="habit-hdr" style="grid-template-columns:${col}; display:grid; align-items:center; height:var(--row-h);">
+    <div style="width:var(--right-date); flex-shrink:0;"></div>${cells}
+    <div class="hdr-total" style="width:var(--total-w);">합</div>
   </div>`;
 }
 
 /* ── 체크 행 ── */
 function buildCheckRow(d, src){
   const cnt  = hcnt();
-  const col  = `var(--right-date) repeat(${cnt},var(--cb-w)) var(--total-w)`;
+  const col  = `var(--right-date) repeat(${cnt},1fr) var(--total-w)`;
   const cls  = dcls(d);
   const ch   = checks[d]||Array(MAX_H).fill(false);
   const tot  = ch.slice(0,cnt).filter(Boolean).length;
@@ -611,12 +611,12 @@ function buildCheckRow(d, src){
   let cbs='';
   for(let i=0;i<cnt;i++){
     const chk=ch[i]?'checked':'';
-    cbs+=`<div class="cb-wrap"><input type="checkbox" data-day="${d}" data-idx="${i}" data-src="${src}" ${chk} ${dis}/></div>`;
+    cbs+=`<div class="cb-wrap" style="min-width:0;"><input type="checkbox" data-day="${d}" data-idx="${i}" data-src="${src}" ${chk} ${dis}/></div>`;
   }
-  return `<div class="check-row" style="grid-template-columns:${col};">
-    <div class="day-cell ${cls}" style="width:var(--right-date);">${d}일${ds}</div>
+  return `<div class="check-row" style="grid-template-columns:${col}; display:grid; align-items:center; height:var(--row-h);">
+    <div class="day-cell ${cls}" style="width:var(--right-date); flex-shrink:0;">${d}일${ds}</div>
     ${cbs}
-    <div class="total-cell" id="tc-${src}-${d}">${tot>0?tot:''}</div>
+    <div class="total-cell" id="tc-${src}-${d}" style="width:var(--total-w);">${tot>0?tot:''}</div>
   </div>`;
 }
 
@@ -654,9 +654,18 @@ async function doSaveHabits(){
     const r=await pj({action:'saveHabits',userId:curUser.userId,yearMonth:ym(),habits:h});
     if(!r.success) throw new Error(r.message);
     habits=r.habits; saveCache();
-    renderAll(); setStatus('습관이 저장되었습니다.');
+    // 저장 완료 후 홈 탭으로 이동
+    rightTab='habit-home';
+    document.querySelectorAll('[data-rtab]').forEach(x=>x.classList.toggle('active', x.dataset.rtab==='habit-home'));
+    renderRight();
+    renderLeft();
+    buildSpine();
+    setStatus('습관이 저장되었습니다.');
     setTimeout(()=>setStatus(''),2000);
-  } catch(e){ setStatus(e.message||'저장 실패',true); if(btn) btn.disabled=false; }
+  } catch(e){
+    setStatus(e.message||'저장 실패',true);
+    if(btn) btn.disabled=false;
+  }
 }
 
 /* ── 체크 이벤트 바인딩 ── */
@@ -763,10 +772,13 @@ function renderGraph(){
   const hasAny=data.some(v=>v>0);
 
   const dpr=window.devicePixelRatio||1;
-  const W=cv.parentElement.offsetWidth||300;
-  const H=140;
-  cv.width=W*dpr; cv.height=H*dpr;
-  cv.style.width=W+'px'; cv.style.height=H+'px';
+  // 부모 너비를 읽되, canvas 자신의 크기는 style로 명시적으로 고정
+  const W=cv.parentElement.clientWidth||320;
+  const H=130;
+  cv.style.width  = W+'px';
+  cv.style.height = H+'px';
+  cv.width  = W*dpr;
+  cv.height = H*dpr;
   ctx.scale(dpr,dpr);
   ctx.clearRect(0,0,W,H);
 
