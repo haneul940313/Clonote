@@ -359,13 +359,18 @@ const API_URL   = 'https://script.google.com/macros/s/AKfycby0aP8-jDB8fZZ1426UD-
 const TOK_KEY   = 'clonote_token';
 const USER_KEY  = 'clonote_user';
 const CACHE_PFX = 'clonote_c2';
+
+/* localStorage 래퍼 — try/catch로 보호 */
+function stGet(k){ try{ return localStorage.getItem(k); }catch{ return null; } }
+function stSet(k,v){ try{ localStorage.setItem(k,v); }catch{} }
+function stDel(k){ try{ localStorage.removeItem(k); }catch{} }
 const MAX_H     = 10;
 const DEF_H     = 5;
 const DEBOUNCE  = 650;
 
 let curDate     = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 let curUser     = null;
-let curToken    = localStorage.getItem(TOK_KEY)||'';
+let curToken    = stGet(TOK_KEY)||'';
 let habits      = [];
 let checks      = {};
 let memos       = {};
@@ -414,11 +419,11 @@ function calcLayout() {
 function ck(t){ return `${CACHE_PFX}:${curUser?.userId}:${ym()}:${t}`; }
 function saveCache(){
   if(!curUser) return;
-  try { localStorage.setItem(ck('h'),JSON.stringify(habits)); localStorage.setItem(ck('c'),JSON.stringify(checks)); localStorage.setItem(ck('m'),JSON.stringify(memos)); } catch{}
+  try { stSet(ck('h'),JSON.stringify(habits)); stSet(ck('c'),JSON.stringify(checks)); stSet(ck('m'),JSON.stringify(memos)); } catch{}
 }
 function loadCache(){
   try {
-    const h=localStorage.getItem(ck('h')), c=localStorage.getItem(ck('c')), m=localStorage.getItem(ck('m'));
+    const h=stGet(ck('h')), c=stGet(ck('c')), m=stGet(ck('m'));
     return { h:h?JSON.parse(h):null, c:c?JSON.parse(c):null, m:m?JSON.parse(m):null };
   } catch{ return {}; }
 }
@@ -432,11 +437,11 @@ async function tryAutoLogin(){
   if(!curToken){ renderMeta(); return false; }
   try {
     const r = await gj(`${API_URL}?action=autoLogin&token=${encodeURIComponent(curToken)}`);
-    if(r.success&&r.user){ curUser=r.user; localStorage.setItem(USER_KEY,JSON.stringify(curUser)); renderMeta(); return true; }
+    if(r.success&&r.user){ curUser=r.user; stSet(USER_KEY,JSON.stringify(curUser)); renderMeta(); return true; }
     clearAuth(); return false;
   } catch{ renderMeta(); return false; }
 }
-function clearAuth(){ localStorage.removeItem(TOK_KEY); localStorage.removeItem(USER_KEY); curToken=''; curUser=null; }
+function clearAuth(){ stDel(TOK_KEY); stDel(USER_KEY); curToken=''; curUser=null; }
 
 async function doStart(){
   const n=$('loginName').value.trim(), p=$('loginPass').value.trim();
@@ -447,7 +452,7 @@ async function doStart(){
     const r=await pj({action:'login',userName:n,password:p});
     if(!r.success||!r.token||!r.user) throw new Error(r.message||'로그인 실패');
     curToken=r.token; curUser=r.user;
-    localStorage.setItem(TOK_KEY,curToken); localStorage.setItem(USER_KEY,JSON.stringify(curUser));
+    stSet(TOK_KEY,curToken); stSet(USER_KEY,JSON.stringify(curUser));
     $('loginName').value=''; $('loginPass').value=''; setLS('');
     renderMeta(); await loadAll();
   } catch(e){ setLS(e.message||'실패',true); }
@@ -469,6 +474,7 @@ function renderMeta(){
 
 /* ─── LOAD ─── */
 async function loadAll(){
+  console.log('[Clonote] loadAll called, curUser:', curUser?.userId, 'ym:', ym());
   renderMeta(); if(!curUser) return;
   const cc=loadCache();
   if(cc.h) habits=cc.h;
@@ -476,16 +482,28 @@ async function loadAll(){
   if(cc.m){ memos={};  Object.entries(cc.m).forEach(([d,v])=>{ memos[+d]=v; }); }
   renderAll();
   try {
+    const habitUrl = `${API_URL}?action=getHabits&userId=${curUser.userId}&yearMonth=${ym()}`;
     const [hR,cR,mR] = await Promise.all([
-      gj(`${API_URL}?action=getHabits&userId=${curUser.userId}&yearMonth=${ym()}`),
+      gj(habitUrl),
       gj(`${API_URL}?action=getChecks&userId=${curUser.userId}&yearMonth=${ym()}`),
       gj(`${API_URL}?action=getRecords&userId=${curUser.userId}&year=${yr()}&month=${mo()}`)
     ]);
-    if(hR.success && hR.habits) habits=hR.habits;  // null이면 캐시 유지
+
+    // 디버그: 습관 응답 확인
+    console.log('[Clonote] getHabits response:', JSON.stringify(hR));
+    console.log('[Clonote] userId:', curUser.userId, 'yearMonth:', ym());
+
+    if(hR.success && Array.isArray(hR.habits)) {
+      habits = hR.habits;
+    } else if(!hR.success) {
+      setStatus('습관 로드 실패: ' + (hR.message||'unknown'), true);
+    }
+    // hR.habits === null 이면 기존값 유지 (캐시)
+
     checks={}; if(cR.success&&cR.checks) cR.checks.forEach(c=>{ checks[c.day]=c.checks; });
     memos={};  if(mR.success&&mR.records) mR.records.forEach(r=>{ memos[r.day]=r.memo||''; });
     saveCache();
-  } catch{ setStatus('데이터 로드 실패',true); return; }
+  } catch(err){ console.error('[Clonote] loadAll error:', err); setStatus('네트워크 오류: '+(err.message||err), true); return; }
   renderAll(); setStatus('');
 }
 
@@ -573,12 +591,11 @@ function buildCheckRow(d,src){
   const cnt=hcnt(), col=`var(--right-date) repeat(${cnt},1fr) var(--total-w)`;
   const ch=checks[d]||Array(MAX_H).fill(false), tot=ch.slice(0,cnt).filter(Boolean).length;
   const dis=curUser?'':'disabled';
-  const DOW=['일','월','화','수','목','금','토'];
-  const ds=src==='rh'?`<span style="font-size:8px;font-weight:400;margin-left:1px;">${DOW[dow(d)]}</span>`:'';
+
   let cbs='';
   for(let i=0;i<cnt;i++) cbs+=`<div class="cb-wrap"><input type="checkbox" data-day="${d}" data-idx="${i}" data-src="${src}" ${ch[i]?'checked':''} ${dis}/></div>`;
   return `<div class="check-row" style="grid-template-columns:${col};">
-    <div class="day-cell ${dcls(d)}" style="width:var(--right-date);flex-shrink:0;">${d}일${ds}</div>
+    <div class="day-cell ${dcls(d)}" style="width:var(--right-date);flex-shrink:0;">${d}일</div>
     ${cbs}
     <div class="total-cell" id="tc-${src}-${d}">${tot>0?tot:''}</div>
   </div>`;
@@ -754,15 +771,24 @@ window.addEventListener('focusout',()=>{ if(isMobile) setTimeout(renderAll,300);
 /* ══════ INIT ══════ */
 async function init(){
   renderMeta(); renderAll();
-  const cachedUser=(()=>{ try{ const r=localStorage.getItem(USER_KEY); return r?JSON.parse(r):null; }catch{return null;} })();
-  if(curToken&&cachedUser){
-    curUser=cachedUser; renderMeta(); await loadAll();
-    const ok=await tryAutoLogin();
-    if(!ok){ clearAuth(); renderMeta(); renderAll(); setStatus('로그인이 만료되었습니다.',true); }
-    else await loadAll();
+  const cachedUser=(()=>{ try{ const r=stGet(USER_KEY); return r?JSON.parse(r):null; }catch{return null;} })();
+  if(curToken && cachedUser){
+    // 캐시 유저로 즉시 표시
+    curUser = cachedUser; renderMeta();
+    // 캐시 데이터 먼저 표시
+    const cc = loadCache();
+    if(cc.h) habits = cc.h;
+    if(cc.c){ checks={}; Object.entries(cc.c).forEach(([d,v])=>{ checks[+d]=v; }); }
+    if(cc.m){ memos={};  Object.entries(cc.m).forEach(([d,v])=>{ memos[+d]=v; }); }
+    renderAll();
+    // 토큰 검증 + 서버 데이터 로드 (한 번만)
+    const ok = await tryAutoLogin();
+    if(!ok){ clearAuth(); renderMeta(); renderAll(); setStatus('로그인이 만료되었습니다.',true); return; }
+    await loadAll();
     return;
   }
-  const ok=await tryAutoLogin(); if(ok) await loadAll();
+  const ok = await tryAutoLogin();
+  if(ok) await loadAll();
 }
 init();
 </script>
