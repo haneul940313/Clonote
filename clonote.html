@@ -60,10 +60,8 @@
       height: var(--topbar-h);
       background: linear-gradient(to right,
         var(--paper) 0%,
-        var(--paper) calc(50% - calc(var(--spine-w)/2)),
-        var(--spine-mid) calc(50% - calc(var(--spine-w)/2)),
-        var(--spine-mid) calc(50% + calc(var(--spine-w)/2)),
-        var(--paper-r) calc(50% + calc(var(--spine-w)/2)),
+        var(--paper) 50%,
+        var(--paper-r) 50%,
         var(--paper-r) 100%
       );
       border-bottom: 1px solid rgba(132,184,196,0.22);
@@ -178,7 +176,7 @@
     /* ════════════════════════════
        ROWS
     ════════════════════════════ */
-    .day-cell { height: var(--row-h); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #777; white-space: nowrap; flex-shrink: 0; }
+    .day-cell { height: var(--row-h); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #777; white-space: nowrap; flex-shrink: 0; margin-left: -2px; }
     .day-cell.sat { color: var(--sat); }
     .day-cell.sun { color: var(--sun); }
 
@@ -214,7 +212,7 @@
     .graph-wrap { overflow: hidden; }
     canvas.graph { display: block; width: 100%; }
 
-    .week-nav { display: flex; align-items: center; justify-content: space-between; height: var(--row-h); }
+    .week-nav { display: flex; align-items: center; justify-content: space-between; height: var(--row-h); padding-left: var(--right-date); }
     .week-lbl { font-size: 10px; font-weight: 700; color: var(--muted); }
     .w-arrow  { border: none; background: transparent; color: #999; font-size: 18px; font-weight: 700; cursor: pointer; padding: 0 4px; line-height: 1; touch-action: manipulation; }
     .w-arrow:active   { opacity: 0.5; }
@@ -232,10 +230,8 @@
       flex-shrink: 0; height: var(--status-h);
       background: linear-gradient(to right,
         var(--paper) 0%,
-        var(--paper) calc(50% - calc(var(--spine-w)/2)),
-        var(--spine-mid) calc(50% - calc(var(--spine-w)/2)),
-        var(--spine-mid) calc(50% + calc(var(--spine-w)/2)),
-        var(--paper-r) calc(50% + calc(var(--spine-w)/2)),
+        var(--paper) 50%,
+        var(--paper-r) 50%,
         var(--paper-r) 100%
       );
       border-top: 1px solid rgba(132,184,196,0.22);
@@ -685,14 +681,16 @@ function renderGraph(){
   cv.style.width=W+'px'; cv.style.height=H+'px';
   cv.width=W*dpr; cv.height=H*dpr;
   ctx.scale(dpr,dpr); ctx.clearRect(0,0,W,H);
-  const p={t:12,r:12,b:22,l:24};
+  // p.l: 날짜 셀(--right-date) + 여백
+  const rdVal = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--right-date'))||44;
+  const p={t:12,r:12,b:22,l: rdVal + 6};
   const gW=W-p.l-p.r, gH=H-p.t-p.b;
   // 격자
   ctx.strokeStyle='rgba(132,184,196,0.28)'; ctx.lineWidth=0.5;
   for(let v=0;v<=cnt;v++){
     const y=p.t+gH-(v/cnt)*gH;
     ctx.beginPath(); ctx.moveTo(p.l,y); ctx.lineTo(p.l+gW,y); ctx.stroke();
-    if(v>0){ ctx.fillStyle='rgba(100,100,100,0.38)'; ctx.font=`${Math.min(9,H/10)}px Arial`; ctx.textAlign='right'; ctx.fillText(v,p.l-3,y+3); }
+    if(v>0){ ctx.fillStyle='rgba(100,100,100,0.38)'; ctx.font=`${Math.min(9,H/10)}px Arial`; ctx.textAlign='center'; ctx.fillText(v, rdVal/2, y+3); }
   }
   // X 레이블
   ctx.fillStyle='rgba(100,100,100,0.42)'; ctx.font=`${Math.min(9,H/10)}px Arial`; ctx.textAlign='center';
