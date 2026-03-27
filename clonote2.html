@@ -403,59 +403,11 @@ function getCSSVar(name) {
 
 function calcLayout() {
   isMobile = window.innerWidth <= 640;
-
-  const topbarH  = $('book-topbar') ? $('book-topbar').offsetHeight : 42;
-  const statusH  = 18;
-  const loginH   = $('loginBox').classList.contains('show') ? ($('loginBox').offsetHeight || 0) : 0;
-  const totalAvail = window.innerHeight - topbarH - statusH - loginH;
-
-  const css = getComputedStyle(document.documentElement);
-  const setVar = (k,v) => document.documentElement.style.setProperty(k, v);
-
-  if (!isMobile) {
-    /* ── 데스크탑: 단일 행 높이 ── */
-    const leftRows  = (leftTab === 'memo-month') ? (1 + last()) : (1 + 7);
-    let   rightRows;
-    if      (rightTab === 'habit-home')  rightRows = 1 + 6 + 1 + 7;  // hdr+graph(6행)+weeknav+7days
-    else if (rightTab === 'habit-all')   rightRows = 1 + last();
-    else                                 rightRows = 1 + MAX_H + 1;
-    const totalRows = Math.max(leftRows, rightRows);
-    const rowH = Math.max(16, Math.floor(totalAvail / totalRows));
-    setVar('--row-h', rowH + 'px');
-    // 페이지 height 리셋 (모바일에서 설정했을 수 있으므로)
-    $('pageLeft').style.height  = '';
-    $('pageRight').style.height = '';
-    return { rowH, graphRows: 6 };
-
-  } else {
-    /* ── 모바일: 위아래 각각 계산 ── */
-    const spineH = 14; // --hspine-h
-    const avail  = totalAvail - spineH;
-
-    // 왼쪽(위): 메모
-    const leftRows = (leftTab === 'memo-month') ? (1 + last()) : (1 + 7);
-
-    // 오른쪽(아래): 습관
-    let rightRows;
-    if      (rightTab === 'habit-home')  rightRows = 1 + 6 + 1 + 7;
-    else if (rightTab === 'habit-all')   rightRows = 1 + last();
-    else                                 rightRows = 1 + MAX_H + 1;
-
-    // 양쪽이 같은 비율로 나눔 (50:50), 각자 row-h 결정
-    const halfH    = Math.floor(avail / 2);
-    const rowHLeft  = Math.max(14, Math.floor(halfH / leftRows));
-    const rowHRight = Math.max(14, Math.floor(halfH / rightRows));
-
-    // 공통 --row-h는 작은 쪽 기준 (배경 줄 맞춤)
-    const rowH = Math.min(rowHLeft, rowHRight);
-    setVar('--row-h', rowH + 'px');
-
-    // 각 페이지 실제 높이 고정
-    $('pageLeft').style.height  = (leftRows  * rowH) + 'px';
-    $('pageRight').style.height = (rightRows * rowH) + 'px';
-
-    return { rowH, graphRows: 6 };
-  }
+  // 행 높이는 CSS 고정값 26px — 날짜/탭에 따라 변하지 않음
+  $('pageLeft').style.height  = '';
+  $('pageRight').style.height = '';
+  const rowH = 26;
+  return { rowH, graphRows: 6 };
 }
 
 /* ─── CACHE ─── */
@@ -529,7 +481,7 @@ async function loadAll(){
       gj(`${API_URL}?action=getChecks&userId=${curUser.userId}&yearMonth=${ym()}`),
       gj(`${API_URL}?action=getRecords&userId=${curUser.userId}&year=${yr()}&month=${mo()}`)
     ]);
-    habits=(hR.success&&hR.habits)?hR.habits:Array(MAX_H).fill('');
+    if(hR.success && hR.habits) habits=hR.habits;  // null이면 캐시 유지
     checks={}; if(cR.success&&cR.checks) cR.checks.forEach(c=>{ checks[c.day]=c.checks; });
     memos={};  if(mR.success&&mR.records) mR.records.forEach(r=>{ memos[r.day]=r.memo||''; });
     saveCache();
