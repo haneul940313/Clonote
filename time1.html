@@ -173,6 +173,16 @@
 
     /* ── 상태 텍스트 ── */
     /* ── 토스트 ── */
+    .credit {
+      position: fixed;
+      bottom: 8px; right: 10px;
+      font-size: 9px; font-weight: 700;
+      color: #ccc;
+      font-family: 'Nunito', sans-serif;
+      letter-spacing: 0.04em;
+      pointer-events: none;
+      z-index: 10;
+    }
     .toast {
       position: fixed; top: 12px; left: 50%;
       transform: translateX(-50%) translateY(-60px);
@@ -255,6 +265,7 @@
 
 </div>
 
+<div class="credit">© Clonote</div>
 <div class="toast" id="toast"></div>
 
 <script>
