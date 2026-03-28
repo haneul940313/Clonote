@@ -204,7 +204,7 @@ $('prevBtn').addEventListener('click', () => { cm--; if(cm<0){cm=11;cy--;} rende
 $('nextBtn').addEventListener('click', () => { cm++; if(cm>11){cm=0;cy++;} render(); });
 $('todayBtn').addEventListener('click', () => {
   cy=now.getFullYear(); cm=now.getMonth();
-  sel={y:cy,m:cm,d:now.getDate()}; render();
+  sel=null; render();
 });
 
 render();
