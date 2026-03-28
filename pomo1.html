@@ -70,7 +70,7 @@
     .mode-lbl.brk  { color: var(--success); }
 
     /* ── 링 타이머 ── */
-    .ring-wrap { position: relative; width: 130px; height: 130px; }
+    .ring-wrap { position: relative; width: 130px; height: 130px; pointer-events: none; }
     .ring-svg  { width: 130px; height: 130px; transform: rotate(-90deg); }
     .ring-bg   { fill: none; stroke: #ebebeb; stroke-width: 4; }
     .ring-prog {
@@ -86,6 +86,7 @@
       position: absolute; inset: 0;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 2px;
+      pointer-events: none;
     }
     .time-txt {
       font-size: 30px; font-weight: 800;
@@ -110,8 +111,11 @@
     .btn:active { background: #e8e8e8; }
     .btn.prime {
       background: var(--accent); color: #fff;
-      padding: 7px 22px; font-size: 13px; font-weight: 800;
+      padding: 10px 28px; font-size: 14px; font-weight: 800;
       border-radius: 8px;
+      position: relative; z-index: 10;
+      -webkit-appearance: none;
+      user-select: none;
     }
     .btn.prime:hover  { opacity: 0.88; }
     .btn.prime.work   { background: var(--danger); }
@@ -198,6 +202,7 @@
       padding: 8px 18px; border-radius: 20px;
       box-shadow: 0 4px 16px rgba(0,0,0,0.15);
       z-index: 100; white-space: nowrap;
+      pointer-events: none;
       transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
