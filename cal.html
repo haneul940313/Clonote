@@ -35,7 +35,7 @@
       align-items: center;
       justify-content: center;
       padding: 14px 16px 10px;
-      gap: 10px;
+      gap: 8px;
     }
 
     /* ── 헤더: ‹ 2026년 3월 › ── */
@@ -60,9 +60,9 @@
     .nav-btn:hover  { background: var(--accent-l); }
     .nav-btn:active { background: #dce8f8; }
     .title {
-      font-size: 13px; font-weight: 800;
+      font-size: 14px; font-weight: 800;
       color: var(--text); letter-spacing: -0.01em;
-      min-width: 90px; text-align: center;
+      min-width: 96px; text-align: center;
     }
 
     /* ── 요일 ── */
@@ -73,8 +73,8 @@
     }
     .dow {
       text-align: center;
-      font-size: 9px; font-weight: 800;
-      letter-spacing: 0.05em;
+      font-size: 11px; font-weight: 800;
+      letter-spacing: 0.04em;
       color: var(--muted);
       padding: 2px 0 4px;
     }
@@ -85,18 +85,20 @@
     .grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
+      grid-template-rows: repeat(6, 1fr);
       gap: 2px;
       width: 100%;
+      flex: 1;
     }
     .dc {
-      aspect-ratio: 1;
       display: flex; align-items: center; justify-content: center;
       border-radius: 6px;
-      font-size: 11px; font-weight: 700;
+      font-size: 13px; font-weight: 700;
       color: var(--text);
       cursor: pointer;
       transition: background 0.1s, color 0.1s;
       touch-action: manipulation;
+      min-height: 0;
     }
     .dc:hover   { background: var(--accent-l); }
     .dc.empty   { pointer-events: none; }
@@ -119,14 +121,14 @@
       border: none; background: var(--accent-l);
       color: var(--accent); cursor: pointer;
       font-family: 'Nunito', sans-serif;
-      font-size: 10px; font-weight: 800;
+      font-size: 11px; font-weight: 800;
       padding: 4px 10px; border-radius: 5px;
       touch-action: manipulation;
       transition: background 0.1s;
     }
     .today-btn:hover { background: #dce8f8; }
     .sel-lbl {
-      font-size: 10px; font-weight: 700;
+      font-size: 11px; font-weight: 700;
       color: var(--muted);
     }
     .sel-lbl b { color: var(--accent); font-weight: 800; }
