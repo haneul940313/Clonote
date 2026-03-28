@@ -39,7 +39,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 16px;
+      gap: 12px;
       padding: 20px 22px;
     }
 
@@ -88,11 +88,6 @@
     }
     .time-txt.work { color: var(--danger); }
     .time-txt.brk  { color: var(--success); }
-    .time-sub {
-      font-size: 10px; font-weight: 700;
-      letter-spacing: 0.1em; color: var(--muted);
-      text-transform: uppercase;
-    }
 
     /* ── 컨트롤 버튼 ── */
     .controls { display: flex; align-items: center; gap: 10px; }
@@ -177,8 +172,6 @@
     .tgl-lbl { font-size: 11px; font-weight: 700; color: var(--sub); }
 
     /* ── 상태 텍스트 ── */
-    .status { font-size: 11px; font-weight: 700; color: var(--muted); height: 14px; }
-
     /* ── 토스트 ── */
     .toast {
       position: fixed; top: 12px; left: 50%;
@@ -197,9 +190,10 @@
 <body>
 <div class="wrap">
 
-  <div class="dots" id="dots"></div>
-
-  <div class="mode-lbl" id="modeLbl">준비</div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="dots" id="dots"></div>
+    <div class="mode-lbl" id="modeLbl">준비</div>
+  </div>
 
   <div class="ring-wrap">
     <svg class="ring-svg" viewBox="0 0 130 130">
@@ -208,7 +202,6 @@
     </svg>
     <div class="ring-center">
       <div class="time-txt" id="timeTxt">25:00</div>
-      <div class="time-sub" id="timeSub">focus</div>
     </div>
   </div>
 
@@ -260,7 +253,6 @@
     </div>
   </div>
 
-  <div class="status" id="statusTxt">타이머를 시작하세요</div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -275,8 +267,8 @@ const s = {
 };
 
 const $  = id => document.getElementById(id);
-const rp = $('ringProg'), tt=$('timeTxt'), ts=$('timeSub');
-const ml = $('modeLbl'), sb=$('startBtn'), st=$('statusTxt'), toast=$('toast');
+const rp = $('ringProg'), tt=$('timeTxt');
+const ml = $('modeLbl'), sb=$('startBtn'), toast=$('toast');
 
 const fmt = s => String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
 
@@ -299,9 +291,9 @@ function applyStyle(p){
 
 function render(){
   tt.textContent=fmt(s.remain); setRing(s.remain,s.total); renderDots();
-  if(s.phase==='work'){ ml.textContent=`${s.round+1}/${s.rounds} 집중`; ts.textContent='focus'; st.textContent=s.running?'집중하는 중...':'집중 준비됨'; }
-  else if(s.phase==='brk'){ ml.textContent='휴식'; ts.textContent='break'; st.textContent=s.running?'잠깐 쉬어요 ☕':'휴식 준비됨'; }
-  else { ml.textContent='준비'; ts.textContent='ready'; st.textContent='타이머를 시작하세요'; }
+  if(s.phase==='work'){ ml.textContent=`${s.round+1}/${s.rounds} 집중`; }
+  else if(s.phase==='brk'){ ml.textContent='휴식'; }
+  else { ml.textContent='준비'; }
   sb.textContent=s.running?'pause':'start';
   applyStyle(s.phase);
 }
