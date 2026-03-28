@@ -244,37 +244,47 @@
     ════════════════════════════ */
     @media (max-width: 640px) {
       :root {
-        --topbar-h:     40px;
-        --left-date:    40px;
-        --left-margin:  48px;
-        --right-date:   38px;
-        --right-margin: 46px;
-        --total-w:      24px;
-        --spine-w:      14px;   /* 상하단 그라디언트 폭 */
+        --topbar-h:     44px;
+        --row-h:        30px;
+        --left-date:    42px;
+        --left-margin:  50px;
+        --right-date:   42px;
+        --right-margin: 50px;
+        --total-w:      26px;
       }
 
-      /* 좌우 → 상하 */
-      .book-spread { flex-direction: column; }
+      /* 전체를 스크롤 가능하게 */
+      html, body { overflow: auto; height: auto; }
+      .book-outer { height: auto; min-height: 100vh; border-radius: 0; box-shadow: none; }
 
-      /* 세로 제본선 숨김 */
+      /* 좌우 → 상하 스택, 스크롤 허용 */
+      .book-spread { flex-direction: column; overflow: visible; height: auto; }
+
+      /* 각 페이지: overflow visible, 높이 auto */
+      .page-left, .page-right {
+        flex: none; overflow: visible;
+        height: auto !important;
+        padding: 0 12px 12px 12px;
+      }
+
+      /* 세로 제본선 숨김, 가로 제본선 표시 */
       .spine-v { display: none !important; }
-
-      /* 가로 제본선 표시 */
       .spine-h { display: flex; }
 
-      /* 양쪽 페이지 동일 padding */
-      .page-left, .page-right { padding: 0 12px 0 12px; flex: none; }
-
-      /* 높이는 JS가 각각 style.height 로 설정 */
-
-      /* 상태바: 모바일에서는 단색 */
+      /* 상태바 단색 */
       .book-status { background: var(--paper-r); }
 
-      /* 탭 글자 키우기 */
-      .tab-pill { font-size: 11px; padding: 4px 8px; }
+      /* 탭/버튼 터치 영역 확대 */
+      .tab-pill { font-size: 12px; padding: 5px 10px; }
+      .icon-btn { font-size: 24px; width: 32px; height: 32px; }
 
-      /* 체크박스 더 크게 */
-      .cb-wrap input[type="checkbox"] { width: 17px; height: 17px; }
+      /* 체크박스 크게 */
+      .cb-wrap input[type="checkbox"] { width: 18px; height: 18px; }
+
+      /* 메모 입력 */
+      .memo-input { font-size: 14px; }
+
+      /* 그래프 영역 줄이기 */
     }
   </style>
 </head>
@@ -404,11 +414,10 @@ function getCSSVar(name) {
 
 function calcLayout() {
   isMobile = window.innerWidth <= 640;
-  // 행 높이는 CSS 고정값 26px — 날짜/탭에 따라 변하지 않음
   $('pageLeft').style.height  = '';
   $('pageRight').style.height = '';
-  const rowH = 26;
-  return { rowH, graphRows: 6 };
+  const rowH = isMobile ? 30 : 26;
+  return { rowH, graphRows: isMobile ? 4 : 6 };
 }
 
 /* ─── CACHE ─── */
@@ -539,8 +548,9 @@ function buildMemoWeek(){
 function bindMemo(el){
   el.querySelectorAll('.memo-input').forEach(inp=>{
     inp.addEventListener('input',()=>scheduleMemo(+inp.dataset.day,inp.dataset.src));
-    inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault(); flushMemo(+inp.dataset.day,inp.dataset.src);} });
+    inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault(); inp.blur(); flushMemo(+inp.dataset.day,inp.dataset.src);} });
     inp.addEventListener('blur',()=>flushMemo(+inp.dataset.day,inp.dataset.src));
+    inp.addEventListener('change',()=>flushMemo(+inp.dataset.day,inp.dataset.src));
   });
 }
 
@@ -762,9 +772,8 @@ document.querySelectorAll('[data-rtab]').forEach(b=>b.addEventListener('click',(
 let resizeTimer;
 window.addEventListener('resize',()=>{ clearTimeout(resizeTimer); resizeTimer=setTimeout(renderAll,80); });
 
-// 모바일 키보드 올라올 때 재계산
-window.addEventListener('focusin', ()=>{ if(isMobile) setTimeout(renderAll,300); });
-window.addEventListener('focusout',()=>{ if(isMobile) setTimeout(renderAll,300); });
+// 모바일 resize 대응
+
 
 /* ══════ INIT ══════ */
 async function init(){
