@@ -46,6 +46,7 @@
       justify-content: center;
       gap: 12px;
       padding: 20px 22px;
+      position: relative;
     }
 
     /* ── 세션 도트 ── */
@@ -276,6 +277,18 @@
 <script>
 const CIRC = 2 * Math.PI * 55;
 
+// 모바일 터치 대응 — touchend + click 모두 처리
+function addTap(el, fn) {
+  let touched = false;
+  el.addEventListener('touchend', e => {
+    e.preventDefault();
+    touched = true;
+    fn();
+    setTimeout(() => { touched = false; }, 400);
+  }, { passive: false });
+  el.addEventListener('click', () => { if (!touched) fn(); });
+}
+
 const s = {
   work:25, brk:5, rounds:4, notify:true,
   phase:'idle', round:0,
@@ -341,22 +354,22 @@ function onEnd(){
 
 function autoStart(){ s.running=true; s.tmr=setInterval(tick,1000); render(); }
 
-sb.addEventListener('click',()=>{
+addTap(sb, ()=>{
   if(s.phase==='idle'){ s.round=0; initWork(); }
   if(s.running){ clearInterval(s.tmr); s.running=false; }
   else{ if(s.notify&&Notification.permission==='default') Notification.requestPermission(); s.running=true; s.tmr=setInterval(tick,1000); }
   render();
 });
 
-$('resetBtn').addEventListener('click',()=>{ clearInterval(s.tmr); s.running=false; s.phase='idle'; s.round=0; s.remain=s.work*60; s.total=s.work*60; render(); setRing(1,1); });
+addTap($('resetBtn'), ()=>{ clearInterval(s.tmr); s.running=false; s.phase='idle'; s.round=0; s.remain=s.work*60; s.total=s.work*60; render(); setRing(1,1); });
 
-$('skipBtn').addEventListener('click',()=>{
+addTap($('skipBtn'), ()=>{
   clearInterval(s.tmr); s.running=false;
   if(s.phase==='work'||s.phase==='idle'){ s.round=Math.min(s.round+1,s.rounds); if(s.round>=s.rounds){ s.phase='idle'; s.round=0; s.remain=s.work*60; s.total=s.work*60; render(); } else { initBrk(); render(); } }
   else { initWork(); render(); }
 });
 
-document.querySelectorAll('.nbtn').forEach(btn=>btn.addEventListener('click',()=>{
+document.querySelectorAll('.nbtn').forEach(btn=>addTap(btn, ()=>{
   const t=btn.dataset.t, d=parseInt(btn.dataset.d);
   const inp=$(t==='work'?'workVal':t==='brk'?'brkVal':'roundsVal');
   let v=parseInt(inp.value)||0;
