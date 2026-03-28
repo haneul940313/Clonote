@@ -70,7 +70,7 @@
     .mode-lbl.brk  { color: var(--success); }
 
     /* ── 링 타이머 ── */
-    .ring-wrap { position: relative; width: 130px; height: 130px; pointer-events: none; }
+    .ring-wrap { position: relative; width: 130px; height: 130px; }
     .ring-svg  { width: 130px; height: 130px; transform: rotate(-90deg); }
     .ring-bg   { fill: none; stroke: #ebebeb; stroke-width: 4; }
     .ring-prog {
@@ -86,7 +86,6 @@
       position: absolute; inset: 0;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 2px;
-      pointer-events: none;
     }
     .time-txt {
       font-size: 30px; font-weight: 800;
@@ -111,7 +110,7 @@
     .btn:active { background: #e8e8e8; }
     .btn.prime {
       background: var(--accent); color: #fff;
-      padding: 10px 28px; font-size: 14px; font-weight: 800;
+      padding: 7px 22px; font-size: 13px; font-weight: 800;
       border-radius: 8px;
       position: relative; z-index: 10;
       -webkit-appearance: none;
@@ -217,11 +216,11 @@
   </div>
 
   <div class="ring-wrap">
-    <svg class="ring-svg" viewBox="0 0 130 130">
+    <svg class="ring-svg" viewBox="0 0 130 130" style="pointer-events:none;">
       <circle class="ring-bg"   cx="65" cy="65" r="55"/>
       <circle class="ring-prog" id="ringProg" cx="65" cy="65" r="55"/>
     </svg>
-    <div class="ring-center">
+    <div class="ring-center" style="pointer-events:none;">
       <div class="time-txt" id="timeTxt">25:00</div>
     </div>
   </div>
@@ -345,7 +344,7 @@ function beep(){
   }catch{}
 }
 
-function notify(m){ showToast(m); if(!s.notify)return; beep(); if(Notification.permission==='granted') new Notification('Pomodoro',{body:m}); else if(Notification.permission!=='denied') Notification.requestPermission().then(p=>{ if(p==='granted') new Notification('Pomodoro',{body:m}); }); }
+function notify(m){ showToast(m); if(!s.notify)return; beep(); }
 
 function tick(){ if(s.remain<=0){ clearInterval(s.tmr); s.running=false; onEnd(); return; } s.remain--; render(); }
 
@@ -362,7 +361,7 @@ function autoStart(){ s.running=true; s.tmr=setInterval(tick,1000); render(); }
 addTap(sb, ()=>{
   if(s.phase==='idle'){ s.round=0; initWork(); }
   if(s.running){ clearInterval(s.tmr); s.running=false; }
-  else{ if(s.notify&&Notification.permission==='default') Notification.requestPermission(); s.running=true; s.tmr=setInterval(tick,1000); }
+  else{ s.running=true; s.tmr=setInterval(tick,1000); }
   render();
 });
 
