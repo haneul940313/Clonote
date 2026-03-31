@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>馬시멜로</title>
-  <link href="https://script.google.com/macros/s/AKfycbzSXEHTwbhMQwbBLGqHcY9LDOEoCPtz3S6A-3dWRlMkOjMnn_HhgD1Os4_3Rm1zVqU/exec">
+  <link href="https://script.google.com/macros/s/AKfycbxVZ-_6jwOtZjHZIWaAiTOFYly-_0xb3tIvtDv7ijK2LRGIjsp0p2d7ApS_4fWopaaI/exec">
   <style>
     :root {
       --pink: #e91e8c;
@@ -459,7 +459,7 @@
 
   <script>
     const ADMIN_PW = '1234';
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyjG7Jj-1rX-MF_mUCIkI8VWCDSUDwu8kP9_w_AngqVGAhL6bQqlnZCCb7BornP3mik/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxVZ-_6jwOtZjHZIWaAiTOFYly-_0xb3tIvtDv7ijK2LRGIjsp0p2d7ApS_4fWopaaI/exec';
 
     const DEFAULT = [
       {
@@ -539,30 +539,82 @@
         document.getElementById('pw-err').style.display = 'block';
       }
     }
+function renderSkeleton() {
+  document.getElementById('content').innerHTML = `
+    <div class="section-header">
+      <span class="label">인스타그램 팔로우</span>
+      <div class="line"></div>
+    </div>
+    <div class="cards">
+      ${[1,2,3].map(i => `
+        <div class="card" style="pointer-events:none; animation-delay:${i*0.04}s">
+          <div class="card-fallback icon-insta" style="opacity:0.3;"></div>
+          <div class="card-text">
+            <div style="height:13px; width:72px; background:#fce8f3; border-radius:6px;"></div>
+            <div style="height:11px; width:48px; background:#fce8f3; border-radius:6px; margin-top:5px;"></div>
+          </div>
+          <span class="card-cta" style="opacity:0.3;">팔로우</span>
+        </div>
+      `).join('')}
+    </div>
+    <div class="section-header gap">
+      <span class="label">앱 다운로드</span>
+      <div class="line"></div>
+    </div>
+    <div class="cards">
+      ${[1,2].map(i => `
+        <div class="card" style="pointer-events:none; animation-delay:${i*0.04}s">
+          <div class="card-fallback icon-app" style="opacity:0.3;"></div>
+          <div class="card-text">
+            <div style="height:13px; width:60px; background:#fce8f3; border-radius:6px;"></div>
+          </div>
+          <span class="card-cta" style="opacity:0.3;">다운로드</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+   async function loadData() {
+  renderSkeleton(); // 즉시 스켈레톤 표시
 
-    async function loadData() {
-      if (!currentData.length) {
-        currentData = DEFAULT;
+  // localStorage 캐시로 빠르게 먼저 렌더링
+  const localCache = localStorage.getItem('mashimello_cache');
+  if (localCache) {
+    try {
+      const parsed = JSON.parse(localCache);
+      if (parsed && parsed.data && parsed.data.length) {
+        currentData = parsed.data;
         renderCards(currentData);
       }
+    } catch(e) {}
+  } else {
+    // 캐시 없으면 DEFAULT 표시
+    currentData = DEFAULT;
+    renderCards(currentData);
+  }
 
-      try {
-        const res = await fetch(GAS_URL + '?t=' + Date.now(), {
-          method: 'GET',
-          cache: 'no-store'
-        });
+  // 백그라운드로 최신 데이터 fetch
+  try {
+    const res = await fetch(GAS_URL + '?t=' + Date.now(), {
+      method: 'GET',
+      cache: 'no-store'
+    });
+    const text = await res.text();
+    const json = JSON.parse(text);
 
-        const text = await res.text();
-        const json = JSON.parse(text);
-
-        if (json.ok && Array.isArray(json.data) && json.data.length) {
-          currentData = json.data;
-          renderCards(currentData);
-        }
-      } catch (e) {
-        console.error('loadData error:', e);
-      }
+    if (json.ok && Array.isArray(json.data) && json.data.length) {
+      currentData = json.data;
+      renderCards(currentData);
+      // localStorage에 캐시 저장
+      localStorage.setItem('mashimello_cache', JSON.stringify({
+        data: currentData,
+        ts: Date.now()
+      }));
     }
+  } catch (e) {
+    console.error('loadData error:', e);
+  }
+}
 
     function renderCards(items) {
       const insta = items.filter(x => x.type === 'insta');
