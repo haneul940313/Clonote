@@ -377,9 +377,12 @@
 
 <script>
 const API_URL   = 'https://script.google.com/macros/s/AKfycbx7c5hpzouh_OxnSRkXWPi23w7h_QMNvG6we93HoEOfBrCSeb-CnHUgXlWHQENQS2rV/exec';
-const TOK_KEY   = 'clonote_token';
-const USER_KEY  = 'clonote_user';
-const CACHE_PFX = 'clonote_c2';
+// URL ?id=xxx 로 페이지별 독립 저장공간 분리
+// 없으면 'default' 사용 (기존 개인용과 호환)
+const PAGE_ID   = new URLSearchParams(location.search).get('id') || 'default';
+const TOK_KEY   = 'clonote_token_' + PAGE_ID;
+const USER_KEY  = 'clonote_user_' + PAGE_ID;
+const CACHE_PFX = 'clonote_c2_' + PAGE_ID;
 
 /* localStorage 래퍼 — try/catch로 보호 */
 function stGet(k){ try{ return localStorage.getItem(k); }catch{ return null; } }
@@ -795,15 +798,12 @@ async function init(){
   renderMeta(); renderAll();
   const cachedUser=(()=>{ try{ const r=stGet(USER_KEY); return r?JSON.parse(r):null; }catch{return null;} })();
   if(curToken && cachedUser){
-    // 캐시 유저로 즉시 표시
     curUser = cachedUser; renderMeta();
-    // 캐시 데이터 먼저 표시
     const cc = loadCache();
     if(cc.h) habits = cc.h;
     if(cc.c){ checks={}; Object.entries(cc.c).forEach(([d,v])=>{ checks[+d]=v; }); }
     if(cc.m){ memos={};  Object.entries(cc.m).forEach(([d,v])=>{ memos[+d]=v; }); }
     renderAll();
-    // 토큰 검증 + 서버 데이터 로드 (한 번만)
     const ok = await tryAutoLogin();
     if(!ok){ clearAuth(); renderMeta(); renderAll(); setStatus('로그인이 만료되었습니다.',true); return; }
     await loadAll();
