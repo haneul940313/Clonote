@@ -607,25 +607,24 @@
           <div class="cards">
         `;
 
-        app.forEach((item, i) => {
-          html += `
-            <a class="card" href="${escapeHtml(item.url || '#')}" target="_blank" rel="noopener"
-              style="animation-delay:${0.35 + i * 0.06}s">
-              ${
-                item.image
-                  ? `<img class="card-thumb" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name || '')}">`
-                  : `<div class="card-fallback icon-app"></div>`
-              }
-              <div class="card-text">
-                <div class="card-title-row">
-                  <span class="card-name">${escapeHtml(item.name || '')}</span>
-                  <span class="card-sub">${escapeHtml(item.sub || '')}</span>
-                </div>
-              </div>
-              <span class="card-cta">다운로드</span>
-            </a>
-          `;
-        });
+    app.forEach((item, i) => {
+  html += `
+    <a class="card" href="${escapeHtml(item.url || '#')}" target="_blank" rel="noopener"
+      style="animation-delay:${0.35 + i * 0.06}s">
+      ${
+        item.image
+          ? `<img class="card-thumb" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name || '')}">`
+          : `<div class="card-fallback icon-app"></div>`
+      }
+      <div class="card-text">
+        <div class="card-title-row">
+          <span class="card-name">${escapeHtml(item.name || '')}</span>
+        </div>
+      </div>
+      <span class="card-cta">다운로드</span>
+    </a>
+  `;
+});
 
         html += `</div>`;
       }
