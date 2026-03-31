@@ -897,6 +897,9 @@ function renderSkeleton() {
 
         currentData = Array.isArray(json.data) ? json.data : [];
         renderCards(currentData);
+        localStorage.setItem('mashimello_cache', JSON.stringify({ data: currentData, ts: Date.now() }));
+
+closeOverlay();
 
         closeOverlay();
         document.getElementById('pw-view').style.display = 'block';
