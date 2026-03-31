@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>馬시멜로</title>
+<link href="https://script.google.com/macros/s/AKfycbwiXZu7BBjquxIPkOaYCPpRGOPWZTXMGlCr0y_wr8pWkj2uM5HA90Y7nU3KvhRZp3xr/exec" rel="stylesheet">
+<style>
+  :root {
+    --pink: #e91e8c;
+    --pink-deep: #c2185b;
+    --pink-soft: #f48fb1;
+    --pink-pale: #fff0f7;
+    --pink-border: #fcd4e8;
+    --text: #2d1020;
+    --text-sub: #a0527a;
+    --white: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: transparent;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+
+
+  /* 레이아웃 */
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 28px 16px 60px;
+  }
+
+  /* 섹션 헤더 */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    animation: up 0.6s ease both;
+  }
+  .section-header .line {
+    flex: 1; height: 1px;
+    background: linear-gradient(to right, var(--pink-soft), transparent);
+  }
+  .section-header .label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    color: var(--pink);
+    text-transform: uppercase;
+  }
+
+  /* 카드 */
+  .cards { display: flex; flex-direction: column; gap: 10px; }
+
+  .card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(145deg, #ffffff 0%, #fdf4f9 60%, #fce8f3 100%);
+    border: 1px solid #fad6ea;
+    border-radius: 22px;
+    padding: 15px 18px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow:
+      0 2px 0 #f2c4db,
+      0 6px 20px #e91e8c0e,
+      inset 0 1px 0 rgba(255,255,255,0.95);
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: up 0.6s ease both;
+    cursor: pointer;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 4px 0 #f2c4db,
+      0 12px 28px #e91e8c1a,
+      inset 0 1px 0 rgba(255,255,255,0.95);
+  }
+  .card:active { transform: scale(0.98); }
+
+  .card-icon {
+    width: 44px; height: 44px;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .icon-insta { background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+  .icon-app   { background: linear-gradient(135deg, #f8b4d0, #e91e8c); }
+
+  .card-text { flex: 1; min-width: 0; }
+  .card-name { font-size: 15px; font-weight: 700; color: var(--text); }
+  .card-sub  { font-size: 12px; color: var(--text-sub); }
+  .card-title-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+
+  .card-cta {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 7px 14px;
+    border-radius: 24px;
+    flex-shrink: 0;
+    color: white;
+    background: linear-gradient(135deg, #f48fb1, #e91e8c);
+    border: none;
+    letter-spacing: 0.5px;
+  }
+
+  .gap { margin-top: 20px; }
+
+  /* 로딩 */
+  .loading {
+    text-align: center;
+    padding: 40px 0;
+    color: var(--text-sub);
+    font-size: 14px;
+    animation: pulse 1.2s ease infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* 에러 */
+  .error-box {
+    background: #fff0f0;
+    border: 1px solid #ffcdd2;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 13px;
+    color: #c62828;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  @keyframes up {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 관리자 버튼 */
+  .admin-btn {
+    display: block;
+    margin: 32px auto 0;
+    width: 40px; height: 40px;
+    background: white;
+    border: 1px solid var(--pink-border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px #e91e8c12;
+    transition: transform 0.2s, box-shadow 0.2s;
+    opacity: 0.5;
+  }
+  .admin-btn:hover { transform: rotate(25deg); opacity: 1; box-shadow: 0 4px 16px #e91e8c22; }
+
+  /* 오버레이 */
+  .overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(45, 16, 32, 0.45);
+    backdrop-filter: blur(5px);
+    z-index: 100;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .overlay.open { display: flex; }
+
+  /* 바텀시트 */
+  .sheet {
+    background: white;
+    border-radius: 24px 24px 0 0;
+    padding: 24px 20px 36px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 -8px 40px #e91e8c22;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  .sheet-handle {
+    width: 40px; height: 4px;
+    background: #fcd4e8;
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+  .sheet-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+  .sheet-close {
+    position: absolute; top: 20px; right: 20px;
+    background: none; border: none; cursor: pointer;
+    font-size: 20px; color: var(--text-sub);
+  }
+
+  /* 비밀번호 */
+  .pw-wrap { text-align: center; }
+  .pw-wrap p { font-size: 13px; color: var(--text-sub); margin-bottom: 14px; }
+  .pw-input {
+    width: 100%;
+    border: 1.5px solid var(--pink-border);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 6px;
+    font-family: inherit;
+    outline: none;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .pw-input:focus { border-color: var(--pink); }
+  .pw-err { font-size: 12px; color: var(--pink); display: none; margin-bottom: 10px; }
+
+  /* 관리 폼 */
+  .sec-label {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; color: var(--pink);
+    margin: 16px 0 10px;
+  }
+  .field { margin-bottom: 10px; }
+  .field label {
+    font-size: 11px; font-weight: 700;
+    color: var(--text-sub); letter-spacing: 0.5px;
+    display: block; margin-bottom: 4px;
+  }
+  .field input {
+    width: 100%;
+    border: 1.5px solid var(--pink-border);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus { border-color: var(--pink); }
+  .field-group {
+    background: var(--pink-pale);
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+
+  .hr { border: none; border-top: 1px dashed var(--pink-border); margin: 16px 0; }
+
+  .save-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #e91e8c, #c2185b);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: opacity 0.2s;
+  }
+  .save-btn:hover { opacity: 0.88; }
+  .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* GAS URL 입력 */
+  .gas-setup {
+    background: #fff8fc;
+    border: 1px dashed var(--pink-border);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--text-sub);
+    line-height: 1.7;
+  }
+  .gas-setup strong { color: var(--pink); }
+  .gas-input {
+    width: 100%;
+    border: 1.5px solid var(--pink-border);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 12px;
+    font-family: monospace;
+    color: var(--text);
+    outline: none;
+    margin-top: 8px;
+    transition: border-color 0.2s;
+  }
+  .gas-input:focus { border-color: var(--pink); }
+</style>
+</head>
+<body>
+
+
+
+<div class="wrap">
+  <div id="content">
+    <div class="loading">🌸 불러오는 중...</div>
+  </div>
+  <button class="admin-btn" onclick="openOverlay()" title="관리자">⚙️</button>
+</div>
+
+<!-- 오버레이 (바텀시트) -->
+<div class="overlay" id="overlay">
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" onclick="closeOverlay()">✕</button>
+
+    <!-- 비밀번호 -->
+    <div id="pw-view">
+      <div class="sheet-title">🔒 관리자 모드</div>
+      <div class="pw-wrap">
+        <p>비밀번호를 입력하세요</p>
+        <input class="pw-input" type="password" id="pw-input" maxlength="20"
+          placeholder="••••" onkeydown="if(event.key==='Enter')checkPw()">
+        <div class="pw-err" id="pw-err">비밀번호가 틀렸습니다</div>
+        <button class="save-btn" onclick="checkPw()">확인</button>
+      </div>
+    </div>
+
+    <!-- 관리 패널 -->
+    <div id="admin-view" style="display:none">
+      <div class="sheet-title">✏️ 링크 편집</div>
+
+      <!-- GAS URL 설정 -->
+      <div class="gas-setup" id="gas-box">
+        <strong>⚠️ Google Apps Script URL 설정</strong><br>
+        아래에 배포된 웹앱 URL을 붙여넣으세요.<br>
+        한 번 저장하면 다음부터 자동으로 적용돼요.
+        <input class="gas-input" id="gas-url-input" type="url"
+          placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+
+      <div class="sec-label">🌸 인스타그램</div>
+      <div id="admin-insta"></div>
+
+      <hr class="hr">
+      <div class="sec-label">📱 앱 다운로드</div>
+      <div id="admin-app"></div>
+
+      <button class="save-btn" id="save-btn" onclick="saveAll()">저장하기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ADMIN_PW = '1234';
+const GAS_KEY  = 'mashimello_gas_url';
+
+const DEFAULT = {
+  insta: [
+    { type:'insta', name:'맘맘',    sub:'@mom_mom.ins',  url:'https://www.instagram.com/mom_mom.ins' },
+    { type:'insta', name:'월리플랍', sub:'@wallytrp',     url:'https://www.instagram.com/wallytrp' },
+    { type:'insta', name:'말타',    sub:'@malta_luxspo', url:'https://www.instagram.com/malta_luxspo' },
+  ],
+  app: [
+    { type:'app', name:'맘맘 앱', sub:'앱 다운로드', url:'https://mommom.onelink.me/oQHz/9d6j1i9x' },
+    { type:'app', name:'말타 앱', sub:'앱 다운로드', url:'https://luxspomalta.page.link/V9Hh' },
+  ]
+};
+
+let gasUrl = localStorage.getItem(GAS_KEY) || '';
+let currentData = null;
+
+// ── 데이터 로드 ──────────────────────────────
+async function loadData() {
+  document.getElementById('content').innerHTML = '<div class="loading">🌸 불러오는 중...</div>';
+
+  if (!gasUrl) {
+    renderCards(DEFAULT.insta.concat(DEFAULT.app));
+    return;
+  }
+
+  try {
+    const res = await fetch(gasUrl + '?action=get');
+    const json = await res.json();
+    if (json.ok && json.data.length > 0) {
+      renderCards(json.data);
+    } else {
+      renderCards(DEFAULT.insta.concat(DEFAULT.app));
+    }
+  } catch {
+    document.getElementById('content').innerHTML = `
+      <div class="error-box">
+        🌸 데이터를 불러올 수 없어요.<br>
+        <small>Apps Script URL을 확인해 주세요.</small>
+      </div>`;
+  }
+}
+
+// ── 카드 렌더링 ──────────────────────────────
+function renderCards(items) {
+  currentData = items;
+  const insta = items.filter(x => x.type === 'insta');
+  const app   = items.filter(x => x.type === 'app');
+
+  let html = '';
+
+  if (insta.length) {
+    html += `<div class="section-header" style="animation-delay:.1s">
+      <span class="label">인스타그램 팔로우</span>
+      <div class="line"></div>
+    </div>
+    <div class="cards">`;
+    insta.forEach((item, i) => {
+      html += `<a class="card" href="${item.url}" target="_blank" rel="noopener"
+        style="animation-delay:${0.15 + i*0.06}s">
+        <div class="card-icon icon-insta">${item.icon || '📸'}</div>
+        <div class="card-text">
+          <div class="card-title-row">
+            <span class="card-name">${item.name}</span>
+            <span class="card-sub">${item.sub}</span>
+          </div>
+        </div>
+        <span class="card-cta">팔로우</span>
+      </a>`;
+    });
+    html += `</div>`;
+  }
+
+  if (app.length) {
+    html += `<div class="section-header gap" style="animation-delay:.3s">
+      <span class="label">앱 다운로드</span>
+      <div class="line"></div>
+    </div>
+    <div class="cards">`;
+    app.forEach((item, i) => {
+      html += `<a class="card" href="${item.url}" target="_blank" rel="noopener"
+        style="animation-delay:${0.35 + i*0.06}s">
+        <div class="card-icon icon-app">${item.icon || '📲'}</div>
+        <div class="card-text">
+          <div class="card-title-row">
+            <span class="card-name">${item.name}</span>
+          </div>
+        </div>
+        <span class="card-cta">다운로드</span>
+      </a>`;
+    });
+    html += `</div>`;
+  }
+
+  document.getElementById('content').innerHTML = html;
+}
+
+// ── 관리자 ──────────────────────────────────
+function openOverlay() {
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('pw-view').style.display = 'block';
+  document.getElementById('admin-view').style.display = 'none';
+  document.getElementById('pw-input').value = '';
+  document.getElementById('pw-err').style.display = 'none';
+}
+function closeOverlay() {
+  document.getElementById('overlay').classList.remove('open');
+}
+document.getElementById('overlay').addEventListener('click', function(e){
+  if (e.target === this) closeOverlay();
+});
+
+function checkPw() {
+  if (document.getElementById('pw-input').value === ADMIN_PW) {
+    document.getElementById('pw-view').style.display = 'none';
+    document.getElementById('admin-view').style.display = 'block';
+    buildAdminForm();
+  } else {
+    document.getElementById('pw-err').style.display = 'block';
+  }
+}
+
+function buildAdminForm() {
+  // GAS URL
+  document.getElementById('gas-url-input').value = gasUrl;
+  document.getElementById('gas-box').style.display = gasUrl ? 'none' : 'block';
+
+  const items = currentData || DEFAULT.insta.concat(DEFAULT.app);
+  const insta = items.filter(x => x.type === 'insta');
+  const app   = items.filter(x => x.type === 'app');
+
+  document.getElementById('admin-insta').innerHTML = insta.map((item, i) => `
+    <div class="field-group" data-type="insta">
+      <div class="field"><label>이름</label>
+        <input class="f-name" value="${item.name}"></div>
+      <div class="field"><label>핸들 (@ 포함)</label>
+        <input class="f-sub" value="${item.sub}"></div>
+      <div class="field"><label>URL</label>
+        <input class="f-url" value="${item.url}"></div>
+      <div class="field"><label>아이콘 (이모지)</label>
+        <input class="f-icon" value="${item.icon || '📸'}"></div>
+    </div>`).join('');
+
+  document.getElementById('admin-app').innerHTML = app.map((item, i) => `
+    <div class="field-group" data-type="app">
+      <div class="field"><label>앱 이름</label>
+        <input class="f-name" value="${item.name}"></div>
+      <div class="field"><label>설명</label>
+        <input class="f-sub" value="${item.sub}"></div>
+      <div class="field"><label>URL</label>
+        <input class="f-url" value="${item.url}"></div>
+      <div class="field"><label>아이콘 (이모지)</label>
+        <input class="f-icon" value="${item.icon || '📲'}"></div>
+    </div>`).join('');
+}
+
+async function saveAll() {
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.textContent = '저장 중...';
+
+  // GAS URL 저장
+  const inputUrl = document.getElementById('gas-url-input').value.trim();
+  if (inputUrl) {
+    gasUrl = inputUrl;
+    localStorage.setItem(GAS_KEY, gasUrl);
+  }
+
+  // 폼 데이터 수집
+  const items = [];
+  document.querySelectorAll('#admin-insta .field-group').forEach(el => {
+    items.push({
+      type: 'insta',
+      name: el.querySelector('.f-name').value,
+      sub:  el.querySelector('.f-sub').value,
+      url:  el.querySelector('.f-url').value,
+      icon: el.querySelector('.f-icon').value,
+    });
+  });
+  document.querySelectorAll('#admin-app .field-group').forEach(el => {
+    items.push({
+      type: 'app',
+      name: el.querySelector('.f-name').value,
+      sub:  el.querySelector('.f-sub').value,
+      url:  el.querySelector('.f-url').value,
+      icon: el.querySelector('.f-icon').value,
+    });
+  });
+
+  if (!gasUrl) {
+    // GAS 없으면 화면만 업데이트
+    renderCards(items);
+    closeOverlay();
+    btn.disabled = false;
+    btn.textContent = '저장하기';
+    alert('🌸 화면에 반영됐어요!\n(Google Apps Script URL을 입력하면 영구 저장돼요)');
+    return;
+  }
+
+  try {
+    await fetch(gasUrl, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'save', items }),
+    });
+    renderCards(items);
+    closeOverlay();
+    alert('🌸 저장됐어요!');
+  } catch {
+    alert('저장 실패. URL을 확인해 주세요.');
+  }
+
+  btn.disabled = false;
+  btn.textContent = '저장하기';
+}
+
+loadData();
+</script>
+</body>
+</html>
