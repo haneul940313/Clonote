@@ -246,6 +246,7 @@
       .login-row .text-btn { width: 100%; height: 34px; font-size: 13px; }
       .guide { font-size: 12px; }
     }
+
     .credit {
       position: fixed;
       bottom: 4px; right: 8px;
@@ -261,6 +262,7 @@
 <body>
 
 <div class="book-outer">
+
   <div class="book-topbar">
     <div class="book-nav">
       <button class="icon-btn" id="prevBtn">‹</button>
@@ -290,6 +292,7 @@
   </div>
 
   <div class="book-spread" id="bookSpread">
+
     <div class="page-left" id="pageLeft">
       <div class="page-header">
         <div class="page-title">메모</div>
@@ -322,22 +325,43 @@
 </div>
 
 <script>
-const API_URL   = 'https://script.google.com/macros/s/AKfycbx7c5hpzouh_OxnSRkXWPi23w7h_QMNvG6we93HoEOfBrCSeb-CnHUgXlWHQENQS2rV/exec';
+const API_URL   = 'https://script.google.com/macros/s/AKfycbxVsn2NI9NwT0NJrWGIfxdhO6ExOsoTHxMOdG1EzZ7l_ZRXdGkJRg7iVI4GcoJ3a0Y/exec';
 const PAGE_ID   = new URLSearchParams(location.search).get('id') || 'default';
 const TOK_KEY   = 'clonote_token_' + PAGE_ID;
 const USER_KEY  = 'clonote_user_' + PAGE_ID;
 const CACHE_PFX = 'clonote_c2_' + PAGE_ID;
 
-function stGet(k){ try{ return localStorage.getItem(k); }catch{ return null; } }
-function stSet(k,v){ try{ localStorage.setItem(k,v); }catch{} }
-function stDel(k){ try{ localStorage.removeItem(k); }catch{} }
+const memStore = {};
+
+function stGet(k){
+  try {
+    const v = localStorage.getItem(k);
+    if (v !== null) return v;
+  } catch {}
+  try {
+    const v = sessionStorage.getItem(k);
+    if (v !== null) return v;
+  } catch {}
+  return Object.prototype.hasOwnProperty.call(memStore, k) ? memStore[k] : null;
+}
+function stSet(k,v){
+  memStore[k] = String(v);
+  try { localStorage.setItem(k,v); } catch {}
+  try { sessionStorage.setItem(k,v); } catch {}
+}
+function stDel(k){
+  delete memStore[k];
+  try { localStorage.removeItem(k); } catch {}
+  try { sessionStorage.removeItem(k); } catch {}
+}
+
 const MAX_H     = 10;
 const DEF_H     = 5;
 const DEBOUNCE  = 650;
 
 let curDate     = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 let curUser     = null;
-let curToken    = stGet(TOK_KEY)||'';
+let curToken    = stGet(TOK_KEY) || '';
 let habits      = [];
 let checks      = {};
 let memos       = {};
@@ -349,25 +373,36 @@ let memoTimers  = {};
 let memoVers    = {};
 let checkTimers = {};
 let loadSeq     = 0;
-let activeYm    = '';
 
 const $    = id => document.getElementById(id);
-const esc  = s  => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');
+const esc  = s  => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const yr   = () => curDate.getFullYear();
-const mo   = () => curDate.getMonth()+1;
-const ym   = () => yr()+'-'+String(mo()).padStart(2,'0');
+const mo   = () => curDate.getMonth() + 1;
+const ym   = () => yr() + '-' + String(mo()).padStart(2,'0');
 const last = () => new Date(yr(), mo(), 0).getDate();
 const dow  = d  => new Date(yr(), mo()-1, d).getDay();
 const dcls = d  => { const w=dow(d); return w===6?'sat':w===0?'sun':''; };
-const hcnt = () => Math.max(habits.filter(h=>String(h||'').trim()!=='').length, DEF_H);
+const hcnt = () => Math.max(habits.filter(h => String(h || '').trim() !== '').length, DEF_H);
 
-function setStatus(m,e=false){ $('statusText').textContent=m||''; $('statusText').style.color=e?'#c0392b':'#888'; }
-function setLS(m,e=false){ $('loginStatus').textContent=m||''; $('loginStatus').style.color=e?'#c0392b':'#666'; }
+function setStatus(m, e=false){
+  $('statusText').textContent = m || '';
+  $('statusText').style.color = e ? '#c0392b' : '#888';
+}
+function setLS(m, e=false){
+  $('loginStatus').textContent = m || '';
+  $('loginStatus').style.color = e ? '#c0392b' : '#666';
+}
 
 function normalizeHabitList(raw){
   if (Array.isArray(raw)) return raw.slice(0, MAX_H).map(v => String(v ?? '').trim());
   if (raw && Array.isArray(raw.habits)) return raw.habits.slice(0, MAX_H).map(v => String(v ?? '').trim());
   if (raw && Array.isArray(raw.items)) return raw.items.slice(0, MAX_H).map(v => String(v ?? '').trim());
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.slice(0, MAX_H).map(v => String(v ?? '').trim());
+    } catch {}
+  }
   return null;
 }
 
@@ -375,11 +410,9 @@ function normalizeCheckMap(raw){
   const out = {};
   const list = Array.isArray(raw)
     ? raw
-    : Array.isArray(raw?.checks)
-      ? raw.checks
-      : Array.isArray(raw?.records)
-        ? raw.records
-        : [];
+    : Array.isArray(raw?.checks) ? raw.checks
+    : Array.isArray(raw?.records) ? raw.records
+    : [];
 
   list.forEach(item => {
     const day = Number(item?.day ?? item?.date ?? item?.d);
@@ -387,7 +420,8 @@ function normalizeCheckMap(raw){
 
     let arr = item?.checks ?? item?.values ?? item?.checked ?? item?.habitChecks;
     if (typeof arr === 'string') {
-      try { arr = JSON.parse(arr); } catch { arr = arr.split(',').map(v => v === 'true' || v === '1'); }
+      try { arr = JSON.parse(arr); }
+      catch { arr = arr.split(',').map(v => v === 'true' || v === '1' || v === 'TRUE'); }
     }
     if (!Array.isArray(arr)) return;
 
@@ -401,11 +435,9 @@ function normalizeMemoMap(raw){
   const out = {};
   const list = Array.isArray(raw)
     ? raw
-    : Array.isArray(raw?.records)
-      ? raw.records
-      : Array.isArray(raw?.memos)
-        ? raw.memos
-        : [];
+    : Array.isArray(raw?.records) ? raw.records
+    : Array.isArray(raw?.memos) ? raw.memos
+    : [];
 
   list.forEach(item => {
     const day = Number(item?.day ?? item?.date ?? item?.d);
@@ -416,13 +448,9 @@ function normalizeMemoMap(raw){
   return out;
 }
 
-function getCSSVar(name) {
-  return parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name));
-}
-
 function calcLayout() {
   isMobile = window.innerWidth <= 640;
-  $('pageLeft').style.height  = '';
+  $('pageLeft').style.height = '';
   $('pageRight').style.height = '';
   const rowH = isMobile ? 30 : 26;
   return { rowH, graphRows: isMobile ? 4 : 6 };
@@ -432,92 +460,150 @@ function ck(t, targetYm = ym()){
   return `${CACHE_PFX}:${curUser?.userId}:${targetYm}:${t}`;
 }
 function saveCache(targetYm = ym()){
-  if(!curUser) return;
+  if (!curUser) return;
   try {
     stSet(ck('h', targetYm), JSON.stringify(habits));
     stSet(ck('c', targetYm), JSON.stringify(checks));
     stSet(ck('m', targetYm), JSON.stringify(memos));
-  } catch{}
+  } catch {}
 }
 function loadCache(targetYm = ym()){
   try {
-    const h=stGet(ck('h', targetYm)), c=stGet(ck('c', targetYm)), m=stGet(ck('m', targetYm));
-    return { h:h?JSON.parse(h):null, c:c?JSON.parse(c):null, m:m?JSON.parse(m):null };
-  } catch{ return {}; }
+    const h = stGet(ck('h', targetYm));
+    const c = stGet(ck('c', targetYm));
+    const m = stGet(ck('m', targetYm));
+    return {
+      h: h ? JSON.parse(h) : null,
+      c: c ? JSON.parse(c) : null,
+      m: m ? JSON.parse(m) : null
+    };
+  } catch {
+    return {};
+  }
 }
 
-const gj = url  => fetch(url, { cache: 'no-store' }).then(r=>r.json());
-const pj = body => fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(r=>r.json());
+const gj = url => fetch(url, { cache: 'no-store' }).then(r => r.json());
+const pj = body => fetch(API_URL, {
+  method: 'POST',
+  headers: { 'Content-Type':'text/plain;charset=utf-8' },
+  body: JSON.stringify(body)
+}).then(r => r.json());
 
 async function tryAutoLogin(){
-  if(!curToken){ renderMeta(); return false; }
+  if (!curToken) { renderMeta(); return false; }
   try {
-    const r = await gj(`${API_URL}?action=autoLogin&token=${encodeURIComponent(curToken)}`);
-    if(r.success&&r.user){ curUser=r.user; stSet(USER_KEY,JSON.stringify(curUser)); renderMeta(); return true; }
-    clearAuth(); return false;
-  } catch{ renderMeta(); return false; }
+    const r = await gj(`${API_URL}?action=autoLogin&token=${encodeURIComponent(curToken)}&_=${Date.now()}`);
+    if (r.success && r.user) {
+      curUser = r.user;
+      stSet(USER_KEY, JSON.stringify(curUser));
+      renderMeta();
+      return true;
+    }
+    clearAuth();
+    return false;
+  } catch {
+    renderMeta();
+    return false;
+  }
 }
-function clearAuth(){ stDel(TOK_KEY); stDel(USER_KEY); curToken=''; curUser=null; }
+function clearAuth(){
+  stDel(TOK_KEY);
+  stDel(USER_KEY);
+  curToken = '';
+  curUser = null;
+}
 
 async function doStart(){
-  const n=$('loginName').value.trim(), p=$('loginPass').value.trim();
-  if(!n||!p){ setLS('이름과 비밀번호를 입력해 주세요.',true); return; }
-  $('startBtn').disabled=true; setLS('확인 중...');
+  const n = $('loginName').value.trim();
+  const p = $('loginPass').value.trim();
+
+  if (!n || !p) {
+    setLS('이름과 비밀번호를 입력해 주세요.', true);
+    return;
+  }
+
+  $('startBtn').disabled = true;
+  setLS('확인 중...');
+
   try {
-    await pj({action:'registerUser',userName:n,password:p});
-    const r=await pj({action:'login',userName:n,password:p});
-    if(!r.success||!r.token||!r.user) throw new Error(r.message||'로그인 실패');
-    curToken=r.token; curUser=r.user;
-    stSet(TOK_KEY,curToken); stSet(USER_KEY,JSON.stringify(curUser));
-    $('loginName').value=''; $('loginPass').value=''; setLS('');
-    renderMeta(); await loadAll();
-  } catch(e){ setLS(e.message||'실패',true); }
-  finally{ $('startBtn').disabled=false; }
+    await pj({ action:'registerUser', userName:n, password:p });
+    const r = await pj({ action:'login', userName:n, password:p });
+
+    if (!r.success || !r.token || !r.user) {
+      throw new Error(r.message || '로그인 실패');
+    }
+
+    curToken = r.token;
+    curUser = r.user;
+    stSet(TOK_KEY, curToken);
+    stSet(USER_KEY, JSON.stringify(curUser));
+
+    $('loginName').value = '';
+    $('loginPass').value = '';
+    setLS('');
+    renderMeta();
+    await loadAll();
+  } catch(e) {
+    setLS(e.message || '실패', true);
+  } finally {
+    $('startBtn').disabled = false;
+  }
 }
+
 async function doLogout(){
-  try{ if(curToken) await pj({action:'logout',token:curToken}); } catch{}
-  clearAuth(); habits=[]; checks={}; memos={}; activeYm='';
-  renderMeta(); renderAll(); setStatus('로그아웃되었습니다.');
+  try {
+    if (curToken) await pj({ action:'logout', token:curToken });
+  } catch {}
+  clearAuth();
+  habits = [];
+  checks = {};
+  memos = {};
+  renderMeta();
+  renderAll();
+  setStatus('로그아웃되었습니다.');
 }
 
 function renderMeta(){
-  $('monthTitle').textContent = yr()+'년 '+mo()+'월';
-  $('userNameText').textContent = curUser?.userName||'사용자';
-  $('loginBox').classList.toggle('show',!curUser);
+  $('monthTitle').textContent = yr() + '년 ' + mo() + '월';
+  $('userNameText').textContent = curUser?.userName || '사용자';
+  $('loginBox').classList.toggle('show', !curUser);
   $('menuWrap').style.display = curUser ? 'block' : 'none';
-  if(!curUser) $('menuPop').classList.remove('show');
+  if (!curUser) $('menuPop').classList.remove('show');
 }
 
 async function loadAll(){
   renderMeta();
-  if(!curUser) return;
+  if (!curUser) return;
 
   const requestSeq = ++loadSeq;
   const targetYm = ym();
-  activeYm = targetYm;
 
-  const cc=loadCache(targetYm);
+  const cc = loadCache(targetYm);
   habits = Array.isArray(cc.h) ? cc.h : [];
-  checks = cc.c && typeof cc.c === 'object' ? Object.fromEntries(Object.entries(cc.c).map(([d,v]) => [Number(d), Array.isArray(v) ? v : Array(MAX_H).fill(false)])) : {};
-  memos  = cc.m && typeof cc.m === 'object' ? Object.fromEntries(Object.entries(cc.m).map(([d,v]) => [Number(d), String(v ?? '')])) : {};
+  checks = cc.c && typeof cc.c === 'object'
+    ? Object.fromEntries(Object.entries(cc.c).map(([d, v]) => [Number(d), Array.isArray(v) ? v : Array(MAX_H).fill(false)]))
+    : {};
+  memos = cc.m && typeof cc.m === 'object'
+    ? Object.fromEntries(Object.entries(cc.m).map(([d, v]) => [Number(d), String(v ?? '')]))
+    : {};
+
   renderAll();
 
   try {
-    const habitUrl = `${API_URL}?action=getHabits&userId=${encodeURIComponent(curUser.userId)}&yearMonth=${encodeURIComponent(targetYm)}&_=${Date.now()}`;
-    const checksUrl = `${API_URL}?action=getChecks&userId=${encodeURIComponent(curUser.userId)}&yearMonth=${encodeURIComponent(targetYm)}&_=${Date.now()}`;
-    const memoUrl = `${API_URL}?action=getRecords&userId=${encodeURIComponent(curUser.userId)}&year=${yr()}&month=${mo()}&_=${Date.now()}`;
-
-    const [hR,cR,mR] = await Promise.all([
-      gj(habitUrl),
-      gj(checksUrl),
-      gj(memoUrl)
+    const [hR, cR, mR] = await Promise.all([
+      gj(`${API_URL}?action=getHabits&userId=${encodeURIComponent(curUser.userId)}&yearMonth=${encodeURIComponent(targetYm)}&_=${Date.now()}`),
+      gj(`${API_URL}?action=getChecks&userId=${encodeURIComponent(curUser.userId)}&yearMonth=${encodeURIComponent(targetYm)}&_=${Date.now()}`),
+      gj(`${API_URL}?action=getRecords&userId=${encodeURIComponent(curUser.userId)}&year=${yr()}&month=${mo()}&_=${Date.now()}`)
     ]);
 
     if (requestSeq !== loadSeq || targetYm !== ym()) return;
 
     const normalizedHabits = normalizeHabitList(hR?.habits ?? hR?.data ?? hR);
-    if (normalizedHabits) habits = normalizedHabits;
-    else if (hR?.success === false) setStatus('습관 로드 실패: ' + (hR.message || 'unknown'), true);
+    if (normalizedHabits) {
+      habits = normalizedHabits;
+    } else if (hR?.success === false) {
+      setStatus('습관 로드 실패: ' + (hR.message || 'unknown'), true);
+    }
 
     checks = normalizeCheckMap(cR?.data ?? cR);
     memos  = normalizeMemoMap(mR?.data ?? mR);
@@ -525,10 +611,9 @@ async function loadAll(){
     saveCache(targetYm);
     renderAll();
     setStatus('');
-  } catch(err){
+  } catch(err) {
     if (requestSeq !== loadSeq) return;
-    console.error('[Clonote] loadAll error:', err);
-    setStatus('네트워크 오류: '+(err.message||err), true);
+    setStatus('네트워크 오류: ' + (err.message || err), true);
   }
 }
 
@@ -539,19 +624,20 @@ function renderAll(){
   buildSpines(rowH);
 }
 
+/* LEFT */
 function renderLeft(){
-  const el=$('memoContent');
-  el.innerHTML = (leftTab==='memo-month') ? buildMemoRows(1,last(),'lm') : buildMemoWeek();
+  const el = $('memoContent');
+  el.innerHTML = (leftTab === 'memo-month') ? buildMemoRows(1, last(), 'lm') : buildMemoWeek();
   bindMemo(el);
 }
-function buildMemoRows(from,to,src){
-  let h='';
-  for(let d=from;d<=to;d++){
-    h+=`<div class="memo-row">
+function buildMemoRows(from, to, src){
+  let h = '';
+  for (let d = from; d <= to; d++) {
+    h += `<div class="memo-row">
       <div class="day-cell ${dcls(d)}" style="width:var(--left-date);">${d}일</div>
       <div class="memo-cell">
         <input class="memo-input" id="mi-${src}-${d}" type="text" data-day="${d}" data-src="${src}"
-          value="${esc(memos[d]||'')}" ${curUser?'':'disabled'} autocomplete="off"/>
+          value="${esc(memos[d] || '')}" ${curUser ? '' : 'disabled'} autocomplete="off"/>
         <span class="save-ind" id="si-${src}-${d}"></span>
       </div>
     </div>`;
@@ -559,261 +645,442 @@ function buildMemoRows(from,to,src){
   return h;
 }
 function buildMemoWeek(){
-  const days=getWeekDays();
-  if(!days.length) return '<div style="padding:8px 4px;font-size:11px;color:var(--muted);">해당 없음</div>';
-  return buildMemoRows(days[0],days[days.length-1],'lw');
+  const days = getWeekDays();
+  if (!days.length) return '<div style="padding:8px 4px;font-size:11px;color:var(--muted);">해당 없음</div>';
+  return buildMemoRows(days[0], days[days.length - 1], 'lw');
 }
 function bindMemo(el){
-  el.querySelectorAll('.memo-input').forEach(inp=>{
-    inp.addEventListener('input',()=>scheduleMemo(+inp.dataset.day,inp.dataset.src));
-    inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault(); inp.blur(); flushMemo(+inp.dataset.day,inp.dataset.src);} });
-    inp.addEventListener('blur',()=>flushMemo(+inp.dataset.day,inp.dataset.src));
-    inp.addEventListener('change',()=>flushMemo(+inp.dataset.day,inp.dataset.src));
+  el.querySelectorAll('.memo-input').forEach(inp => {
+    inp.addEventListener('input', () => scheduleMemo(+inp.dataset.day, inp.dataset.src));
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        inp.blur();
+        flushMemo(+inp.dataset.day, inp.dataset.src);
+      }
+    });
+    inp.addEventListener('blur', () => flushMemo(+inp.dataset.day, inp.dataset.src));
+    inp.addEventListener('change', () => flushMemo(+inp.dataset.day, inp.dataset.src));
   });
 }
 
+/* RIGHT */
 function renderRight(rowH, graphRows){
-  const el=$('habitContent');
-  if(rightTab==='habit-home')       el.innerHTML=buildHabitHome(rowH,graphRows);
-  else if(rightTab==='habit-setup') el.innerHTML=buildHabitSetup();
-  else                              el.innerHTML=buildHabitAll();
+  const el = $('habitContent');
+  if (rightTab === 'habit-home') el.innerHTML = buildHabitHome(rowH, graphRows);
+  else if (rightTab === 'habit-setup') el.innerHTML = buildHabitSetup();
+  else el.innerHTML = buildHabitAll();
+
   bindChecks(el);
-  if(rightTab==='habit-setup') bindSetup(el);
-  if(rightTab==='habit-home')  renderGraph();
+  if (rightTab === 'habit-setup') bindSetup(el);
+  if (rightTab === 'habit-home') renderGraph();
 }
 
 function buildHabitHome(rowH, graphRows){
-  const days=getWeekDays(), lastDay=last();
-  const minD=days[0]||1, maxD=days[days.length-1]||lastDay;
-  const lbl=days.length?`${days[0]}일 — ${days[days.length-1]}일`:'';
+  const days = getWeekDays(), lastDay = last();
+  const minD = days[0] || 1, maxD = days[days.length - 1] || lastDay;
+  const lbl = days.length ? `${days[0]}일 — ${days[days.length - 1]}일` : '';
   const graphH = rowH * graphRows;
-  let h=`<div class="graph-wrap" style="height:${graphH}px;"><canvas class="graph" id="graphCanvas"></canvas></div>`;
-  h+=`<div class="week-nav">
-    <button class="w-arrow" id="wPrev" ${minD<=1?'disabled':''}>‹</button>
+
+  let h = `<div class="graph-wrap" style="height:${graphH}px;"><canvas class="graph" id="graphCanvas"></canvas></div>`;
+  h += `<div class="week-nav">
+    <button class="w-arrow" id="wPrev" ${minD <= 1 ? 'disabled' : ''}>‹</button>
     <div class="week-lbl">${lbl}</div>
-    <button class="w-arrow" id="wNext" ${maxD>=lastDay?'disabled':''}>›</button>
+    <button class="w-arrow" id="wNext" ${maxD >= lastDay ? 'disabled' : ''}>›</button>
   </div>`;
-  if(days.length){ h+=buildCheckHeader('rh'); days.forEach(d=>{ h+=buildCheckRow(d,'rh'); }); }
+  if (days.length) {
+    h += buildCheckHeader('rh');
+    days.forEach(d => { h += buildCheckRow(d, 'rh'); });
+  }
   return h;
 }
 function buildHabitAll(){
-  let h=buildCheckHeader('ra');
-  for(let d=1;d<=last();d++) h+=buildCheckRow(d,'ra');
+  let h = buildCheckHeader('ra');
+  for (let d = 1; d <= last(); d++) h += buildCheckRow(d, 'ra');
   return h;
 }
 function buildCheckHeader(src){
-  const cnt=hcnt(), col=`var(--right-date) repeat(${cnt},1fr) var(--total-w)`;
-  let cells=''; habits.slice(0,cnt).forEach(n=>{ cells+=`<div class="hdr-cell">${esc(n||'—')}</div>`; });
+  const cnt = hcnt(), col = `var(--right-date) repeat(${cnt},1fr) var(--total-w)`;
+  let cells = '';
+  habits.slice(0, cnt).forEach(n => { cells += `<div class="hdr-cell">${esc(n || '—')}</div>`; });
+
   return `<div class="habit-hdr" style="grid-template-columns:${col};">
     <div style="width:var(--right-date);flex-shrink:0;"></div>${cells}
     <div class="hdr-total">합</div>
   </div>`;
 }
-function buildCheckRow(d,src){
-  const cnt=hcnt(), col=`var(--right-date) repeat(${cnt},1fr) var(--total-w)`;
-  const ch=Array.isArray(checks[d]) ? checks[d] : Array(MAX_H).fill(false);
-  const tot=ch.slice(0,cnt).filter(Boolean).length;
-  const dis=curUser?'':'disabled';
+function buildCheckRow(d, src){
+  const cnt = hcnt(), col = `var(--right-date) repeat(${cnt},1fr) var(--total-w)`;
+  const ch = Array.isArray(checks[d]) ? checks[d] : Array(MAX_H).fill(false);
+  const tot = ch.slice(0, cnt).filter(Boolean).length;
+  const dis = curUser ? '' : 'disabled';
 
-  let cbs='';
-  for(let i=0;i<cnt;i++) cbs+=`<div class="cb-wrap"><input type="checkbox" data-day="${d}" data-idx="${i}" data-src="${src}" ${ch[i]?'checked':''} ${dis}/></div>`;
+  let cbs = '';
+  for (let i = 0; i < cnt; i++) {
+    cbs += `<div class="cb-wrap"><input type="checkbox" data-day="${d}" data-idx="${i}" data-src="${src}" ${ch[i] ? 'checked' : ''} ${dis}/></div>`;
+  }
+
   return `<div class="check-row" style="grid-template-columns:${col};">
     <div class="day-cell ${dcls(d)}" style="width:var(--right-date);flex-shrink:0;">${d}일</div>
     ${cbs}
-    <div class="total-cell" id="tc-${src}-${d}">${tot>0?tot:''}</div>
+    <div class="total-cell" id="tc-${src}-${d}">${tot > 0 ? tot : ''}</div>
   </div>`;
 }
 function buildHabitSetup(){
-  let h='';
-  for(let i=0;i<MAX_H;i++){
-    const dis=curUser?'':'disabled', ph=i<DEF_H?`습관 ${i+1}`:`습관 ${i+1} (선택)`;
-    h+=`<div class="setup-row"><div class="setup-num">${i+1}</div><div class="setup-inp-wrap">
-      <input class="setup-inp" type="text" data-hi="${i}" value="${esc(habits[i]||'')}" placeholder="${ph}" maxlength="20" ${dis} autocomplete="off"/>
+  let h = '';
+  for (let i = 0; i < MAX_H; i++) {
+    const dis = curUser ? '' : 'disabled';
+    const ph = i < DEF_H ? `습관 ${i+1}` : `습관 ${i+1} (선택)`;
+    h += `<div class="setup-row"><div class="setup-num">${i+1}</div><div class="setup-inp-wrap">
+      <input class="setup-inp" type="text" data-hi="${i}" value="${esc(habits[i] || '')}" placeholder="${ph}" maxlength="20" ${dis} autocomplete="off"/>
     </div></div>`;
   }
-  return h+`<div class="habit-save-row"><button class="habit-save-btn" id="habitSaveBtn">저장</button></div>`;
+  return h + `<div class="habit-save-row"><button class="habit-save-btn" id="habitSaveBtn">저장</button></div>`;
 }
-function bindSetup(el){ const b=el.querySelector('#habitSaveBtn'); if(b) b.addEventListener('click',doSaveHabits); }
+function bindSetup(el){
+  const b = el.querySelector('#habitSaveBtn');
+  if (b) b.addEventListener('click', doSaveHabits);
+}
 async function doSaveHabits(){
-  if(!curUser) return;
+  if (!curUser) return;
+
   const targetYm = ym();
-  const h=Array.from(document.querySelectorAll('.setup-inp')).map(i=>i.value.trim());
-  const btn=document.getElementById('habitSaveBtn');
-  if(btn) btn.disabled=true; setStatus('저장 중...');
+  const h = Array.from(document.querySelectorAll('.setup-inp')).map(i => i.value.trim());
+  const btn = document.getElementById('habitSaveBtn');
+  if (btn) btn.disabled = true;
+  setStatus('저장 중...');
+
   try {
-    const r=await pj({action:'saveHabits',userId:curUser.userId,yearMonth:targetYm,habits:h});
-    if(!r.success) throw new Error(r.message);
-    habits=normalizeHabitList(r?.habits ?? r?.data ?? h) || h;
+    const r = await pj({ action:'saveHabits', userId:curUser.userId, yearMonth:targetYm, habits:h });
+    if (!r.success) throw new Error(r.message);
+    habits = normalizeHabitList(r?.habits ?? r?.data ?? h) || h;
     saveCache(targetYm);
-    rightTab='habit-home';
-    document.querySelectorAll('[data-rtab]').forEach(x=>x.classList.toggle('active',x.dataset.rtab==='habit-home'));
-    renderAll(); setStatus('습관이 저장되었습니다.'); setTimeout(()=>setStatus(''),2000);
-  } catch(e){ setStatus(e.message||'저장 실패',true); }
-  finally { if(btn) btn.disabled=false; }
+
+    rightTab = 'habit-home';
+    document.querySelectorAll('[data-rtab]').forEach(x => x.classList.toggle('active', x.dataset.rtab === 'habit-home'));
+    renderAll();
+    setStatus('습관이 저장되었습니다.');
+    setTimeout(() => setStatus(''), 2000);
+  } catch(e) {
+    setStatus(e.message || '저장 실패', true);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 function bindChecks(el){
-  el.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.addEventListener('change',onCheck));
-  const wp=el.querySelector('#wPrev'), wn=el.querySelector('#wNext');
-  if(wp) wp.addEventListener('click',()=>{ weekOff--; renderAll(); });
-  if(wn) wn.addEventListener('click',()=>{ weekOff++; renderAll(); });
+  el.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', onCheck));
+  const wp = el.querySelector('#wPrev');
+  const wn = el.querySelector('#wNext');
+  if (wp) wp.addEventListener('click', () => { weekOff--; renderAll(); });
+  if (wn) wn.addEventListener('click', () => { weekOff++; renderAll(); });
 }
 function onCheck(e){
-  if(!curUser) return;
+  if (!curUser) return;
+
   const targetYm = ym();
-  const d=+e.target.dataset.day, idx=+e.target.dataset.idx, cnt=hcnt();
-  const prev=Array.isArray(checks[d])?[...checks[d]]:Array(MAX_H).fill(false);
-  prev[idx]=e.target.checked; checks[d]=prev;
-  const tot=prev.slice(0,cnt).filter(Boolean).length;
-  document.querySelectorAll(`input[type="checkbox"][data-day="${d}"][data-idx="${idx}"]`).forEach(cb=>{ if(cb!==e.target) cb.checked=e.target.checked; });
-  document.querySelectorAll(`[id^="tc-"][id$="-${d}"]`).forEach(el=>{ el.textContent=tot>0?tot:''; });
-  saveCache(targetYm); if(rightTab==='habit-home') renderGraph();
+  const d = +e.target.dataset.day;
+  const idx = +e.target.dataset.idx;
+  const cnt = hcnt();
+
+  const prev = Array.isArray(checks[d]) ? [...checks[d]] : Array(MAX_H).fill(false);
+  prev[idx] = e.target.checked;
+  checks[d] = prev;
+
+  const tot = prev.slice(0, cnt).filter(Boolean).length;
+  document.querySelectorAll(`input[type="checkbox"][data-day="${d}"][data-idx="${idx}"]`).forEach(cb => {
+    if (cb !== e.target) cb.checked = e.target.checked;
+  });
+  document.querySelectorAll(`[id^="tc-"][id$="-${d}"]`).forEach(el => { el.textContent = tot > 0 ? tot : ''; });
+
+  saveCache(targetYm);
+  if (rightTab === 'habit-home') renderGraph();
+
   clearTimeout(checkTimers[d]);
-  checkTimers[d]=setTimeout(async()=>{
+  checkTimers[d] = setTimeout(async () => {
     try {
-      const r=await pj({action:'saveCheck',userId:curUser.userId,yearMonth:targetYm,day:d,checks:checks[d]});
-      if(!r.success) setStatus('체크 저장 실패',true);
+      const r = await pj({ action:'saveCheck', userId:curUser.userId, yearMonth:targetYm, day:d, checks:checks[d] });
+      if (!r.success) setStatus('체크 저장 실패', true);
+    } catch {
+      setStatus('체크 저장 오류', true);
     }
-    catch{ setStatus('체크 저장 오류',true); }
-  },800);
+  }, 800);
 }
 
-function scheduleMemo(d,src){ if(!curUser) return; clearTimeout(memoTimers[d]); showInd(d,src,'저장중',true); memoTimers[d]=setTimeout(()=>flushMemo(d,src),DEBOUNCE); }
-function flushMemo(d,src){ if(!curUser) return; clearTimeout(memoTimers[d]); doMemoSave(d,src); }
-async function doMemoSave(d,src){
+function scheduleMemo(d, src){
+  if (!curUser) return;
+  clearTimeout(memoTimers[d]);
+  showInd(d, src, '저장중', true);
+  memoTimers[d] = setTimeout(() => flushMemo(d, src), DEBOUNCE);
+}
+function flushMemo(d, src){
+  if (!curUser) return;
+  clearTimeout(memoTimers[d]);
+  doMemoSave(d, src);
+}
+async function doMemoSave(d, src){
   const targetYear = yr();
   const targetMonth = mo();
   const targetYm = ym();
-  const inp=document.getElementById(`mi-${src}-${d}`); if(!inp) return;
-  const val=inp.value.trim();
-  const other=src==='lm'?'lw':'lm';
-  const twin=document.getElementById(`mi-${other}-${d}`); if(twin&&twin.value!==inp.value) twin.value=inp.value;
-  if(!val){ showInd(d,src,'',false); showInd(d,other,'',false); memos[d]=''; saveCache(targetYm); return; }
-  if(val===(memos[d]||'')){ showInd(d,src,'',false); return; }
-  const ver=(memoVers[d]||0)+1; memoVers[d]=ver;
+
+  const inp = document.getElementById(`mi-${src}-${d}`);
+  if (!inp) return;
+
+  const val = inp.value.trim();
+  const other = src === 'lm' ? 'lw' : 'lm';
+  const twin = document.getElementById(`mi-${other}-${d}`);
+  if (twin && twin.value !== inp.value) twin.value = inp.value;
+
+  if (!val) {
+    showInd(d, src, '', false);
+    showInd(d, other, '', false);
+    memos[d] = '';
+    saveCache(targetYm);
+    return;
+  }
+  if (val === (memos[d] || '')) {
+    showInd(d, src, '', false);
+    return;
+  }
+
+  const ver = (memoVers[d] || 0) + 1;
+  memoVers[d] = ver;
+
   try {
-    const r=await pj({action:'saveRecord',userId:curUser.userId,year:targetYear,month:targetMonth,day:d,memo:val});
-    if(memoVers[d]!==ver) return;
-    if(!r.success) throw new Error(r.message);
-    memos[d]=val; saveCache(targetYm); showInd(d,src,'',false); showInd(d,other,'',false);
-    setStatus(`${d}일 메모 저장`); setTimeout(()=>setStatus(''),1500);
-  } catch(err){ if(memoVers[d]!==ver) return; showInd(d,src,'오류',true); setStatus(err.message||'메모 저장 오류',true); }
+    const r = await pj({ action:'saveRecord', userId:curUser.userId, year:targetYear, month:targetMonth, day:d, memo:val });
+    if (memoVers[d] !== ver) return;
+    if (!r.success) throw new Error(r.message);
+
+    memos[d] = val;
+    saveCache(targetYm);
+    showInd(d, src, '', false);
+    showInd(d, other, '', false);
+    setStatus(`${d}일 메모 저장`);
+    setTimeout(() => setStatus(''), 1500);
+  } catch(err) {
+    if (memoVers[d] !== ver) return;
+    showInd(d, src, '오류', true);
+    setStatus(err.message || '메모 저장 오류', true);
+  }
 }
-function showInd(d,src,txt,show){ const el=document.getElementById(`si-${src}-${d}`); if(!el) return; el.textContent=txt; el.classList.toggle('show',show&&!!txt); }
+function showInd(d, src, txt, show){
+  const el = document.getElementById(`si-${src}-${d}`);
+  if (!el) return;
+  el.textContent = txt;
+  el.classList.toggle('show', show && !!txt);
+}
 
 function renderGraph(){
-  const cv=document.getElementById('graphCanvas'); if(!cv) return;
-  const ctx=cv.getContext('2d');
-  const ld=last(), cnt=hcnt();
-  const now=new Date();
-  const isCur=(yr()===now.getFullYear()&&mo()===now.getMonth()+1);
-  const today=isCur?now.getDate():ld;
-  const data=[]; for(let d=1;d<=ld;d++){ const c=Array.isArray(checks[d]) ? checks[d] : []; data.push(c.slice(0,cnt).filter(Boolean).length); }
-  const hasAny=data.some(v=>v>0);
-  const dpr=window.devicePixelRatio||1;
-  const W=cv.parentElement.clientWidth||300;
-  const H=cv.parentElement.clientHeight||100;
-  cv.style.width=W+'px'; cv.style.height=H+'px';
-  cv.width=W*dpr; cv.height=H*dpr;
-  ctx.scale(dpr,dpr); ctx.clearRect(0,0,W,H);
-  const rdVal = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--right-date'))||44;
-  const p={t:12,r:12,b:22,l: rdVal + 6};
-  const gW=W-p.l-p.r, gH=H-p.t-p.b;
-  ctx.strokeStyle='rgba(132,184,196,0.28)'; ctx.lineWidth=0.5;
-  for(let v=0;v<=cnt;v++){
-    const y=p.t+gH-(v/cnt)*gH;
-    ctx.beginPath(); ctx.moveTo(p.l,y); ctx.lineTo(p.l+gW,y); ctx.stroke();
-    if(v>0){ ctx.fillStyle='rgba(100,100,100,0.38)'; ctx.font=`${Math.min(9,H/10)}px Arial`; ctx.textAlign='center'; ctx.fillText(v, rdVal/2, y+3); }
+  const cv = document.getElementById('graphCanvas');
+  if (!cv) return;
+
+  const ctx = cv.getContext('2d');
+  const ld = last(), cnt = hcnt();
+  const now = new Date();
+  const isCur = (yr() === now.getFullYear() && mo() === now.getMonth() + 1);
+  const today = isCur ? now.getDate() : ld;
+
+  const data = [];
+  for (let d = 1; d <= ld; d++) {
+    const c = Array.isArray(checks[d]) ? checks[d] : [];
+    data.push(c.slice(0, cnt).filter(Boolean).length);
   }
-  ctx.fillStyle='rgba(100,100,100,0.42)'; ctx.font=`${Math.min(9,H/10)}px Arial`; ctx.textAlign='center';
-  for(let d=1;d<=ld;d++){ if(d===1||d%5===0||d===ld){ const x=p.l+((d-1)/(ld-1||1))*gW; ctx.fillText(d,x,H-p.b+11); } }
-  if(!hasAny) return;
-  const pts=[]; for(let d=1;d<=today;d++) pts.push({x:p.l+((d-1)/(ld-1||1))*gW, y:p.t+gH-(data[d-1]/cnt)*gH, v:data[d-1]});
-  if(!pts.length) return;
-  ctx.beginPath(); ctx.moveTo(pts[0].x,p.t+gH); pts.forEach(pt=>ctx.lineTo(pt.x,pt.y)); ctx.lineTo(pts[pts.length-1].x,p.t+gH); ctx.closePath(); ctx.fillStyle='rgba(93,134,200,0.09)'; ctx.fill();
-  ctx.beginPath(); ctx.strokeStyle='rgba(93,134,200,0.82)'; ctx.lineWidth=1.8; ctx.lineJoin='round'; pts.forEach((pt,i)=>i===0?ctx.moveTo(pt.x,pt.y):ctx.lineTo(pt.x,pt.y)); ctx.stroke();
-  pts.forEach(pt=>{ ctx.beginPath(); ctx.arc(pt.x,pt.y,2.2,0,Math.PI*2); ctx.fillStyle=pt.v>0?'rgba(93,134,200,0.85)':'rgba(190,190,190,0.5)'; ctx.fill(); });
+
+  const hasAny = data.some(v => v > 0);
+  const dpr = window.devicePixelRatio || 1;
+  const W = cv.parentElement.clientWidth || 300;
+  const H = cv.parentElement.clientHeight || 100;
+
+  cv.style.width = W + 'px';
+  cv.style.height = H + 'px';
+  cv.width = W * dpr;
+  cv.height = H * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0,0,W,H);
+
+  const rdVal = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--right-date')) || 44;
+  const p = { t:12, r:12, b:22, l: rdVal + 6 };
+  const gW = W - p.l - p.r, gH = H - p.t - p.b;
+
+  ctx.strokeStyle = 'rgba(132,184,196,0.28)';
+  ctx.lineWidth = 0.5;
+  for (let v = 0; v <= cnt; v++) {
+    const y = p.t + gH - (v / cnt) * gH;
+    ctx.beginPath();
+    ctx.moveTo(p.l, y);
+    ctx.lineTo(p.l + gW, y);
+    ctx.stroke();
+
+    if (v > 0) {
+      ctx.fillStyle = 'rgba(100,100,100,0.38)';
+      ctx.font = `${Math.min(9,H/10)}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.fillText(v, rdVal/2, y+3);
+    }
+  }
+
+  ctx.fillStyle = 'rgba(100,100,100,0.42)';
+  ctx.font = `${Math.min(9,H/10)}px Arial`;
+  ctx.textAlign = 'center';
+  for (let d = 1; d <= ld; d++) {
+    if (d === 1 || d % 5 === 0 || d === ld) {
+      const x = p.l + ((d - 1) / (ld - 1 || 1)) * gW;
+      ctx.fillText(d, x, H - p.b + 11);
+    }
+  }
+
+  if (!hasAny) return;
+
+  const pts = [];
+  for (let d = 1; d <= today; d++) {
+    pts.push({
+      x: p.l + ((d - 1) / (ld - 1 || 1)) * gW,
+      y: p.t + gH - (data[d - 1] / cnt) * gH,
+      v: data[d - 1]
+    });
+  }
+  if (!pts.length) return;
+
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, p.t + gH);
+  pts.forEach(pt => ctx.lineTo(pt.x, pt.y));
+  ctx.lineTo(pts[pts.length - 1].x, p.t + gH);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(93,134,200,0.09)';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.strokeStyle = 'rgba(93,134,200,0.82)';
+  ctx.lineWidth = 1.8;
+  ctx.lineJoin = 'round';
+  pts.forEach((pt, i) => i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y));
+  ctx.stroke();
+
+  pts.forEach(pt => {
+    ctx.beginPath();
+    ctx.arc(pt.x, pt.y, 2.2, 0, Math.PI * 2);
+    ctx.fillStyle = pt.v > 0 ? 'rgba(93,134,200,0.85)' : 'rgba(190,190,190,0.5)';
+    ctx.fill();
+  });
 }
 
 function getWeekDays(){
-  const today=new Date(), isCur=(yr()===today.getFullYear()&&mo()===today.getMonth()+1);
-  const base=isCur?today.getDate():last();
-  const bd=new Date(yr(),mo()-1,base), dw=bd.getDay();
-  const monday=new Date(bd); monday.setDate(bd.getDate()-(dw===0?6:dw-1)+weekOff*7);
-  const days=[];
-  for(let i=0;i<7;i++){ const d=new Date(monday); d.setDate(monday.getDate()+i); if(d.getFullYear()===yr()&&d.getMonth()+1===mo()) days.push(d.getDate()); }
+  const today = new Date();
+  const isCur = (yr() === today.getFullYear() && mo() === today.getMonth() + 1);
+  const base = isCur ? today.getDate() : last();
+  const bd = new Date(yr(), mo()-1, base);
+  const dw = bd.getDay();
+  const monday = new Date(bd);
+  monday.setDate(bd.getDate() - (dw === 0 ? 6 : dw - 1) + weekOff * 7);
+
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    if (d.getFullYear() === yr() && d.getMonth() + 1 === mo()) days.push(d.getDate());
+  }
   return days;
 }
 
 function buildSpines(rowH){
-  const sv=$('spineV');
-  if(sv && sv.offsetHeight>0){
-    const h=sv.offsetHeight, gap=Math.max(3,rowH-10);
-    const count=Math.max(4,Math.floor(h/(10+gap)));
-    sv.innerHTML=Array.from({length:count},()=>`<div class="ring" style="margin-bottom:${gap}px;"></div>`).join('');
+  const sv = $('spineV');
+  if (sv && sv.offsetHeight > 0) {
+    const h = sv.offsetHeight, gap = Math.max(3, rowH - 10);
+    const count = Math.max(4, Math.floor(h / (10 + gap)));
+    sv.innerHTML = Array.from({length:count}, () => `<div class="ring" style="margin-bottom:${gap}px;"></div>`).join('');
   }
-  const sh=$('spineH');
-  if(sh && sh.offsetWidth>0){
-    const w=sh.offsetWidth;
-    const count=Math.max(8,Math.floor(w/30));
-    sh.innerHTML=Array.from({length:count},()=>`<div class="ring-h"></div>`).join('');
+
+  const sh = $('spineH');
+  if (sh && sh.offsetWidth > 0) {
+    const w = sh.offsetWidth;
+    const count = Math.max(8, Math.floor(w / 30));
+    sh.innerHTML = Array.from({length:count}, () => `<div class="ring-h"></div>`).join('');
   }
 }
 
 function moveMonth(off){
   loadSeq++;
-  curDate=new Date(yr(),mo()-1+off,1);
-  activeYm = ym();
-  weekOff=0;
-  habits=[];
-  checks={};
-  memos={};
+  curDate = new Date(yr(), mo()-1+off, 1);
+  weekOff = 0;
+  habits = [];
+  checks = {};
+  memos = {};
   renderMeta();
   renderAll();
   loadAll();
 }
 
-$('prevBtn').addEventListener('click',()=>moveMonth(-1));
-$('nextBtn').addEventListener('click',()=>moveMonth(1));
-$('startBtn').addEventListener('click',doStart);
-$('logoutBtn').addEventListener('click',doLogout);
-$('loginName').addEventListener('keydown',e=>{ if(e.key==='Enter') $('loginPass').focus(); });
-$('loginPass').addEventListener('keydown',e=>{ if(e.key==='Enter') doStart(); });
-$('menuBtn').addEventListener('click',e=>{ e.stopPropagation(); $('menuPop').classList.toggle('show'); });
-document.addEventListener('click',e=>{ if(!$('menuWrap').contains(e.target)) $('menuPop').classList.remove('show'); });
+$('prevBtn').addEventListener('click', () => moveMonth(-1));
+$('nextBtn').addEventListener('click', () => moveMonth(1));
+$('startBtn').addEventListener('click', doStart);
+$('logoutBtn').addEventListener('click', doLogout);
+$('loginName').addEventListener('keydown', e => { if (e.key === 'Enter') $('loginPass').focus(); });
+$('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doStart(); });
+$('menuBtn').addEventListener('click', e => { e.stopPropagation(); $('menuPop').classList.toggle('show'); });
+document.addEventListener('click', e => { if (!$('menuWrap').contains(e.target)) $('menuPop').classList.remove('show'); });
 
-document.querySelectorAll('[data-ltab]').forEach(b=>b.addEventListener('click',()=>{
-  leftTab=b.dataset.ltab;
-  document.querySelectorAll('[data-ltab]').forEach(x=>x.classList.toggle('active',x===b));
+document.querySelectorAll('[data-ltab]').forEach(b => b.addEventListener('click', () => {
+  leftTab = b.dataset.ltab;
+  document.querySelectorAll('[data-ltab]').forEach(x => x.classList.toggle('active', x === b));
   renderAll();
 }));
-document.querySelectorAll('[data-rtab]').forEach(b=>b.addEventListener('click',()=>{
-  rightTab=b.dataset.rtab;
-  document.querySelectorAll('[data-rtab]').forEach(x=>x.classList.toggle('active',x===b));
+document.querySelectorAll('[data-rtab]').forEach(b => b.addEventListener('click', () => {
+  rightTab = b.dataset.rtab;
+  document.querySelectorAll('[data-rtab]').forEach(x => x.classList.toggle('active', x === b));
   renderAll();
 }));
 
 let resizeTimer;
-window.addEventListener('resize',()=>{ clearTimeout(resizeTimer); resizeTimer=setTimeout(renderAll,80); });
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(renderAll, 80);
+});
 
 async function init(){
-  renderMeta(); renderAll();
-  const cachedUser=(()=>{ try{ const r=stGet(USER_KEY); return r?JSON.parse(r):null; }catch{return null;} })();
-  if(curToken && cachedUser){
-    curUser = cachedUser; renderMeta();
+  renderMeta();
+  renderAll();
+
+  const cachedUser = (() => {
+    try {
+      const r = stGet(USER_KEY);
+      return r ? JSON.parse(r) : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  if (curToken && cachedUser) {
+    curUser = cachedUser;
+    renderMeta();
+
     const cc = loadCache();
-    if(Array.isArray(cc.h)) habits = cc.h;
-    if(cc.c && typeof cc.c === 'object'){ checks={}; Object.entries(cc.c).forEach(([d,v])=>{ checks[+d]=Array.isArray(v)?v:Array(MAX_H).fill(false); }); }
-    if(cc.m && typeof cc.m === 'object'){ memos={};  Object.entries(cc.m).forEach(([d,v])=>{ memos[+d]=String(v ?? ''); }); }
+    if (Array.isArray(cc.h)) habits = cc.h;
+    if (cc.c && typeof cc.c === 'object') {
+      checks = {};
+      Object.entries(cc.c).forEach(([d,v]) => { checks[+d] = Array.isArray(v) ? v : Array(MAX_H).fill(false); });
+    }
+    if (cc.m && typeof cc.m === 'object') {
+      memos = {};
+      Object.entries(cc.m).forEach(([d,v]) => { memos[+d] = String(v ?? ''); });
+    }
     renderAll();
+
     const ok = await tryAutoLogin();
-    if(!ok){ clearAuth(); renderMeta(); renderAll(); setStatus('로그인이 만료되었습니다.',true); return; }
+    if (!ok) {
+      clearAuth();
+      renderMeta();
+      renderAll();
+      setStatus('로그인이 만료되었습니다.', true);
+      return;
+    }
     await loadAll();
     return;
   }
+
   const ok = await tryAutoLogin();
-  if(ok) await loadAll();
+  if (ok) await loadAll();
 }
+
 init();
 </script>
 </body>
