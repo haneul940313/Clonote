@@ -444,7 +444,13 @@ async function loadAll(){
     // 3) 응답 도착 시점에 seq가 바뀌었으면 → 더 최신 요청이 있으므로 무시
     if(mySeq !== loadSeq) return;
 
-    const newHabits = (hR.success && Array.isArray(hR.habits)) ? hR.habits : [];
+    // hR.habits === null 은 "아직 등록 안 됨" → 빈 배열 유지
+    // hR.habits === [] 도 동일하게 빈 배열
+    const newHabits = (hR.success && Array.isArray(hR.habits) && hR.habits.length > 0)
+      ? hR.habits
+      : (hR.success && hR.habits === null)
+        ? []   // 서버에 아직 등록 안 된 상태
+        : (habits.length ? habits : []);  // 서버 오류면 기존 유지
     const newChecks = {};
     if(cR.success && cR.checks) cR.checks.forEach(c=>{ newChecks[c.day]=c.checks; });
     const newMemos = {};
