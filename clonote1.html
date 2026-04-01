@@ -51,7 +51,12 @@
     .book-topbar {
       flex-shrink: 0;
       height: var(--topbar-h);
-      background: linear-gradient(to right, var(--paper) 0%, var(--paper) 50%, var(--paper-r) 50%, var(--paper-r) 100%);
+      background: linear-gradient(to right,
+        var(--paper) 0%,
+        var(--paper) 50%,
+        var(--paper-r) 50%,
+        var(--paper-r) 100%
+      );
       border-bottom: 1px solid rgba(132,184,196,0.22);
       display: flex; align-items: center; padding: 0 14px;
       position: relative; z-index: 10;
@@ -64,7 +69,8 @@
 
     .icon-btn, .text-btn, .menu-btn {
       border: none; background: transparent; cursor: pointer; padding: 0;
-      color: #3a3630; transition: opacity 0.15s; touch-action: manipulation;
+      color: #3a3630; transition: opacity 0.15s;
+      touch-action: manipulation;
     }
     .icon-btn { font-size: 22px; font-weight: 700; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
     .text-btn  { height: 26px; padding: 0 10px; font-size: 11px; font-weight: 600; border-radius: 6px; background: rgba(255,255,255,0.55); border: 1px solid rgba(0,0,0,0.07); white-space: nowrap; }
@@ -105,7 +111,8 @@
     .spine-v {
       width: var(--spine-w); flex-shrink: 0; overflow: hidden;
       background: linear-gradient(to right, var(--spine-edge), var(--spine-mid), var(--spine-edge));
-      position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 6px; gap: 0;
+      position: relative;
+      display: flex; flex-direction: column; align-items: center; padding-top: 6px; gap: 0;
     }
     .spine-v::before {
       content: ''; position: absolute; top: 0; bottom: 0; left: 2px; right: 2px;
@@ -130,9 +137,11 @@
     }
 
     .spine-h {
-      display: none; height: var(--hspine-h); flex-shrink: 0; overflow: hidden;
+      display: none;
+      height: var(--hspine-h); flex-shrink: 0; overflow: hidden;
       background: linear-gradient(to bottom, var(--spine-edge), var(--spine-mid), var(--spine-edge));
-      position: relative; flex-direction: row; align-items: center; justify-content: space-around; padding: 0 8px;
+      position: relative;
+      flex-direction: row; align-items: center; justify-content: space-around; padding: 0 8px;
     }
     .spine-h::before {
       content: ''; position: absolute; top: 2px; bottom: 2px; left: 0; right: 0;
@@ -143,7 +152,7 @@
     .page-header { display: flex; align-items: center; justify-content: space-between; height: var(--row-h); padding: 0 2px; }
     .page-title  { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; }
     .tab-pills   { display: flex; gap: 2px; }
-    .tab-pill    { border: none; background: transparent; font-size: 10px; font-weight: 700; color: var(--muted); padding: 3px 7px; border-radius: 5px; cursor: pointer; touch-action: manipulation; }
+    .tab-pill    { border: none; background: transparent; font-size: 10px; font-weight: 700; color: var(--muted); padding: 3px 7px; border-radius: 5px; cursor: pointer; transition: background 0.12s, color 0.12s; touch-action: manipulation; }
     .tab-pill.active { background: rgba(93,134,200,0.14); color: var(--accent); }
 
     .day-cell { height: var(--row-h); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #777; white-space: nowrap; flex-shrink: 0; margin-left: -2px; }
@@ -155,7 +164,8 @@
     .memo-input {
       width: 100%; height: 100%; border: none; outline: none; background: transparent;
       padding: 0; font-size: 13px; color: var(--text); line-height: 1;
-      overflow-x: auto; overflow-y: hidden; white-space: nowrap; -webkit-appearance: none;
+      overflow-x: auto; overflow-y: hidden; white-space: nowrap;
+      -webkit-appearance: none;
     }
     .memo-input:disabled { color: rgba(0,0,0,0.35); cursor: default; }
     .save-ind { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); font-size: 9px; color: #9a9a9a; opacity: 0; transition: opacity 0.15s; pointer-events: none; background: rgba(251,251,248,0.92); padding-left: 4px; }
@@ -189,34 +199,41 @@
 
     .habit-save-row { height: var(--row-h); display: flex; align-items: center; padding-left: var(--right-date); }
     .habit-save-btn { border: none; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; padding: 4px 14px; border-radius: 6px; cursor: pointer; touch-action: manipulation; }
-    .habit-save-btn:active   { opacity: 0.75; }
+    .habit-save-btn:active  { opacity: 0.75; }
     .habit-save-btn:disabled { opacity: 0.4; }
 
     .book-status {
       flex-shrink: 0; height: var(--status-h);
-      background: linear-gradient(to right, var(--paper) 0%, var(--paper) 50%, var(--paper-r) 50%, var(--paper-r) 100%);
+      background: linear-gradient(to right,
+        var(--paper) 0%,
+        var(--paper) 50%,
+        var(--paper-r) 50%,
+        var(--paper-r) 100%
+      );
       border-top: 1px solid rgba(132,184,196,0.22);
       display: flex; align-items: center; justify-content: center;
       font-size: 10px; color: #888;
     }
 
-    /* 로딩 오버레이 */
-    .page-loading {
-      opacity: 0.45;
-      pointer-events: none;
-      transition: opacity 0.15s;
-    }
-
     @media (max-width: 640px) {
       :root {
-        --topbar-h: 44px; --row-h: 30px;
-        --left-date: 42px; --left-margin: 50px;
-        --right-date: 42px; --right-margin: 50px; --total-w: 26px;
+        --topbar-h:     44px;
+        --row-h:        30px;
+        --left-date:    42px;
+        --left-margin:  50px;
+        --right-date:   42px;
+        --right-margin: 50px;
+        --total-w:      26px;
       }
+
       html, body { overflow: auto; height: auto; }
       .book-outer { height: auto; min-height: 100vh; border-radius: 0; box-shadow: none; }
       .book-spread { flex-direction: column; overflow: visible; height: auto; }
-      .page-left, .page-right { flex: none; overflow: visible; height: auto !important; padding: 0 12px 12px 12px; }
+      .page-left, .page-right {
+        flex: none; overflow: visible;
+        height: auto !important;
+        padding: 0 12px 12px 12px;
+      }
       .spine-v { display: none !important; }
       .spine-h { display: flex; }
       .book-status { background: var(--paper-r); }
@@ -229,8 +246,16 @@
       .login-row .text-btn { width: 100%; height: 34px; font-size: 13px; }
       .guide { font-size: 12px; }
     }
-
-    .credit { position: fixed; bottom: 4px; right: 8px; font-size: 9px; font-weight: 600; color: rgba(0,0,0,0.18); font-family: 'Helvetica Neue', Arial, sans-serif; letter-spacing: 0.04em; pointer-events: none; z-index: 20; }
+    .credit {
+      position: fixed;
+      bottom: 4px; right: 8px;
+      font-size: 9px; font-weight: 600;
+      color: rgba(0,0,0,0.18);
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      letter-spacing: 0.04em;
+      pointer-events: none;
+      z-index: 20;
+    }
   </style>
 </head>
 <body>
@@ -270,20 +295,22 @@
         <div class="page-title">메모</div>
         <div class="tab-pills">
           <button class="tab-pill active" data-ltab="memo-month">월간</button>
-          <button class="tab-pill"        data-ltab="memo-week">주간</button>
+          <button class="tab-pill" data-ltab="memo-week">주간</button>
         </div>
       </div>
       <div id="memoContent"></div>
     </div>
+
     <div class="spine-v" id="spineV"></div>
     <div class="spine-h" id="spineH"></div>
+
     <div class="page-right" id="pageRight">
       <div class="page-header">
         <div class="page-title">습관</div>
         <div class="tab-pills">
           <button class="tab-pill active" data-rtab="habit-home">홈</button>
-          <button class="tab-pill"        data-rtab="habit-setup">설정</button>
-          <button class="tab-pill"        data-rtab="habit-all">전체</button>
+          <button class="tab-pill" data-rtab="habit-setup">설정</button>
+          <button class="tab-pill" data-rtab="habit-all">전체</button>
         </div>
       </div>
       <div id="habitContent"></div>
@@ -295,82 +322,133 @@
 </div>
 
 <script>
-const API_URL   = 'https://script.google.com/macros/s/AKfycby0aP8-jDB8fZZ1426UD-OgA0dX6zX8H6EqrKv2kknhCIlFRGp_N_w8xpO3Vx8vKD_7/exec';
+const API_URL   = 'https://script.google.com/macros/s/AKfycbx7c5hpzouh_OxnSRkXWPi23w7h_QMNvG6we93HoEOfBrCSeb-CnHUgXlWHQENQS2rV/exec';
 const PAGE_ID   = new URLSearchParams(location.search).get('id') || 'default';
 const TOK_KEY   = 'clonote_token_' + PAGE_ID;
-const USER_KEY  = 'clonote_user_'  + PAGE_ID;
-const CACHE_PFX = 'clonote_c2_'   + PAGE_ID;
+const USER_KEY  = 'clonote_user_' + PAGE_ID;
+const CACHE_PFX = 'clonote_c2_' + PAGE_ID;
 
 function stGet(k){ try{ return localStorage.getItem(k); }catch{ return null; } }
 function stSet(k,v){ try{ localStorage.setItem(k,v); }catch{} }
 function stDel(k){ try{ localStorage.removeItem(k); }catch{} }
-
-const MAX_H    = 10;
-const DEF_H    = 5;
-const DEBOUNCE = 650;
+const MAX_H     = 10;
+const DEF_H     = 5;
+const DEBOUNCE  = 650;
 
 let curDate     = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 let curUser     = null;
 let curToken    = stGet(TOK_KEY)||'';
-
-// ─── 현재 표시 중인 월의 데이터 ───
 let habits      = [];
 let checks      = {};
 let memos       = {};
-
 let leftTab     = 'memo-month';
 let rightTab    = 'habit-home';
 let weekOff     = 0;
+let isMobile    = false;
 let memoTimers  = {};
 let memoVers    = {};
 let checkTimers = {};
-
-// ─── race condition 방지: 진행 중인 fetch 식별자 ───
-let loadSeq     = 0;   // loadAll 호출마다 증가, 완료 시점에 현재값과 비교
+let loadSeq     = 0;
+let activeYm    = '';
 
 const $    = id => document.getElementById(id);
-const esc  = s  => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const esc  = s  => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');
 const yr   = () => curDate.getFullYear();
 const mo   = () => curDate.getMonth()+1;
 const ym   = () => yr()+'-'+String(mo()).padStart(2,'0');
 const last = () => new Date(yr(), mo(), 0).getDate();
 const dow  = d  => new Date(yr(), mo()-1, d).getDay();
 const dcls = d  => { const w=dow(d); return w===6?'sat':w===0?'sun':''; };
-const hcnt = () => Math.max(habits.filter(h=>h&&h.trim()!=='').length, DEF_H);
+const hcnt = () => Math.max(habits.filter(h=>String(h||'').trim()!=='').length, DEF_H);
 
 function setStatus(m,e=false){ $('statusText').textContent=m||''; $('statusText').style.color=e?'#c0392b':'#888'; }
 function setLS(m,e=false){ $('loginStatus').textContent=m||''; $('loginStatus').style.color=e?'#c0392b':'#666'; }
 
-/* ── CACHE ── */
-function ck(t){ return `${CACHE_PFX}:${curUser?.userId}:${ym()}:${t}`; }
-function saveCache(){
-  if(!curUser) return;
-  stSet(ck('h'), JSON.stringify(habits));
-  stSet(ck('c'), JSON.stringify(checks));
-  stSet(ck('m'), JSON.stringify(memos));
-}
-function loadCacheFor(ymStr){
-  // ymStr을 받아서 해당 월 캐시를 로드 (현재 ym()이 아닐 수 있음)
-  if(!curUser) return { h:null, c:null, m:null };
-  const pfx = `${CACHE_PFX}:${curUser.userId}:${ymStr}`;
-  try {
-    const h = stGet(pfx+':h'), c = stGet(pfx+':c'), m = stGet(pfx+':m');
-    return { h:h?JSON.parse(h):null, c:c?JSON.parse(c):null, m:m?JSON.parse(m):null };
-  } catch { return { h:null, c:null, m:null }; }
-}
-function saveCacheFor(ymStr, h, c, m){
-  if(!curUser) return;
-  const pfx = `${CACHE_PFX}:${curUser.userId}:${ymStr}`;
-  stSet(pfx+':h', JSON.stringify(h));
-  stSet(pfx+':c', JSON.stringify(c));
-  stSet(pfx+':m', JSON.stringify(m));
+function normalizeHabitList(raw){
+  if (Array.isArray(raw)) return raw.slice(0, MAX_H).map(v => String(v ?? '').trim());
+  if (raw && Array.isArray(raw.habits)) return raw.habits.slice(0, MAX_H).map(v => String(v ?? '').trim());
+  if (raw && Array.isArray(raw.items)) return raw.items.slice(0, MAX_H).map(v => String(v ?? '').trim());
+  return null;
 }
 
-/* ── API ── */
-const gj = url  => fetch(url).then(r=>r.json());
+function normalizeCheckMap(raw){
+  const out = {};
+  const list = Array.isArray(raw)
+    ? raw
+    : Array.isArray(raw?.checks)
+      ? raw.checks
+      : Array.isArray(raw?.records)
+        ? raw.records
+        : [];
+
+  list.forEach(item => {
+    const day = Number(item?.day ?? item?.date ?? item?.d);
+    if (!Number.isInteger(day) || day < 1 || day > 31) return;
+
+    let arr = item?.checks ?? item?.values ?? item?.checked ?? item?.habitChecks;
+    if (typeof arr === 'string') {
+      try { arr = JSON.parse(arr); } catch { arr = arr.split(',').map(v => v === 'true' || v === '1'); }
+    }
+    if (!Array.isArray(arr)) return;
+
+    out[day] = Array.from({ length: MAX_H }, (_, idx) => Boolean(arr[idx]));
+  });
+
+  return out;
+}
+
+function normalizeMemoMap(raw){
+  const out = {};
+  const list = Array.isArray(raw)
+    ? raw
+    : Array.isArray(raw?.records)
+      ? raw.records
+      : Array.isArray(raw?.memos)
+        ? raw.memos
+        : [];
+
+  list.forEach(item => {
+    const day = Number(item?.day ?? item?.date ?? item?.d);
+    if (!Number.isInteger(day) || day < 1 || day > 31) return;
+    out[day] = String(item?.memo ?? item?.text ?? '');
+  });
+
+  return out;
+}
+
+function getCSSVar(name) {
+  return parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name));
+}
+
+function calcLayout() {
+  isMobile = window.innerWidth <= 640;
+  $('pageLeft').style.height  = '';
+  $('pageRight').style.height = '';
+  const rowH = isMobile ? 30 : 26;
+  return { rowH, graphRows: isMobile ? 4 : 6 };
+}
+
+function ck(t, targetYm = ym()){
+  return `${CACHE_PFX}:${curUser?.userId}:${targetYm}:${t}`;
+}
+function saveCache(targetYm = ym()){
+  if(!curUser) return;
+  try {
+    stSet(ck('h', targetYm), JSON.stringify(habits));
+    stSet(ck('c', targetYm), JSON.stringify(checks));
+    stSet(ck('m', targetYm), JSON.stringify(memos));
+  } catch{}
+}
+function loadCache(targetYm = ym()){
+  try {
+    const h=stGet(ck('h', targetYm)), c=stGet(ck('c', targetYm)), m=stGet(ck('m', targetYm));
+    return { h:h?JSON.parse(h):null, c:c?JSON.parse(c):null, m:m?JSON.parse(m):null };
+  } catch{ return {}; }
+}
+
+const gj = url  => fetch(url, { cache: 'no-store' }).then(r=>r.json());
 const pj = body => fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(r=>r.json());
 
-/* ── AUTH ── */
 async function tryAutoLogin(){
   if(!curToken){ renderMeta(); return false; }
   try {
@@ -396,10 +474,9 @@ async function doStart(){
   } catch(e){ setLS(e.message||'실패',true); }
   finally{ $('startBtn').disabled=false; }
 }
-
 async function doLogout(){
   try{ if(curToken) await pj({action:'logout',token:curToken}); } catch{}
-  clearAuth(); habits=[]; checks={}; memos={};
+  clearAuth(); habits=[]; checks={}; memos={}; activeYm='';
   renderMeta(); renderAll(); setStatus('로그아웃되었습니다.');
 }
 
@@ -411,80 +488,60 @@ function renderMeta(){
   if(!curUser) $('menuPop').classList.remove('show');
 }
 
-/* ════════════════════════════════════
-   loadAll — race condition 완전 차단
-   핵심: seq 스냅샷으로 구 요청 응답 무시
-════════════════════════════════════ */
 async function loadAll(){
+  renderMeta();
   if(!curUser) return;
 
-  // 이 호출의 고유 번호 (월 이동 시마다 증가)
-  const mySeq = ++loadSeq;
-  const myYm  = ym();  // 이 호출 시점의 월 스냅샷
+  const requestSeq = ++loadSeq;
+  const targetYm = ym();
+  activeYm = targetYm;
 
-  // 1) 캐시 즉시 복원 → 화면 먼저 표시
-  const cc = loadCacheFor(myYm);
-  if(cc.h) habits = cc.h;
-  else     habits = [];
-  if(cc.c){ checks={}; Object.entries(cc.c).forEach(([d,v])=>{ checks[+d]=v; }); }
-  else     checks={};
-  if(cc.m){ memos={};  Object.entries(cc.m).forEach(([d,v])=>{ memos[+d]=v; }); }
-  else     memos={};
+  const cc=loadCache(targetYm);
+  habits = Array.isArray(cc.h) ? cc.h : [];
+  checks = cc.c && typeof cc.c === 'object' ? Object.fromEntries(Object.entries(cc.c).map(([d,v]) => [Number(d), Array.isArray(v) ? v : Array(MAX_H).fill(false)])) : {};
+  memos  = cc.m && typeof cc.m === 'object' ? Object.fromEntries(Object.entries(cc.m).map(([d,v]) => [Number(d), String(v ?? '')])) : {};
   renderAll();
 
-  // 2) 서버에서 최신 데이터 fetch (이 시점의 월 파라미터 고정)
-  setStatus('불러오는 중...');
   try {
-    const [hR, cR, mR] = await Promise.all([
-      gj(`${API_URL}?action=getHabits&userId=${curUser.userId}&yearMonth=${myYm}`),
-      gj(`${API_URL}?action=getChecks&userId=${curUser.userId}&yearMonth=${myYm}`),
-      gj(`${API_URL}?action=getRecords&userId=${curUser.userId}&year=${myYm.slice(0,4)}&month=${+myYm.slice(5)}`)
+    const habitUrl = `${API_URL}?action=getHabits&userId=${encodeURIComponent(curUser.userId)}&yearMonth=${encodeURIComponent(targetYm)}&_=${Date.now()}`;
+    const checksUrl = `${API_URL}?action=getChecks&userId=${encodeURIComponent(curUser.userId)}&yearMonth=${encodeURIComponent(targetYm)}&_=${Date.now()}`;
+    const memoUrl = `${API_URL}?action=getRecords&userId=${encodeURIComponent(curUser.userId)}&year=${yr()}&month=${mo()}&_=${Date.now()}`;
+
+    const [hR,cR,mR] = await Promise.all([
+      gj(habitUrl),
+      gj(checksUrl),
+      gj(memoUrl)
     ]);
 
-    // 3) 응답 도착 시점에 seq가 바뀌었으면 → 더 최신 요청이 있으므로 무시
-    if(mySeq !== loadSeq) return;
+    if (requestSeq !== loadSeq || targetYm !== ym()) return;
 
-    // hR.habits === null 은 "아직 등록 안 됨" → 빈 배열 유지
-    // hR.habits === [] 도 동일하게 빈 배열
-    const newHabits = (hR.success && Array.isArray(hR.habits) && hR.habits.length > 0)
-      ? hR.habits
-      : (hR.success && hR.habits === null)
-        ? []   // 서버에 아직 등록 안 된 상태
-        : (habits.length ? habits : []);  // 서버 오류면 기존 유지
-    const newChecks = {};
-    if(cR.success && cR.checks) cR.checks.forEach(c=>{ newChecks[c.day]=c.checks; });
-    const newMemos = {};
-    if(mR.success && mR.records) mR.records.forEach(r=>{ newMemos[r.day]=r.memo||''; });
+    const normalizedHabits = normalizeHabitList(hR?.habits ?? hR?.data ?? hR);
+    if (normalizedHabits) habits = normalizedHabits;
+    else if (hR?.success === false) setStatus('습관 로드 실패: ' + (hR.message || 'unknown'), true);
 
-    // 4) 현재 보고 있는 월이 바뀌지 않았을 때만 상태 갱신
-    if(myYm !== ym()) return;
+    checks = normalizeCheckMap(cR?.data ?? cR);
+    memos  = normalizeMemoMap(mR?.data ?? mR);
 
-    habits = newHabits;
-    checks = newChecks;
-    memos  = newMemos;
-    saveCacheFor(myYm, habits, checks, memos);
+    saveCache(targetYm);
+    renderAll();
+    setStatus('');
   } catch(err){
-    if(mySeq !== loadSeq) return;
-    setStatus('네트워크 오류', true); return;
+    if (requestSeq !== loadSeq) return;
+    console.error('[Clonote] loadAll error:', err);
+    setStatus('네트워크 오류: '+(err.message||err), true);
   }
-
-  renderAll(); setStatus('');
 }
 
-/* ── RENDER ALL ── */
 function renderAll(){
-  const rowH = window.innerWidth <= 640 ? 30 : 26;
-  const graphRows = window.innerWidth <= 640 ? 4 : 6;
-  renderMeta();
+  const { rowH, graphRows } = calcLayout();
   renderLeft();
   renderRight(rowH, graphRows);
   buildSpines(rowH);
 }
 
-/* ══ LEFT — 메모 ══ */
 function renderLeft(){
   const el=$('memoContent');
-  el.innerHTML = leftTab==='memo-month' ? buildMemoRows(1,last(),'lm') : buildMemoWeek();
+  el.innerHTML = (leftTab==='memo-month') ? buildMemoRows(1,last(),'lm') : buildMemoWeek();
   bindMemo(el);
 }
 function buildMemoRows(from,to,src){
@@ -509,27 +566,27 @@ function buildMemoWeek(){
 function bindMemo(el){
   el.querySelectorAll('.memo-input').forEach(inp=>{
     inp.addEventListener('input',()=>scheduleMemo(+inp.dataset.day,inp.dataset.src));
-    inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault(); inp.blur();} });
+    inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault(); inp.blur(); flushMemo(+inp.dataset.day,inp.dataset.src);} });
     inp.addEventListener('blur',()=>flushMemo(+inp.dataset.day,inp.dataset.src));
     inp.addEventListener('change',()=>flushMemo(+inp.dataset.day,inp.dataset.src));
   });
 }
 
-/* ══ RIGHT — 습관 ══ */
 function renderRight(rowH, graphRows){
   const el=$('habitContent');
-  if(rightTab==='habit-home')       el.innerHTML=buildHabitHome(rowH||26, graphRows||6);
+  if(rightTab==='habit-home')       el.innerHTML=buildHabitHome(rowH,graphRows);
   else if(rightTab==='habit-setup') el.innerHTML=buildHabitSetup();
   else                              el.innerHTML=buildHabitAll();
   bindChecks(el);
   if(rightTab==='habit-setup') bindSetup(el);
   if(rightTab==='habit-home')  renderGraph();
 }
+
 function buildHabitHome(rowH, graphRows){
   const days=getWeekDays(), lastDay=last();
   const minD=days[0]||1, maxD=days[days.length-1]||lastDay;
   const lbl=days.length?`${days[0]}일 — ${days[days.length-1]}일`:'';
-  const graphH=rowH*graphRows;
+  const graphH = rowH * graphRows;
   let h=`<div class="graph-wrap" style="height:${graphH}px;"><canvas class="graph" id="graphCanvas"></canvas></div>`;
   h+=`<div class="week-nav">
     <button class="w-arrow" id="wPrev" ${minD<=1?'disabled':''}>‹</button>
@@ -554,8 +611,10 @@ function buildCheckHeader(src){
 }
 function buildCheckRow(d,src){
   const cnt=hcnt(), col=`var(--right-date) repeat(${cnt},1fr) var(--total-w)`;
-  const ch=checks[d]||Array(MAX_H).fill(false), tot=ch.slice(0,cnt).filter(Boolean).length;
+  const ch=Array.isArray(checks[d]) ? checks[d] : Array(MAX_H).fill(false);
+  const tot=ch.slice(0,cnt).filter(Boolean).length;
   const dis=curUser?'':'disabled';
+
   let cbs='';
   for(let i=0;i<cnt;i++) cbs+=`<div class="cb-wrap"><input type="checkbox" data-day="${d}" data-idx="${i}" data-src="${src}" ${ch[i]?'checked':''} ${dis}/></div>`;
   return `<div class="check-row" style="grid-template-columns:${col};">
@@ -575,27 +634,22 @@ function buildHabitSetup(){
   return h+`<div class="habit-save-row"><button class="habit-save-btn" id="habitSaveBtn">저장</button></div>`;
 }
 function bindSetup(el){ const b=el.querySelector('#habitSaveBtn'); if(b) b.addEventListener('click',doSaveHabits); }
-
 async function doSaveHabits(){
   if(!curUser) return;
+  const targetYm = ym();
   const h=Array.from(document.querySelectorAll('.setup-inp')).map(i=>i.value.trim());
   const btn=document.getElementById('habitSaveBtn');
   if(btn) btn.disabled=true; setStatus('저장 중...');
   try {
-    const r=await pj({action:'saveHabits',userId:curUser.userId,yearMonth:ym(),habits:h});
-    if(!r.success) throw new Error(r.message||JSON.stringify(r));
-    // 서버 응답의 habits 사용, 없으면 입력값 사용
-    habits = (r.habits && r.habits.length) ? r.habits : h.concat(Array(MAX_H-h.length).fill(''));
-    saveCacheFor(ym(), habits, checks, memos);
+    const r=await pj({action:'saveHabits',userId:curUser.userId,yearMonth:targetYm,habits:h});
+    if(!r.success) throw new Error(r.message);
+    habits=normalizeHabitList(r?.habits ?? r?.data ?? h) || h;
+    saveCache(targetYm);
     rightTab='habit-home';
     document.querySelectorAll('[data-rtab]').forEach(x=>x.classList.toggle('active',x.dataset.rtab==='habit-home'));
-    renderAll();
-    setStatus('습관 저장 완료 ('+habits.filter(x=>x).length+'개)');
-    setTimeout(()=>setStatus(''),2000);
-  } catch(e){
-    setStatus('저장 실패: '+(e.message||'오류'), true);
-    if(btn) btn.disabled=false;
-  }
+    renderAll(); setStatus('습관이 저장되었습니다.'); setTimeout(()=>setStatus(''),2000);
+  } catch(e){ setStatus(e.message||'저장 실패',true); }
+  finally { if(btn) btn.disabled=false; }
 }
 
 function bindChecks(el){
@@ -606,46 +660,47 @@ function bindChecks(el){
 }
 function onCheck(e){
   if(!curUser) return;
+  const targetYm = ym();
   const d=+e.target.dataset.day, idx=+e.target.dataset.idx, cnt=hcnt();
-  const prev=checks[d]?[...checks[d]]:Array(MAX_H).fill(false);
+  const prev=Array.isArray(checks[d])?[...checks[d]]:Array(MAX_H).fill(false);
   prev[idx]=e.target.checked; checks[d]=prev;
   const tot=prev.slice(0,cnt).filter(Boolean).length;
   document.querySelectorAll(`input[type="checkbox"][data-day="${d}"][data-idx="${idx}"]`).forEach(cb=>{ if(cb!==e.target) cb.checked=e.target.checked; });
   document.querySelectorAll(`[id^="tc-"][id$="-${d}"]`).forEach(el=>{ el.textContent=tot>0?tot:''; });
-  saveCacheFor(ym(), habits, checks, memos);
-  if(rightTab==='habit-home') renderGraph();
+  saveCache(targetYm); if(rightTab==='habit-home') renderGraph();
   clearTimeout(checkTimers[d]);
   checkTimers[d]=setTimeout(async()=>{
     try {
-      const r=await pj({action:'saveCheck',userId:curUser.userId,yearMonth:ym(),day:d,checks:checks[d]});
-      if(!r.success) setStatus('체크 저장 실패: '+(r.message||''), true);
-    } catch{ setStatus('체크 저장 오류',true); }
+      const r=await pj({action:'saveCheck',userId:curUser.userId,yearMonth:targetYm,day:d,checks:checks[d]});
+      if(!r.success) setStatus('체크 저장 실패',true);
+    }
+    catch{ setStatus('체크 저장 오류',true); }
   },800);
 }
 
-/* ══ MEMO SAVE ══ */
 function scheduleMemo(d,src){ if(!curUser) return; clearTimeout(memoTimers[d]); showInd(d,src,'저장중',true); memoTimers[d]=setTimeout(()=>flushMemo(d,src),DEBOUNCE); }
 function flushMemo(d,src){ if(!curUser) return; clearTimeout(memoTimers[d]); doMemoSave(d,src); }
 async function doMemoSave(d,src){
+  const targetYear = yr();
+  const targetMonth = mo();
+  const targetYm = ym();
   const inp=document.getElementById(`mi-${src}-${d}`); if(!inp) return;
   const val=inp.value.trim();
   const other=src==='lm'?'lw':'lm';
   const twin=document.getElementById(`mi-${other}-${d}`); if(twin&&twin.value!==inp.value) twin.value=inp.value;
-  if(!val){ showInd(d,src,'',false); showInd(d,other,'',false); memos[d]=''; saveCacheFor(ym(),habits,checks,memos); return; }
+  if(!val){ showInd(d,src,'',false); showInd(d,other,'',false); memos[d]=''; saveCache(targetYm); return; }
   if(val===(memos[d]||'')){ showInd(d,src,'',false); return; }
   const ver=(memoVers[d]||0)+1; memoVers[d]=ver;
   try {
-    const r=await pj({action:'saveRecord',userId:curUser.userId,year:yr(),month:mo(),day:d,memo:val});
+    const r=await pj({action:'saveRecord',userId:curUser.userId,year:targetYear,month:targetMonth,day:d,memo:val});
     if(memoVers[d]!==ver) return;
     if(!r.success) throw new Error(r.message);
-    memos[d]=val; saveCacheFor(ym(),habits,checks,memos);
-    showInd(d,src,'',false); showInd(d,other,'',false);
+    memos[d]=val; saveCache(targetYm); showInd(d,src,'',false); showInd(d,other,'',false);
     setStatus(`${d}일 메모 저장`); setTimeout(()=>setStatus(''),1500);
   } catch(err){ if(memoVers[d]!==ver) return; showInd(d,src,'오류',true); setStatus(err.message||'메모 저장 오류',true); }
 }
 function showInd(d,src,txt,show){ const el=document.getElementById(`si-${src}-${d}`); if(!el) return; el.textContent=txt; el.classList.toggle('show',show&&!!txt); }
 
-/* ══ GRAPH ══ */
 function renderGraph(){
   const cv=document.getElementById('graphCanvas'); if(!cv) return;
   const ctx=cv.getContext('2d');
@@ -653,7 +708,7 @@ function renderGraph(){
   const now=new Date();
   const isCur=(yr()===now.getFullYear()&&mo()===now.getMonth()+1);
   const today=isCur?now.getDate():ld;
-  const data=[]; for(let d=1;d<=ld;d++){ const c=checks[d]||[]; data.push(c.slice(0,cnt).filter(Boolean).length); }
+  const data=[]; for(let d=1;d<=ld;d++){ const c=Array.isArray(checks[d]) ? checks[d] : []; data.push(c.slice(0,cnt).filter(Boolean).length); }
   const hasAny=data.some(v=>v>0);
   const dpr=window.devicePixelRatio||1;
   const W=cv.parentElement.clientWidth||300;
@@ -661,26 +716,25 @@ function renderGraph(){
   cv.style.width=W+'px'; cv.style.height=H+'px';
   cv.width=W*dpr; cv.height=H*dpr;
   ctx.scale(dpr,dpr); ctx.clearRect(0,0,W,H);
-  const rdVal=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--right-date'))||44;
-  const p={t:12,r:12,b:22,l:rdVal+6};
+  const rdVal = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--right-date'))||44;
+  const p={t:12,r:12,b:22,l: rdVal + 6};
   const gW=W-p.l-p.r, gH=H-p.t-p.b;
   ctx.strokeStyle='rgba(132,184,196,0.28)'; ctx.lineWidth=0.5;
   for(let v=0;v<=cnt;v++){
     const y=p.t+gH-(v/cnt)*gH;
     ctx.beginPath(); ctx.moveTo(p.l,y); ctx.lineTo(p.l+gW,y); ctx.stroke();
-    if(v>0){ ctx.fillStyle='rgba(100,100,100,0.38)'; ctx.font=`${Math.min(9,H/10)}px Arial`; ctx.textAlign='center'; ctx.fillText(v,rdVal/2,y+3); }
+    if(v>0){ ctx.fillStyle='rgba(100,100,100,0.38)'; ctx.font=`${Math.min(9,H/10)}px Arial`; ctx.textAlign='center'; ctx.fillText(v, rdVal/2, y+3); }
   }
   ctx.fillStyle='rgba(100,100,100,0.42)'; ctx.font=`${Math.min(9,H/10)}px Arial`; ctx.textAlign='center';
   for(let d=1;d<=ld;d++){ if(d===1||d%5===0||d===ld){ const x=p.l+((d-1)/(ld-1||1))*gW; ctx.fillText(d,x,H-p.b+11); } }
   if(!hasAny) return;
-  const pts=[]; for(let d=1;d<=today;d++) pts.push({x:p.l+((d-1)/(ld-1||1))*gW,y:p.t+gH-(data[d-1]/cnt)*gH,v:data[d-1]});
+  const pts=[]; for(let d=1;d<=today;d++) pts.push({x:p.l+((d-1)/(ld-1||1))*gW, y:p.t+gH-(data[d-1]/cnt)*gH, v:data[d-1]});
   if(!pts.length) return;
   ctx.beginPath(); ctx.moveTo(pts[0].x,p.t+gH); pts.forEach(pt=>ctx.lineTo(pt.x,pt.y)); ctx.lineTo(pts[pts.length-1].x,p.t+gH); ctx.closePath(); ctx.fillStyle='rgba(93,134,200,0.09)'; ctx.fill();
   ctx.beginPath(); ctx.strokeStyle='rgba(93,134,200,0.82)'; ctx.lineWidth=1.8; ctx.lineJoin='round'; pts.forEach((pt,i)=>i===0?ctx.moveTo(pt.x,pt.y):ctx.lineTo(pt.x,pt.y)); ctx.stroke();
   pts.forEach(pt=>{ ctx.beginPath(); ctx.arc(pt.x,pt.y,2.2,0,Math.PI*2); ctx.fillStyle=pt.v>0?'rgba(93,134,200,0.85)':'rgba(190,190,190,0.5)'; ctx.fill(); });
 }
 
-/* ══ WEEK DAYS ══ */
 function getWeekDays(){
   const today=new Date(), isCur=(yr()===today.getFullYear()&&mo()===today.getMonth()+1);
   const base=isCur?today.getDate():last();
@@ -691,38 +745,34 @@ function getWeekDays(){
   return days;
 }
 
-/* ══ SPINE ══ */
 function buildSpines(rowH){
   const sv=$('spineV');
-  if(sv&&sv.offsetHeight>0){
+  if(sv && sv.offsetHeight>0){
     const h=sv.offsetHeight, gap=Math.max(3,rowH-10);
     const count=Math.max(4,Math.floor(h/(10+gap)));
     sv.innerHTML=Array.from({length:count},()=>`<div class="ring" style="margin-bottom:${gap}px;"></div>`).join('');
   }
   const sh=$('spineH');
-  if(sh&&sh.offsetWidth>0){
-    const w=sh.offsetWidth, count=Math.max(8,Math.floor(w/30));
+  if(sh && sh.offsetWidth>0){
+    const w=sh.offsetWidth;
+    const count=Math.max(8,Math.floor(w/30));
     sh.innerHTML=Array.from({length:count},()=>`<div class="ring-h"></div>`).join('');
   }
 }
 
-/* ══ MONTH NAV ══ */
 function moveMonth(off){
-  // 타이머 모두 정리 (이전 달 저장 요청 취소)
-  Object.values(memoTimers).forEach(t=>clearTimeout(t));
-  Object.values(checkTimers).forEach(t=>clearTimeout(t));
-  memoTimers={}; checkTimers={}; memoVers={};
-
+  loadSeq++;
   curDate=new Date(yr(),mo()-1+off,1);
+  activeYm = ym();
   weekOff=0;
-
-  // 데이터 초기화 후 새 달 렌더
-  habits=[]; checks={}; memos={};
+  habits=[];
+  checks={};
+  memos={};
+  renderMeta();
   renderAll();
   loadAll();
 }
 
-/* ══ EVENTS ══ */
 $('prevBtn').addEventListener('click',()=>moveMonth(-1));
 $('nextBtn').addEventListener('click',()=>moveMonth(1));
 $('startBtn').addEventListener('click',doStart);
@@ -746,18 +796,22 @@ document.querySelectorAll('[data-rtab]').forEach(b=>b.addEventListener('click',(
 let resizeTimer;
 window.addEventListener('resize',()=>{ clearTimeout(resizeTimer); resizeTimer=setTimeout(renderAll,80); });
 
-/* ══ INIT ══ */
 async function init(){
   renderMeta(); renderAll();
   const cachedUser=(()=>{ try{ const r=stGet(USER_KEY); return r?JSON.parse(r):null; }catch{return null;} })();
   if(curToken && cachedUser){
-    curUser=cachedUser; renderMeta();
-    await loadAll();                  // 캐시 즉시 표시 + 서버 갱신
-    const ok=await tryAutoLogin();    // 토큰 유효성 확인
-    if(!ok){ clearAuth(); renderMeta(); renderAll(); setStatus('로그인이 만료되었습니다.',true); }
+    curUser = cachedUser; renderMeta();
+    const cc = loadCache();
+    if(Array.isArray(cc.h)) habits = cc.h;
+    if(cc.c && typeof cc.c === 'object'){ checks={}; Object.entries(cc.c).forEach(([d,v])=>{ checks[+d]=Array.isArray(v)?v:Array(MAX_H).fill(false); }); }
+    if(cc.m && typeof cc.m === 'object'){ memos={};  Object.entries(cc.m).forEach(([d,v])=>{ memos[+d]=String(v ?? ''); }); }
+    renderAll();
+    const ok = await tryAutoLogin();
+    if(!ok){ clearAuth(); renderMeta(); renderAll(); setStatus('로그인이 만료되었습니다.',true); return; }
+    await loadAll();
     return;
   }
-  const ok=await tryAutoLogin();
+  const ok = await tryAutoLogin();
   if(ok) await loadAll();
 }
 init();
