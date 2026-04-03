@@ -52,10 +52,8 @@
       flex-shrink: 0;
       height: var(--topbar-h);
       background: linear-gradient(to right,
-        var(--paper) 0%,
-        var(--paper) 50%,
-        var(--paper-r) 50%,
-        var(--paper-r) 100%
+        var(--paper) 0%, var(--paper) 50%,
+        var(--paper-r) 50%, var(--paper-r) 100%
       );
       border-bottom: 1px solid rgba(132,184,196,0.22);
       display: flex; align-items: center; padding: 0 14px;
@@ -69,8 +67,7 @@
 
     .icon-btn, .text-btn, .menu-btn {
       border: none; background: transparent; cursor: pointer; padding: 0;
-      color: #3a3630; transition: opacity 0.15s;
-      touch-action: manipulation;
+      color: #3a3630; transition: opacity 0.15s; touch-action: manipulation;
     }
     .icon-btn { font-size: 22px; font-weight: 700; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
     .text-btn  { height: 26px; padding: 0 10px; font-size: 11px; font-weight: 600; border-radius: 6px; background: rgba(255,255,255,0.55); border: 1px solid rgba(0,0,0,0.07); white-space: nowrap; }
@@ -95,8 +92,7 @@
 
     .page-left {
       flex: 1; min-width: 0; overflow: hidden;
-      background: var(--paper);
-      padding: 0 14px 0 14px;
+      background: var(--paper); padding: 0 14px 0 14px;
       background-image:
         linear-gradient(to right,
           transparent 0, transparent calc(var(--left-margin) - 1px),
@@ -111,8 +107,7 @@
     .spine-v {
       width: var(--spine-w); flex-shrink: 0; overflow: hidden;
       background: linear-gradient(to right, var(--spine-edge), var(--spine-mid), var(--spine-edge));
-      position: relative;
-      display: flex; flex-direction: column; align-items: center; padding-top: 6px; gap: 0;
+      position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 6px; gap: 0;
     }
     .spine-v::before {
       content: ''; position: absolute; top: 0; bottom: 0; left: 2px; right: 2px;
@@ -122,8 +117,7 @@
 
     .page-right {
       flex: 1; min-width: 0; overflow: hidden;
-      background: var(--paper-r);
-      padding: 0 14px 0 14px;
+      background: var(--paper-r); padding: 0 14px 0 14px;
       background-image:
         linear-gradient(to right,
           transparent 0, transparent calc(var(--right-margin) - 1px),
@@ -137,11 +131,9 @@
     }
 
     .spine-h {
-      display: none;
-      height: var(--hspine-h); flex-shrink: 0; overflow: hidden;
+      display: none; height: var(--hspine-h); flex-shrink: 0; overflow: hidden;
       background: linear-gradient(to bottom, var(--spine-edge), var(--spine-mid), var(--spine-edge));
-      position: relative;
-      flex-direction: row; align-items: center; justify-content: space-around; padding: 0 8px;
+      position: relative; flex-direction: row; align-items: center; justify-content: space-around; padding: 0 8px;
     }
     .spine-h::before {
       content: ''; position: absolute; top: 2px; bottom: 2px; left: 0; right: 0;
@@ -164,8 +156,7 @@
     .memo-input {
       width: 100%; height: 100%; border: none; outline: none; background: transparent;
       padding: 0; font-size: 13px; color: var(--text); line-height: 1;
-      overflow-x: auto; overflow-y: hidden; white-space: nowrap;
-      -webkit-appearance: none;
+      overflow-x: auto; overflow-y: hidden; white-space: nowrap; -webkit-appearance: none;
     }
     .memo-input:disabled { color: rgba(0,0,0,0.35); cursor: default; }
     .save-ind { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); font-size: 9px; color: #9a9a9a; opacity: 0; transition: opacity 0.15s; pointer-events: none; background: rgba(251,251,248,0.92); padding-left: 4px; }
@@ -199,17 +190,12 @@
 
     .habit-save-row { height: var(--row-h); display: flex; align-items: center; padding-left: var(--right-date); }
     .habit-save-btn { border: none; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; padding: 4px 14px; border-radius: 6px; cursor: pointer; touch-action: manipulation; }
-    .habit-save-btn:active  { opacity: 0.75; }
+    .habit-save-btn:active   { opacity: 0.75; }
     .habit-save-btn:disabled { opacity: 0.4; }
 
     .book-status {
       flex-shrink: 0; height: var(--status-h);
-      background: linear-gradient(to right,
-        var(--paper) 0%,
-        var(--paper) 50%,
-        var(--paper-r) 50%,
-        var(--paper-r) 100%
-      );
+      background: linear-gradient(to right, var(--paper) 0%, var(--paper) 50%, var(--paper-r) 50%, var(--paper-r) 100%);
       border-top: 1px solid rgba(132,184,196,0.22);
       display: flex; align-items: center; justify-content: center;
       font-size: 10px; color: #888;
@@ -217,23 +203,15 @@
 
     @media (max-width: 640px) {
       :root {
-        --topbar-h:     44px;
-        --row-h:        30px;
-        --left-date:    42px;
-        --left-margin:  50px;
-        --right-date:   42px;
-        --right-margin: 50px;
-        --total-w:      26px;
+        --topbar-h: 44px; --row-h: 30px;
+        --left-date: 42px; --left-margin: 50px;
+        --right-date: 42px; --right-margin: 50px;
+        --total-w: 26px;
       }
-
       html, body { overflow: auto; height: auto; }
       .book-outer { height: auto; min-height: 100vh; border-radius: 0; box-shadow: none; }
       .book-spread { flex-direction: column; overflow: visible; height: auto; }
-      .page-left, .page-right {
-        flex: none; overflow: visible;
-        height: auto !important;
-        padding: 0 12px 12px 12px;
-      }
+      .page-left, .page-right { flex: none; overflow: visible; height: auto !important; padding: 0 12px 12px 12px; }
       .spine-v { display: none !important; }
       .spine-h { display: flex; }
       .book-status { background: var(--paper-r); }
@@ -248,21 +226,16 @@
     }
 
     .credit {
-      position: fixed;
-      bottom: 4px; right: 8px;
-      font-size: 9px; font-weight: 600;
-      color: rgba(0,0,0,0.18);
+      position: fixed; bottom: 4px; right: 8px;
+      font-size: 9px; font-weight: 600; color: rgba(0,0,0,0.18);
       font-family: 'Helvetica Neue', Arial, sans-serif;
-      letter-spacing: 0.04em;
-      pointer-events: none;
-      z-index: 20;
+      letter-spacing: 0.04em; pointer-events: none; z-index: 20;
     }
   </style>
 </head>
 <body>
 
 <div class="book-outer">
-
   <div class="book-topbar">
     <div class="book-nav">
       <button class="icon-btn" id="prevBtn">‹</button>
@@ -292,7 +265,6 @@
   </div>
 
   <div class="book-spread" id="bookSpread">
-
     <div class="page-left" id="pageLeft">
       <div class="page-header">
         <div class="page-title">메모</div>
@@ -303,10 +275,8 @@
       </div>
       <div id="memoContent"></div>
     </div>
-
     <div class="spine-v" id="spineV"></div>
     <div class="spine-h" id="spineH"></div>
-
     <div class="page-right" id="pageRight">
       <div class="page-header">
         <div class="page-title">습관</div>
@@ -325,39 +295,20 @@
 </div>
 
 <script>
-const API_URL   = 'https://script.google.com/macros/s/AKfycbxVsn2NI9NwT0NJrWGIfxdhO6ExOsoTHxMOdG1EzZ7l_ZRXdGkJRg7iVI4GcoJ3a0Y/exec';
+const API_URL   = 'https://script.google.com/macros/s/AKfycbx7c5hpzouh_OxnSRkXWPi23w7h_QMNvG6we93HoEOfBrCSeb-CnHUgXlWHQENQS2rV/exec';
 const PAGE_ID   = new URLSearchParams(location.search).get('id') || 'default';
-const TOK_KEY   = 'clonote_token_' + PAGE_ID;
-const USER_KEY  = 'clonote_user_' + PAGE_ID;
-const CACHE_PFX = 'clonote_c2_' + PAGE_ID;
+const TOK_KEY   = 'clonote_token_'  + PAGE_ID;
+const USER_KEY  = 'clonote_user_'   + PAGE_ID;
+const CACHE_PFX = 'clonote_c3_'     + PAGE_ID;  // c3 — 이전 sessionStorage 캐시와 분리
 
-const memStore = {};
+/* ── localStorage 래퍼 (try/catch만, sessionStorage fallback 없음) ── */
+function stGet(k){ try{ return localStorage.getItem(k); }catch{ return null; } }
+function stSet(k,v){ try{ localStorage.setItem(k,v); }catch{} }
+function stDel(k){ try{ localStorage.removeItem(k); }catch{} }
 
-function stGet(k){
-  try {
-    const v = localStorage.getItem(k);
-    if (v !== null) return v;
-  } catch {}
-  try {
-    const v = sessionStorage.getItem(k);
-    if (v !== null) return v;
-  } catch {}
-  return Object.prototype.hasOwnProperty.call(memStore, k) ? memStore[k] : null;
-}
-function stSet(k,v){
-  memStore[k] = String(v);
-  try { localStorage.setItem(k,v); } catch {}
-  try { sessionStorage.setItem(k,v); } catch {}
-}
-function stDel(k){
-  delete memStore[k];
-  try { localStorage.removeItem(k); } catch {}
-  try { sessionStorage.removeItem(k); } catch {}
-}
-
-const MAX_H     = 10;
-const DEF_H     = 5;
-const DEBOUNCE  = 650;
+const MAX_H    = 10;
+const DEF_H    = 5;
+const DEBOUNCE = 650;
 
 let curDate     = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 let curUser     = null;
@@ -382,262 +333,168 @@ const ym   = () => yr() + '-' + String(mo()).padStart(2,'0');
 const last = () => new Date(yr(), mo(), 0).getDate();
 const dow  = d  => new Date(yr(), mo()-1, d).getDay();
 const dcls = d  => { const w=dow(d); return w===6?'sat':w===0?'sun':''; };
-const hcnt = () => Math.max(habits.filter(h => String(h || '').trim() !== '').length, DEF_H);
+const hcnt = () => Math.max(habits.filter(h => String(h||'').trim() !== '').length, DEF_H);
 
-function setStatus(m, e=false){
-  $('statusText').textContent = m || '';
-  $('statusText').style.color = e ? '#c0392b' : '#888';
-}
-function setLS(m, e=false){
-  $('loginStatus').textContent = m || '';
-  $('loginStatus').style.color = e ? '#c0392b' : '#666';
-}
+function setStatus(m, e=false){ $('statusText').textContent=m||''; $('statusText').style.color=e?'#c0392b':'#888'; }
+function setLS(m, e=false){ $('loginStatus').textContent=m||''; $('loginStatus').style.color=e?'#c0392b':'#666'; }
 
-function normalizeHabitList(raw){
-  if (Array.isArray(raw)) return raw.slice(0, MAX_H).map(v => String(v ?? '').trim());
-  if (raw && Array.isArray(raw.habits)) return raw.habits.slice(0, MAX_H).map(v => String(v ?? '').trim());
-  if (raw && Array.isArray(raw.items)) return raw.items.slice(0, MAX_H).map(v => String(v ?? '').trim());
-  if (typeof raw === 'string') {
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed.slice(0, MAX_H).map(v => String(v ?? '').trim());
-    } catch {}
-  }
-  return null;
+/* ── 캐시 ── */
+function ck(t){ return `${CACHE_PFX}:${curUser?.userId}:${ym()}:${t}`; }
+function saveCache(){
+  if(!curUser) return;
+  try{
+    stSet(ck('h'), JSON.stringify(habits));
+    stSet(ck('c'), JSON.stringify(checks));
+    stSet(ck('m'), JSON.stringify(memos));
+  }catch{}
+}
+function loadCache(){
+  try{
+    const h=stGet(ck('h')), c=stGet(ck('c')), m=stGet(ck('m'));
+    return { h:h?JSON.parse(h):null, c:c?JSON.parse(c):null, m:m?JSON.parse(m):null };
+  }catch{ return {}; }
 }
 
-function normalizeCheckMap(raw){
-  const out = {};
-  const list = Array.isArray(raw)
-    ? raw
-    : Array.isArray(raw?.checks) ? raw.checks
-    : Array.isArray(raw?.records) ? raw.records
-    : [];
+/* ── API ── */
+const gj = url  => fetch(url, {cache:'no-store'}).then(r=>r.json());
+const pj = body => fetch(API_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(body)}).then(r=>r.json());
 
-  list.forEach(item => {
-    const day = Number(item?.day ?? item?.date ?? item?.d);
-    if (!Number.isInteger(day) || day < 1 || day > 31) return;
-
-    let arr = item?.checks ?? item?.values ?? item?.checked ?? item?.habitChecks;
-    if (typeof arr === 'string') {
-      try { arr = JSON.parse(arr); }
-      catch { arr = arr.split(',').map(v => v === 'true' || v === '1' || v === 'TRUE'); }
-    }
-    if (!Array.isArray(arr)) return;
-
-    out[day] = Array.from({ length: MAX_H }, (_, idx) => Boolean(arr[idx]));
-  });
-
-  return out;
-}
-
-function normalizeMemoMap(raw){
-  const out = {};
-  const list = Array.isArray(raw)
-    ? raw
-    : Array.isArray(raw?.records) ? raw.records
-    : Array.isArray(raw?.memos) ? raw.memos
-    : [];
-
-  list.forEach(item => {
-    const day = Number(item?.day ?? item?.date ?? item?.d);
-    if (!Number.isInteger(day) || day < 1 || day > 31) return;
-    out[day] = String(item?.memo ?? item?.text ?? '');
-  });
-
-  return out;
-}
-
-function calcLayout() {
-  isMobile = window.innerWidth <= 640;
-  $('pageLeft').style.height = '';
-  $('pageRight').style.height = '';
-  const rowH = isMobile ? 30 : 26;
-  return { rowH, graphRows: isMobile ? 4 : 6 };
-}
-
-function ck(t, targetYm = ym()){
-  return `${CACHE_PFX}:${curUser?.userId}:${targetYm}:${t}`;
-}
-function saveCache(targetYm = ym()){
-  if (!curUser) return;
-  try {
-    stSet(ck('h', targetYm), JSON.stringify(habits));
-    stSet(ck('c', targetYm), JSON.stringify(checks));
-    stSet(ck('m', targetYm), JSON.stringify(memos));
-  } catch {}
-}
-function loadCache(targetYm = ym()){
-  try {
-    const h = stGet(ck('h', targetYm));
-    const c = stGet(ck('c', targetYm));
-    const m = stGet(ck('m', targetYm));
-    return {
-      h: h ? JSON.parse(h) : null,
-      c: c ? JSON.parse(c) : null,
-      m: m ? JSON.parse(m) : null
-    };
-  } catch {
-    return {};
-  }
-}
-
-const gj = url => fetch(url, { cache: 'no-store' }).then(r => r.json());
-const pj = body => fetch(API_URL, {
-  method: 'POST',
-  headers: { 'Content-Type':'text/plain;charset=utf-8' },
-  body: JSON.stringify(body)
-}).then(r => r.json());
-
+/* ── AUTH ── */
 async function tryAutoLogin(){
-  if (!curToken) { renderMeta(); return false; }
-  try {
+  if(!curToken){ renderMeta(); return false; }
+  try{
     const r = await gj(`${API_URL}?action=autoLogin&token=${encodeURIComponent(curToken)}&_=${Date.now()}`);
-    if (r.success && r.user) {
-      curUser = r.user;
-      stSet(USER_KEY, JSON.stringify(curUser));
-      renderMeta();
-      return true;
-    }
-    clearAuth();
-    return false;
-  } catch {
-    renderMeta();
-    return false;
-  }
+    if(r.success && r.user){ curUser=r.user; stSet(USER_KEY,JSON.stringify(curUser)); renderMeta(); return true; }
+    clearAuth(); return false;
+  }catch{ renderMeta(); return false; }
 }
-function clearAuth(){
-  stDel(TOK_KEY);
-  stDel(USER_KEY);
-  curToken = '';
-  curUser = null;
-}
+function clearAuth(){ stDel(TOK_KEY); stDel(USER_KEY); curToken=''; curUser=null; }
 
 async function doStart(){
-  const n = $('loginName').value.trim();
-  const p = $('loginPass').value.trim();
-
-  if (!n || !p) {
-    setLS('이름과 비밀번호를 입력해 주세요.', true);
-    return;
-  }
-
-  $('startBtn').disabled = true;
-  setLS('확인 중...');
-
-  try {
-    await pj({ action:'registerUser', userName:n, password:p });
-    const r = await pj({ action:'login', userName:n, password:p });
-
-    if (!r.success || !r.token || !r.user) {
-      throw new Error(r.message || '로그인 실패');
-    }
-
-    curToken = r.token;
-    curUser = r.user;
-    stSet(TOK_KEY, curToken);
-    stSet(USER_KEY, JSON.stringify(curUser));
-
-    $('loginName').value = '';
-    $('loginPass').value = '';
-    setLS('');
-    renderMeta();
-    await loadAll();
-  } catch(e) {
-    setLS(e.message || '실패', true);
-  } finally {
-    $('startBtn').disabled = false;
-  }
+  const n=$('loginName').value.trim(), p=$('loginPass').value.trim();
+  if(!n||!p){ setLS('이름과 비밀번호를 입력해 주세요.',true); return; }
+  $('startBtn').disabled=true; setLS('확인 중...');
+  try{
+    await pj({action:'registerUser',userName:n,password:p});
+    const r=await pj({action:'login',userName:n,password:p});
+    if(!r.success||!r.token||!r.user) throw new Error(r.message||'로그인 실패');
+    curToken=r.token; curUser=r.user;
+    stSet(TOK_KEY,curToken); stSet(USER_KEY,JSON.stringify(curUser));
+    $('loginName').value=''; $('loginPass').value=''; setLS('');
+    renderMeta(); await loadAll();
+  }catch(e){ setLS(e.message||'실패',true); }
+  finally{ $('startBtn').disabled=false; }
 }
 
 async function doLogout(){
-  try {
-    if (curToken) await pj({ action:'logout', token:curToken });
-  } catch {}
-  clearAuth();
-  habits = [];
-  checks = {};
-  memos = {};
-  renderMeta();
-  renderAll();
-  setStatus('로그아웃되었습니다.');
+  try{ if(curToken) await pj({action:'logout',token:curToken}); }catch{}
+  clearAuth(); habits=[]; checks={}; memos={};
+  renderMeta(); renderAll(); setStatus('로그아웃되었습니다.');
 }
 
 function renderMeta(){
-  $('monthTitle').textContent = yr() + '년 ' + mo() + '월';
-  $('userNameText').textContent = curUser?.userName || '사용자';
-  $('loginBox').classList.toggle('show', !curUser);
-  $('menuWrap').style.display = curUser ? 'block' : 'none';
-  if (!curUser) $('menuPop').classList.remove('show');
+  $('monthTitle').textContent = yr()+'년 '+mo()+'월';
+  $('userNameText').textContent = curUser?.userName||'사용자';
+  $('loginBox').classList.toggle('show',!curUser);
+  $('menuWrap').style.display = curUser?'block':'none';
+  if(!curUser) $('menuPop').classList.remove('show');
 }
 
+/* ── LOAD ── */
 async function loadAll(){
   renderMeta();
-  if (!curUser) return;
+  if(!curUser) return;
 
-  const requestSeq = ++loadSeq;
+  const seq = ++loadSeq;
   const targetYm = ym();
 
-  const cc = loadCache(targetYm);
-  habits = Array.isArray(cc.h) ? cc.h : [];
-  checks = cc.c && typeof cc.c === 'object'
-    ? Object.fromEntries(Object.entries(cc.c).map(([d, v]) => [Number(d), Array.isArray(v) ? v : Array(MAX_H).fill(false)]))
-    : {};
-  memos = cc.m && typeof cc.m === 'object'
-    ? Object.fromEntries(Object.entries(cc.m).map(([d, v]) => [Number(d), String(v ?? '')]))
-    : {};
-
+  /* 캐시로 즉시 표시 */
+  const cc = loadCache();
+  if(Array.isArray(cc.h)) habits = cc.h;
+  if(cc.c && typeof cc.c==='object'){
+    checks={};
+    Object.entries(cc.c).forEach(([d,v])=>{ checks[+d]=Array.isArray(v)?v:Array(MAX_H).fill(false); });
+  }
+  if(cc.m && typeof cc.m==='object'){
+    memos={};
+    Object.entries(cc.m).forEach(([d,v])=>{ memos[+d]=String(v??''); });
+  }
   renderAll();
 
-  try {
-    const [hR, cR, mR] = await Promise.all([
+  /* 서버에서 최신 데이터 로드 */
+  try{
+    const [hR,cR,mR] = await Promise.all([
       gj(`${API_URL}?action=getHabits&userId=${encodeURIComponent(curUser.userId)}&yearMonth=${encodeURIComponent(targetYm)}&_=${Date.now()}`),
       gj(`${API_URL}?action=getChecks&userId=${encodeURIComponent(curUser.userId)}&yearMonth=${encodeURIComponent(targetYm)}&_=${Date.now()}`),
       gj(`${API_URL}?action=getRecords&userId=${encodeURIComponent(curUser.userId)}&year=${yr()}&month=${mo()}&_=${Date.now()}`)
     ]);
 
-    if (requestSeq !== loadSeq || targetYm !== ym()) return;
+    /* 다른 요청이 시작됐으면 무시 */
+    if(seq !== loadSeq || targetYm !== ym()) return;
 
-    const normalizedHabits = normalizeHabitList(hR?.habits ?? hR?.data ?? hR);
-    if (normalizedHabits) {
-      habits = normalizedHabits;
-    } else if (hR?.success === false) {
-      setStatus('습관 로드 실패: ' + (hR.message || 'unknown'), true);
+    /* 습관 */
+    if(hR?.success && Array.isArray(hR.habits)){
+      habits = hR.habits.map(v=>String(v??'').trim());
+    } else if(hR?.success && hR.habits===null){
+      /* 이번 달 등록 없음 — habits 현재값 유지 */
     }
 
-    checks = normalizeCheckMap(cR?.data ?? cR);
-    memos  = normalizeMemoMap(mR?.data ?? mR);
+    /* 체크 */
+    if(cR?.success && Array.isArray(cR.checks)){
+      checks={};
+      cR.checks.forEach(item=>{
+        const d=Number(item.day);
+        if(d>=1&&d<=31) checks[d]=Array.isArray(item.checks)?item.checks:Array(MAX_H).fill(false);
+      });
+    }
 
-    saveCache(targetYm);
+    /* 메모 */
+    if(mR?.success && Array.isArray(mR.records)){
+      memos={};
+      mR.records.forEach(item=>{
+        const d=Number(item.day);
+        if(d>=1&&d<=31) memos[d]=String(item.memo??'');
+      });
+    }
+
+    saveCache();
     renderAll();
     setStatus('');
-  } catch(err) {
-    if (requestSeq !== loadSeq) return;
-    setStatus('네트워크 오류: ' + (err.message || err), true);
+  }catch(err){
+    if(seq!==loadSeq) return;
+    setStatus('로드 실패: '+(err.message||'네트워크 오류'),true);
   }
 }
 
+/* ── RENDER ── */
+function calcLayout(){
+  isMobile = window.innerWidth<=640;
+  $('pageLeft').style.height='';
+  $('pageRight').style.height='';
+  return { rowH: isMobile?30:26, graphRows: isMobile?4:6 };
+}
+
 function renderAll(){
-  const { rowH, graphRows } = calcLayout();
+  const {rowH,graphRows}=calcLayout();
   renderLeft();
-  renderRight(rowH, graphRows);
+  renderRight(rowH,graphRows);
   buildSpines(rowH);
 }
 
 /* LEFT */
 function renderLeft(){
-  const el = $('memoContent');
-  el.innerHTML = (leftTab === 'memo-month') ? buildMemoRows(1, last(), 'lm') : buildMemoWeek();
+  const el=$('memoContent');
+  el.innerHTML=(leftTab==='memo-month')?buildMemoRows(1,last(),'lm'):buildMemoWeek();
   bindMemo(el);
 }
-function buildMemoRows(from, to, src){
-  let h = '';
-  for (let d = from; d <= to; d++) {
-    h += `<div class="memo-row">
+function buildMemoRows(from,to,src){
+  let h='';
+  for(let d=from;d<=to;d++){
+    h+=`<div class="memo-row">
       <div class="day-cell ${dcls(d)}" style="width:var(--left-date);">${d}일</div>
       <div class="memo-cell">
         <input class="memo-input" id="mi-${src}-${d}" type="text" data-day="${d}" data-src="${src}"
-          value="${esc(memos[d] || '')}" ${curUser ? '' : 'disabled'} autocomplete="off"/>
+          value="${esc(memos[d]||'')}" ${curUser?'':'disabled'} autocomplete="off"/>
         <span class="save-ind" id="si-${src}-${d}"></span>
       </div>
     </div>`;
@@ -645,442 +502,253 @@ function buildMemoRows(from, to, src){
   return h;
 }
 function buildMemoWeek(){
-  const days = getWeekDays();
-  if (!days.length) return '<div style="padding:8px 4px;font-size:11px;color:var(--muted);">해당 없음</div>';
-  return buildMemoRows(days[0], days[days.length - 1], 'lw');
+  const days=getWeekDays();
+  if(!days.length) return '<div style="padding:8px 4px;font-size:11px;color:var(--muted);">해당 없음</div>';
+  return buildMemoRows(days[0],days[days.length-1],'lw');
 }
 function bindMemo(el){
-  el.querySelectorAll('.memo-input').forEach(inp => {
-    inp.addEventListener('input', () => scheduleMemo(+inp.dataset.day, inp.dataset.src));
-    inp.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        inp.blur();
-        flushMemo(+inp.dataset.day, inp.dataset.src);
-      }
-    });
-    inp.addEventListener('blur', () => flushMemo(+inp.dataset.day, inp.dataset.src));
-    inp.addEventListener('change', () => flushMemo(+inp.dataset.day, inp.dataset.src));
+  el.querySelectorAll('.memo-input').forEach(inp=>{
+    inp.addEventListener('input',()=>scheduleMemo(+inp.dataset.day,inp.dataset.src));
+    inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();inp.blur();} });
+    inp.addEventListener('blur',()=>flushMemo(+inp.dataset.day,inp.dataset.src));
+    inp.addEventListener('change',()=>flushMemo(+inp.dataset.day,inp.dataset.src));
   });
 }
 
 /* RIGHT */
-function renderRight(rowH, graphRows){
-  const el = $('habitContent');
-  if (rightTab === 'habit-home') el.innerHTML = buildHabitHome(rowH, graphRows);
-  else if (rightTab === 'habit-setup') el.innerHTML = buildHabitSetup();
-  else el.innerHTML = buildHabitAll();
-
+function renderRight(rowH,graphRows){
+  const el=$('habitContent');
+  if(rightTab==='habit-home') el.innerHTML=buildHabitHome(rowH,graphRows);
+  else if(rightTab==='habit-setup') el.innerHTML=buildHabitSetup();
+  else el.innerHTML=buildHabitAll();
   bindChecks(el);
-  if (rightTab === 'habit-setup') bindSetup(el);
-  if (rightTab === 'habit-home') renderGraph();
+  if(rightTab==='habit-setup') bindSetup(el);
+  if(rightTab==='habit-home') renderGraph();
 }
 
-function buildHabitHome(rowH, graphRows){
-  const days = getWeekDays(), lastDay = last();
-  const minD = days[0] || 1, maxD = days[days.length - 1] || lastDay;
-  const lbl = days.length ? `${days[0]}일 — ${days[days.length - 1]}일` : '';
-  const graphH = rowH * graphRows;
-
-  let h = `<div class="graph-wrap" style="height:${graphH}px;"><canvas class="graph" id="graphCanvas"></canvas></div>`;
-  h += `<div class="week-nav">
-    <button class="w-arrow" id="wPrev" ${minD <= 1 ? 'disabled' : ''}>‹</button>
+function buildHabitHome(rowH,graphRows){
+  const days=getWeekDays(), lastDay=last();
+  const minD=days[0]||1, maxD=days[days.length-1]||lastDay;
+  const lbl=days.length?`${days[0]}일 — ${days[days.length-1]}일`:'';
+  const graphH=rowH*graphRows;
+  let h=`<div class="graph-wrap" style="height:${graphH}px;"><canvas class="graph" id="graphCanvas" style="pointer-events:none;"></canvas></div>`;
+  h+=`<div class="week-nav">
+    <button class="w-arrow" id="wPrev" ${minD<=1?'disabled':''}>‹</button>
     <div class="week-lbl">${lbl}</div>
-    <button class="w-arrow" id="wNext" ${maxD >= lastDay ? 'disabled' : ''}>›</button>
+    <button class="w-arrow" id="wNext" ${maxD>=lastDay?'disabled':''}>›</button>
   </div>`;
-  if (days.length) {
-    h += buildCheckHeader('rh');
-    days.forEach(d => { h += buildCheckRow(d, 'rh'); });
-  }
+  if(days.length){ h+=buildCheckHeader('rh'); days.forEach(d=>{h+=buildCheckRow(d,'rh');}); }
   return h;
 }
 function buildHabitAll(){
-  let h = buildCheckHeader('ra');
-  for (let d = 1; d <= last(); d++) h += buildCheckRow(d, 'ra');
+  let h=buildCheckHeader('ra');
+  for(let d=1;d<=last();d++) h+=buildCheckRow(d,'ra');
   return h;
 }
 function buildCheckHeader(src){
-  const cnt = hcnt(), col = `var(--right-date) repeat(${cnt},1fr) var(--total-w)`;
-  let cells = '';
-  habits.slice(0, cnt).forEach(n => { cells += `<div class="hdr-cell">${esc(n || '—')}</div>`; });
-
+  const cnt=hcnt(), col=`var(--right-date) repeat(${cnt},1fr) var(--total-w)`;
+  let cells=''; habits.slice(0,cnt).forEach(n=>{cells+=`<div class="hdr-cell">${esc(n||'—')}</div>`;});
   return `<div class="habit-hdr" style="grid-template-columns:${col};">
     <div style="width:var(--right-date);flex-shrink:0;"></div>${cells}
     <div class="hdr-total">합</div>
   </div>`;
 }
-function buildCheckRow(d, src){
-  const cnt = hcnt(), col = `var(--right-date) repeat(${cnt},1fr) var(--total-w)`;
-  const ch = Array.isArray(checks[d]) ? checks[d] : Array(MAX_H).fill(false);
-  const tot = ch.slice(0, cnt).filter(Boolean).length;
-  const dis = curUser ? '' : 'disabled';
-
-  let cbs = '';
-  for (let i = 0; i < cnt; i++) {
-    cbs += `<div class="cb-wrap"><input type="checkbox" data-day="${d}" data-idx="${i}" data-src="${src}" ${ch[i] ? 'checked' : ''} ${dis}/></div>`;
-  }
-
+function buildCheckRow(d,src){
+  const cnt=hcnt(), col=`var(--right-date) repeat(${cnt},1fr) var(--total-w)`;
+  const ch=Array.isArray(checks[d])?checks[d]:Array(MAX_H).fill(false);
+  const tot=ch.slice(0,cnt).filter(Boolean).length, dis=curUser?'':'disabled';
+  let cbs='';
+  for(let i=0;i<cnt;i++) cbs+=`<div class="cb-wrap"><input type="checkbox" data-day="${d}" data-idx="${i}" data-src="${src}" ${ch[i]?'checked':''} ${dis}/></div>`;
   return `<div class="check-row" style="grid-template-columns:${col};">
     <div class="day-cell ${dcls(d)}" style="width:var(--right-date);flex-shrink:0;">${d}일</div>
     ${cbs}
-    <div class="total-cell" id="tc-${src}-${d}">${tot > 0 ? tot : ''}</div>
+    <div class="total-cell" id="tc-${src}-${d}">${tot>0?tot:''}</div>
   </div>`;
 }
 function buildHabitSetup(){
-  let h = '';
-  for (let i = 0; i < MAX_H; i++) {
-    const dis = curUser ? '' : 'disabled';
-    const ph = i < DEF_H ? `습관 ${i+1}` : `습관 ${i+1} (선택)`;
-    h += `<div class="setup-row"><div class="setup-num">${i+1}</div><div class="setup-inp-wrap">
-      <input class="setup-inp" type="text" data-hi="${i}" value="${esc(habits[i] || '')}" placeholder="${ph}" maxlength="20" ${dis} autocomplete="off"/>
+  let h='';
+  for(let i=0;i<MAX_H;i++){
+    const dis=curUser?'':'disabled', ph=i<DEF_H?`습관 ${i+1}`:`습관 ${i+1} (선택)`;
+    h+=`<div class="setup-row"><div class="setup-num">${i+1}</div><div class="setup-inp-wrap">
+      <input class="setup-inp" type="text" data-hi="${i}" value="${esc(habits[i]||'')}" placeholder="${ph}" maxlength="20" ${dis} autocomplete="off"/>
     </div></div>`;
   }
-  return h + `<div class="habit-save-row"><button class="habit-save-btn" id="habitSaveBtn">저장</button></div>`;
+  return h+`<div class="habit-save-row"><button class="habit-save-btn" id="habitSaveBtn">저장</button></div>`;
 }
-function bindSetup(el){
-  const b = el.querySelector('#habitSaveBtn');
-  if (b) b.addEventListener('click', doSaveHabits);
-}
+function bindSetup(el){ const b=el.querySelector('#habitSaveBtn'); if(b) b.addEventListener('click',doSaveHabits); }
+
 async function doSaveHabits(){
-  if (!curUser) return;
-
-  const targetYm = ym();
-  const h = Array.from(document.querySelectorAll('.setup-inp')).map(i => i.value.trim());
-  const btn = document.getElementById('habitSaveBtn');
-  if (btn) btn.disabled = true;
-  setStatus('저장 중...');
-
-  try {
-    const r = await pj({ action:'saveHabits', userId:curUser.userId, yearMonth:targetYm, habits:h });
-    if (!r.success) throw new Error(r.message);
-    habits = normalizeHabitList(r?.habits ?? r?.data ?? h) || h;
-    saveCache(targetYm);
-
-    rightTab = 'habit-home';
-    document.querySelectorAll('[data-rtab]').forEach(x => x.classList.toggle('active', x.dataset.rtab === 'habit-home'));
-    renderAll();
-    setStatus('습관이 저장되었습니다.');
-    setTimeout(() => setStatus(''), 2000);
-  } catch(e) {
-    setStatus(e.message || '저장 실패', true);
-  } finally {
-    if (btn) btn.disabled = false;
-  }
+  if(!curUser) return;
+  const targetYm=ym();
+  const h=Array.from(document.querySelectorAll('.setup-inp')).map(i=>i.value.trim());
+  const btn=document.getElementById('habitSaveBtn');
+  if(btn) btn.disabled=true; setStatus('저장 중...');
+  try{
+    const r=await pj({action:'saveHabits',userId:curUser.userId,yearMonth:targetYm,habits:h});
+    if(!r.success) throw new Error(r.message);
+    habits=Array.isArray(r.habits)?r.habits.map(v=>String(v??'').trim()):h;
+    saveCache();
+    rightTab='habit-home';
+    document.querySelectorAll('[data-rtab]').forEach(x=>x.classList.toggle('active',x.dataset.rtab==='habit-home'));
+    renderAll(); setStatus('습관이 저장되었습니다.'); setTimeout(()=>setStatus(''),2000);
+  }catch(e){ setStatus(e.message||'저장 실패',true); }
+  finally{ if(btn) btn.disabled=false; }
 }
 
 function bindChecks(el){
-  el.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', onCheck));
-  const wp = el.querySelector('#wPrev');
-  const wn = el.querySelector('#wNext');
-  if (wp) wp.addEventListener('click', () => { weekOff--; renderAll(); });
-  if (wn) wn.addEventListener('click', () => { weekOff++; renderAll(); });
+  el.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.addEventListener('change',onCheck));
+  const wp=el.querySelector('#wPrev'), wn=el.querySelector('#wNext');
+  if(wp) wp.addEventListener('click',()=>{weekOff--;renderAll();});
+  if(wn) wn.addEventListener('click',()=>{weekOff++;renderAll();});
 }
+
 function onCheck(e){
-  if (!curUser) return;
-
-  const targetYm = ym();
-  const d = +e.target.dataset.day;
-  const idx = +e.target.dataset.idx;
-  const cnt = hcnt();
-
-  const prev = Array.isArray(checks[d]) ? [...checks[d]] : Array(MAX_H).fill(false);
-  prev[idx] = e.target.checked;
-  checks[d] = prev;
-
-  const tot = prev.slice(0, cnt).filter(Boolean).length;
-  document.querySelectorAll(`input[type="checkbox"][data-day="${d}"][data-idx="${idx}"]`).forEach(cb => {
-    if (cb !== e.target) cb.checked = e.target.checked;
-  });
-  document.querySelectorAll(`[id^="tc-"][id$="-${d}"]`).forEach(el => { el.textContent = tot > 0 ? tot : ''; });
-
-  saveCache(targetYm);
-  if (rightTab === 'habit-home') renderGraph();
-
+  if(!curUser) return;
+  const targetYm=ym(), d=+e.target.dataset.day, idx=+e.target.dataset.idx, cnt=hcnt();
+  const prev=Array.isArray(checks[d])?[...checks[d]]:Array(MAX_H).fill(false);
+  prev[idx]=e.target.checked; checks[d]=prev;
+  const tot=prev.slice(0,cnt).filter(Boolean).length;
+  document.querySelectorAll(`input[type="checkbox"][data-day="${d}"][data-idx="${idx}"]`).forEach(cb=>{if(cb!==e.target)cb.checked=e.target.checked;});
+  document.querySelectorAll(`[id^="tc-"][id$="-${d}"]`).forEach(el=>{el.textContent=tot>0?tot:'';});
+  saveCache();
+  if(rightTab==='habit-home') renderGraph();
   clearTimeout(checkTimers[d]);
-  checkTimers[d] = setTimeout(async () => {
-    try {
-      const r = await pj({ action:'saveCheck', userId:curUser.userId, yearMonth:targetYm, day:d, checks:checks[d] });
-      if (!r.success) setStatus('체크 저장 실패', true);
-    } catch {
-      setStatus('체크 저장 오류', true);
-    }
-  }, 800);
+  checkTimers[d]=setTimeout(async()=>{
+    try{
+      const r=await pj({action:'saveCheck',userId:curUser.userId,yearMonth:targetYm,day:d,checks:checks[d]});
+      if(!r.success) setStatus('체크 저장 실패',true);
+    }catch{ setStatus('체크 저장 오류',true); }
+  },800);
 }
 
-function scheduleMemo(d, src){
-  if (!curUser) return;
-  clearTimeout(memoTimers[d]);
-  showInd(d, src, '저장중', true);
-  memoTimers[d] = setTimeout(() => flushMemo(d, src), DEBOUNCE);
+/* MEMO SAVE */
+function scheduleMemo(d,src){ if(!curUser)return; clearTimeout(memoTimers[d]); showInd(d,src,'저장중',true); memoTimers[d]=setTimeout(()=>flushMemo(d,src),DEBOUNCE); }
+function flushMemo(d,src){ if(!curUser)return; clearTimeout(memoTimers[d]); doMemoSave(d,src); }
+async function doMemoSave(d,src){
+  const inp=document.getElementById(`mi-${src}-${d}`); if(!inp)return;
+  const val=inp.value.trim(), other=src==='lm'?'lw':'lm';
+  const twin=document.getElementById(`mi-${other}-${d}`);
+  if(twin&&twin.value!==inp.value) twin.value=inp.value;
+  if(!val){ showInd(d,src,'',false); showInd(d,other,'',false); memos[d]=''; saveCache(); return; }
+  if(val===(memos[d]||'')){ showInd(d,src,'',false); return; }
+  const ver=(memoVers[d]||0)+1; memoVers[d]=ver;
+  try{
+    const r=await pj({action:'saveRecord',userId:curUser.userId,year:yr(),month:mo(),day:d,memo:val});
+    if(memoVers[d]!==ver)return;
+    if(!r.success) throw new Error(r.message);
+    memos[d]=val; saveCache(); showInd(d,src,'',false); showInd(d,other,'',false);
+    setStatus(`${d}일 메모 저장`); setTimeout(()=>setStatus(''),1500);
+  }catch(err){ if(memoVers[d]!==ver)return; showInd(d,src,'오류',true); setStatus(err.message||'메모 저장 오류',true); }
 }
-function flushMemo(d, src){
-  if (!curUser) return;
-  clearTimeout(memoTimers[d]);
-  doMemoSave(d, src);
-}
-async function doMemoSave(d, src){
-  const targetYear = yr();
-  const targetMonth = mo();
-  const targetYm = ym();
+function showInd(d,src,txt,show){ const el=document.getElementById(`si-${src}-${d}`); if(!el)return; el.textContent=txt; el.classList.toggle('show',show&&!!txt); }
 
-  const inp = document.getElementById(`mi-${src}-${d}`);
-  if (!inp) return;
-
-  const val = inp.value.trim();
-  const other = src === 'lm' ? 'lw' : 'lm';
-  const twin = document.getElementById(`mi-${other}-${d}`);
-  if (twin && twin.value !== inp.value) twin.value = inp.value;
-
-  if (!val) {
-    showInd(d, src, '', false);
-    showInd(d, other, '', false);
-    memos[d] = '';
-    saveCache(targetYm);
-    return;
-  }
-  if (val === (memos[d] || '')) {
-    showInd(d, src, '', false);
-    return;
-  }
-
-  const ver = (memoVers[d] || 0) + 1;
-  memoVers[d] = ver;
-
-  try {
-    const r = await pj({ action:'saveRecord', userId:curUser.userId, year:targetYear, month:targetMonth, day:d, memo:val });
-    if (memoVers[d] !== ver) return;
-    if (!r.success) throw new Error(r.message);
-
-    memos[d] = val;
-    saveCache(targetYm);
-    showInd(d, src, '', false);
-    showInd(d, other, '', false);
-    setStatus(`${d}일 메모 저장`);
-    setTimeout(() => setStatus(''), 1500);
-  } catch(err) {
-    if (memoVers[d] !== ver) return;
-    showInd(d, src, '오류', true);
-    setStatus(err.message || '메모 저장 오류', true);
-  }
-}
-function showInd(d, src, txt, show){
-  const el = document.getElementById(`si-${src}-${d}`);
-  if (!el) return;
-  el.textContent = txt;
-  el.classList.toggle('show', show && !!txt);
-}
-
+/* GRAPH */
 function renderGraph(){
-  const cv = document.getElementById('graphCanvas');
-  if (!cv) return;
-
-  const ctx = cv.getContext('2d');
-  const ld = last(), cnt = hcnt();
-  const now = new Date();
-  const isCur = (yr() === now.getFullYear() && mo() === now.getMonth() + 1);
-  const today = isCur ? now.getDate() : ld;
-
-  const data = [];
-  for (let d = 1; d <= ld; d++) {
-    const c = Array.isArray(checks[d]) ? checks[d] : [];
-    data.push(c.slice(0, cnt).filter(Boolean).length);
+  const cv=document.getElementById('graphCanvas'); if(!cv)return;
+  const ctx=cv.getContext('2d');
+  const ld=last(),cnt=hcnt(),now=new Date();
+  const isCur=(yr()===now.getFullYear()&&mo()===now.getMonth()+1);
+  const today=isCur?now.getDate():ld;
+  const data=[]; for(let d=1;d<=ld;d++){const c=Array.isArray(checks[d])?checks[d]:[]; data.push(c.slice(0,cnt).filter(Boolean).length);}
+  const hasAny=data.some(v=>v>0);
+  const dpr=window.devicePixelRatio||1;
+  const W=cv.parentElement.clientWidth||300, H=cv.parentElement.clientHeight||100;
+  cv.style.width=W+'px'; cv.style.height=H+'px';
+  cv.width=W*dpr; cv.height=H*dpr;
+  ctx.scale(dpr,dpr); ctx.clearRect(0,0,W,H);
+  const rdVal=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--right-date'))||44;
+  const p={t:12,r:12,b:22,l:rdVal+6};
+  const gW=W-p.l-p.r, gH=H-p.t-p.b;
+  ctx.strokeStyle='rgba(132,184,196,0.28)'; ctx.lineWidth=0.5;
+  for(let v=0;v<=cnt;v++){
+    const y=p.t+gH-(v/cnt)*gH;
+    ctx.beginPath(); ctx.moveTo(p.l,y); ctx.lineTo(p.l+gW,y); ctx.stroke();
+    if(v>0){ctx.fillStyle='rgba(100,100,100,0.38)';ctx.font=`${Math.min(9,H/10)}px Arial`;ctx.textAlign='center';ctx.fillText(v,rdVal/2,y+3);}
   }
-
-  const hasAny = data.some(v => v > 0);
-  const dpr = window.devicePixelRatio || 1;
-  const W = cv.parentElement.clientWidth || 300;
-  const H = cv.parentElement.clientHeight || 100;
-
-  cv.style.width = W + 'px';
-  cv.style.height = H + 'px';
-  cv.width = W * dpr;
-  cv.height = H * dpr;
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0,0,W,H);
-
-  const rdVal = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--right-date')) || 44;
-  const p = { t:12, r:12, b:22, l: rdVal + 6 };
-  const gW = W - p.l - p.r, gH = H - p.t - p.b;
-
-  ctx.strokeStyle = 'rgba(132,184,196,0.28)';
-  ctx.lineWidth = 0.5;
-  for (let v = 0; v <= cnt; v++) {
-    const y = p.t + gH - (v / cnt) * gH;
-    ctx.beginPath();
-    ctx.moveTo(p.l, y);
-    ctx.lineTo(p.l + gW, y);
-    ctx.stroke();
-
-    if (v > 0) {
-      ctx.fillStyle = 'rgba(100,100,100,0.38)';
-      ctx.font = `${Math.min(9,H/10)}px Arial`;
-      ctx.textAlign = 'center';
-      ctx.fillText(v, rdVal/2, y+3);
-    }
-  }
-
-  ctx.fillStyle = 'rgba(100,100,100,0.42)';
-  ctx.font = `${Math.min(9,H/10)}px Arial`;
-  ctx.textAlign = 'center';
-  for (let d = 1; d <= ld; d++) {
-    if (d === 1 || d % 5 === 0 || d === ld) {
-      const x = p.l + ((d - 1) / (ld - 1 || 1)) * gW;
-      ctx.fillText(d, x, H - p.b + 11);
-    }
-  }
-
-  if (!hasAny) return;
-
-  const pts = [];
-  for (let d = 1; d <= today; d++) {
-    pts.push({
-      x: p.l + ((d - 1) / (ld - 1 || 1)) * gW,
-      y: p.t + gH - (data[d - 1] / cnt) * gH,
-      v: data[d - 1]
-    });
-  }
-  if (!pts.length) return;
-
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, p.t + gH);
-  pts.forEach(pt => ctx.lineTo(pt.x, pt.y));
-  ctx.lineTo(pts[pts.length - 1].x, p.t + gH);
-  ctx.closePath();
-  ctx.fillStyle = 'rgba(93,134,200,0.09)';
-  ctx.fill();
-
-  ctx.beginPath();
-  ctx.strokeStyle = 'rgba(93,134,200,0.82)';
-  ctx.lineWidth = 1.8;
-  ctx.lineJoin = 'round';
-  pts.forEach((pt, i) => i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y));
-  ctx.stroke();
-
-  pts.forEach(pt => {
-    ctx.beginPath();
-    ctx.arc(pt.x, pt.y, 2.2, 0, Math.PI * 2);
-    ctx.fillStyle = pt.v > 0 ? 'rgba(93,134,200,0.85)' : 'rgba(190,190,190,0.5)';
-    ctx.fill();
-  });
+  ctx.fillStyle='rgba(100,100,100,0.42)'; ctx.font=`${Math.min(9,H/10)}px Arial`; ctx.textAlign='center';
+  for(let d=1;d<=ld;d++){if(d===1||d%5===0||d===ld){const x=p.l+((d-1)/(ld-1||1))*gW;ctx.fillText(d,x,H-p.b+11);}}
+  if(!hasAny)return;
+  const pts=[]; for(let d=1;d<=today;d++) pts.push({x:p.l+((d-1)/(ld-1||1))*gW,y:p.t+gH-(data[d-1]/cnt)*gH,v:data[d-1]});
+  if(!pts.length)return;
+  ctx.beginPath(); ctx.moveTo(pts[0].x,p.t+gH); pts.forEach(pt=>ctx.lineTo(pt.x,pt.y)); ctx.lineTo(pts[pts.length-1].x,p.t+gH); ctx.closePath(); ctx.fillStyle='rgba(93,134,200,0.09)'; ctx.fill();
+  ctx.beginPath(); ctx.strokeStyle='rgba(93,134,200,0.82)'; ctx.lineWidth=1.8; ctx.lineJoin='round'; pts.forEach((pt,i)=>i===0?ctx.moveTo(pt.x,pt.y):ctx.lineTo(pt.x,pt.y)); ctx.stroke();
+  pts.forEach(pt=>{ctx.beginPath();ctx.arc(pt.x,pt.y,2.2,0,Math.PI*2);ctx.fillStyle=pt.v>0?'rgba(93,134,200,0.85)':'rgba(190,190,190,0.5)';ctx.fill();});
 }
 
+/* WEEK DAYS */
 function getWeekDays(){
-  const today = new Date();
-  const isCur = (yr() === today.getFullYear() && mo() === today.getMonth() + 1);
-  const base = isCur ? today.getDate() : last();
-  const bd = new Date(yr(), mo()-1, base);
-  const dw = bd.getDay();
-  const monday = new Date(bd);
-  monday.setDate(bd.getDate() - (dw === 0 ? 6 : dw - 1) + weekOff * 7);
-
-  const days = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    if (d.getFullYear() === yr() && d.getMonth() + 1 === mo()) days.push(d.getDate());
-  }
+  const today=new Date(), isCur=(yr()===today.getFullYear()&&mo()===today.getMonth()+1);
+  const base=isCur?today.getDate():last();
+  const bd=new Date(yr(),mo()-1,base), dw=bd.getDay();
+  const monday=new Date(bd); monday.setDate(bd.getDate()-(dw===0?6:dw-1)+weekOff*7);
+  const days=[];
+  for(let i=0;i<7;i++){const d=new Date(monday);d.setDate(monday.getDate()+i);if(d.getFullYear()===yr()&&d.getMonth()+1===mo()) days.push(d.getDate());}
   return days;
 }
 
+/* SPINE */
 function buildSpines(rowH){
-  const sv = $('spineV');
-  if (sv && sv.offsetHeight > 0) {
-    const h = sv.offsetHeight, gap = Math.max(3, rowH - 10);
-    const count = Math.max(4, Math.floor(h / (10 + gap)));
-    sv.innerHTML = Array.from({length:count}, () => `<div class="ring" style="margin-bottom:${gap}px;"></div>`).join('');
+  const sv=$('spineV');
+  if(sv&&sv.offsetHeight>0){
+    const gap=Math.max(3,rowH-10);
+    sv.innerHTML=Array.from({length:Math.max(4,Math.floor(sv.offsetHeight/(10+gap)))},()=>`<div class="ring" style="margin-bottom:${gap}px;"></div>`).join('');
   }
-
-  const sh = $('spineH');
-  if (sh && sh.offsetWidth > 0) {
-    const w = sh.offsetWidth;
-    const count = Math.max(8, Math.floor(w / 30));
-    sh.innerHTML = Array.from({length:count}, () => `<div class="ring-h"></div>`).join('');
+  const sh=$('spineH');
+  if(sh&&sh.offsetWidth>0){
+    sh.innerHTML=Array.from({length:Math.max(8,Math.floor(sh.offsetWidth/30))},()=>`<div class="ring-h"></div>`).join('');
   }
 }
 
+/* MONTH NAV */
 function moveMonth(off){
   loadSeq++;
-  curDate = new Date(yr(), mo()-1+off, 1);
-  weekOff = 0;
-  habits = [];
-  checks = {};
-  memos = {};
-  renderMeta();
-  renderAll();
-  loadAll();
+  curDate=new Date(yr(),mo()-1+off,1); weekOff=0; habits=[]; checks={}; memos={};
+  renderMeta(); renderAll(); loadAll();
 }
 
-$('prevBtn').addEventListener('click', () => moveMonth(-1));
-$('nextBtn').addEventListener('click', () => moveMonth(1));
-$('startBtn').addEventListener('click', doStart);
-$('logoutBtn').addEventListener('click', doLogout);
-$('loginName').addEventListener('keydown', e => { if (e.key === 'Enter') $('loginPass').focus(); });
-$('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doStart(); });
-$('menuBtn').addEventListener('click', e => { e.stopPropagation(); $('menuPop').classList.toggle('show'); });
-document.addEventListener('click', e => { if (!$('menuWrap').contains(e.target)) $('menuPop').classList.remove('show'); });
+/* EVENTS */
+$('prevBtn').addEventListener('click',()=>moveMonth(-1));
+$('nextBtn').addEventListener('click',()=>moveMonth(1));
+$('startBtn').addEventListener('click',doStart);
+$('logoutBtn').addEventListener('click',doLogout);
+$('loginName').addEventListener('keydown',e=>{if(e.key==='Enter')$('loginPass').focus();});
+$('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doStart();});
+$('menuBtn').addEventListener('click',e=>{e.stopPropagation();$('menuPop').classList.toggle('show');});
+document.addEventListener('click',e=>{if(!$('menuWrap').contains(e.target))$('menuPop').classList.remove('show');});
 
-document.querySelectorAll('[data-ltab]').forEach(b => b.addEventListener('click', () => {
-  leftTab = b.dataset.ltab;
-  document.querySelectorAll('[data-ltab]').forEach(x => x.classList.toggle('active', x === b));
+document.querySelectorAll('[data-ltab]').forEach(b=>b.addEventListener('click',()=>{
+  leftTab=b.dataset.ltab;
+  document.querySelectorAll('[data-ltab]').forEach(x=>x.classList.toggle('active',x===b));
   renderAll();
 }));
-document.querySelectorAll('[data-rtab]').forEach(b => b.addEventListener('click', () => {
-  rightTab = b.dataset.rtab;
-  document.querySelectorAll('[data-rtab]').forEach(x => x.classList.toggle('active', x === b));
+document.querySelectorAll('[data-rtab]').forEach(b=>b.addEventListener('click',()=>{
+  rightTab=b.dataset.rtab;
+  document.querySelectorAll('[data-rtab]').forEach(x=>x.classList.toggle('active',x===b));
   renderAll();
 }));
 
 let resizeTimer;
-window.addEventListener('resize', () => {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(renderAll, 80);
-});
+window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(renderAll,80);});
 
+/* INIT */
 async function init(){
-  renderMeta();
-  renderAll();
-
-  const cachedUser = (() => {
-    try {
-      const r = stGet(USER_KEY);
-      return r ? JSON.parse(r) : null;
-    } catch {
-      return null;
-    }
-  })();
-
-  if (curToken && cachedUser) {
-    curUser = cachedUser;
-    renderMeta();
-
-    const cc = loadCache();
-    if (Array.isArray(cc.h)) habits = cc.h;
-    if (cc.c && typeof cc.c === 'object') {
-      checks = {};
-      Object.entries(cc.c).forEach(([d,v]) => { checks[+d] = Array.isArray(v) ? v : Array(MAX_H).fill(false); });
-    }
-    if (cc.m && typeof cc.m === 'object') {
-      memos = {};
-      Object.entries(cc.m).forEach(([d,v]) => { memos[+d] = String(v ?? ''); });
-    }
+  renderMeta(); renderAll();
+  const cachedUser=(()=>{try{const r=stGet(USER_KEY);return r?JSON.parse(r):null;}catch{return null;}})();
+  if(curToken&&cachedUser){
+    curUser=cachedUser; renderMeta();
+    const cc=loadCache();
+    if(Array.isArray(cc.h)) habits=cc.h;
+    if(cc.c&&typeof cc.c==='object'){checks={};Object.entries(cc.c).forEach(([d,v])=>{checks[+d]=Array.isArray(v)?v:Array(MAX_H).fill(false);});}
+    if(cc.m&&typeof cc.m==='object'){memos={};Object.entries(cc.m).forEach(([d,v])=>{memos[+d]=String(v??'');});}
     renderAll();
-
-    const ok = await tryAutoLogin();
-    if (!ok) {
-      clearAuth();
-      renderMeta();
-      renderAll();
-      setStatus('로그인이 만료되었습니다.', true);
-      return;
-    }
+    const ok=await tryAutoLogin();
+    if(!ok){clearAuth();renderMeta();renderAll();setStatus('로그인이 만료되었습니다.',true);return;}
     await loadAll();
     return;
   }
-
-  const ok = await tryAutoLogin();
-  if (ok) await loadAll();
+  const ok=await tryAutoLogin();
+  if(ok) await loadAll();
 }
-
 init();
 </script>
 </body>
