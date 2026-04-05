@@ -106,7 +106,7 @@
 </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbwwVDuz8QYmQpzWOwGJghRzcuwiQyd765nIXNvvPlGosi3Oq8rpj06z3FDbyNxBMOaq/exec';
+const API = 'https://script.google.com/macros/s/AKfycbyX3B_xanf95Y7U_l0edm76fGbJvbGzyZ4cGyI7xNaDuYGmgTD-utXtJRYc0kEwwfax/exec';
 const POLL_INTERVAL = 5000; // 5초마다 폴링
 
 const tankEl    = document.getElementById('tank');
@@ -241,9 +241,10 @@ class Fish {
     ctx.quadraticCurveTo(tailX+swing*0.5,tailY+ropLen*0.55,tagX,tagY);
     ctx.strokeStyle='rgba(0,0,0,.16)'; ctx.lineWidth=0.85; ctx.setLineDash([2.5,2.5]); ctx.stroke(); ctx.setLineDash([]);
 
-    // 채널 뱃지 색상
-    const isYT = this.sub.channel === 'youtube';
-    const badgeColor = isYT ? '#e8453c' : '#c2185b';
+    // 채널 뱃지
+    const ch = (this.sub.channel || '').toLowerCase();
+    const isYT = ch === 'youtube' || ch === '유튜브';
+    const badgeColor  = isYT ? '#e8453c' : '#c2185b';
     const badgeLetter = isYT ? 'U' : 'I';
 
     // 뱃지 크기
@@ -344,8 +345,10 @@ document.getElementById('winnerOverlay').addEventListener('click', ()=>{
 
 function startFishing(){
   if(isFishing) return;
-  const ytPool=fishList.filter(f=>f.sub.eligible&&f.sub.channel==='youtube');
-  const igPool=fishList.filter(f=>f.sub.eligible&&f.sub.channel==='instagram');
+  const isYT = s => { const c=(s.sub.channel||'').toLowerCase(); return c==='youtube'||c==='유튜브'; };
+  const isIG = s => { const c=(s.sub.channel||'').toLowerCase(); return c==='instagram'||c==='인스타그램'; };
+  const ytPool=fishList.filter(f=>f.sub.eligible && isYT(f));
+  const igPool=fishList.filter(f=>f.sub.eligible && isIG(f));
   winnerQueue=[];
   if(ytPool.length) winnerQueue.push(ytPool[Math.floor(Math.random()*ytPool.length)]);
   if(igPool.length) winnerQueue.push(igPool[Math.floor(Math.random()*igPool.length)]);
