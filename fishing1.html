@@ -12,19 +12,15 @@
 
   body {
     background: #eef2ee;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: flex-start;
-    min-height: 100vh;
-    font-family: 'Gowun Dodum', sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; font-family: 'Gowun Dodum', sans-serif;
     padding: 32px 24px 48px;
   }
 
   .tank-title {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px; font-weight: 300;
-    color: #999; letter-spacing: 0.14em;
-    text-align: center; margin-bottom: 10px;
-    text-transform: uppercase;
+    font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 300;
+    color: #999; letter-spacing: 0.14em; text-align: center;
+    margin-bottom: 10px; text-transform: uppercase;
   }
 
   .tank-wrap { position: relative; width: min(720px, 100%); }
@@ -32,14 +28,12 @@
   .tank {
     position: relative; width: 100%; height: 440px;
     background: linear-gradient(180deg, #cce8f5 0%, #b4d8ee 65%, #8ec4e0 100%);
-    border-radius: 14px;
-    border: 2px solid rgba(255,255,255,0.55);
+    border-radius: 14px; border: 2px solid rgba(255,255,255,0.55);
     box-shadow: inset 0 0 50px rgba(255,255,255,0.18), inset 3px 3px 0 rgba(255,255,255,0.38), 0 10px 40px rgba(80,140,190,0.2);
     overflow: hidden;
   }
   .tank::before {
-    content: ''; position: absolute;
-    top: 0; left: 10px; width: 22px; height: 100%;
+    content: ''; position: absolute; top: 0; left: 10px; width: 22px; height: 100%;
     background: linear-gradient(90deg, rgba(255,255,255,0.2), transparent);
     border-radius: 8px; pointer-events: none; z-index: 10;
   }
@@ -66,142 +60,91 @@
     pointer-events: none; z-index: 4; animation: riseUp linear forwards;
   }
   @keyframes riseUp {
-    0%   { opacity: 0.7; transform: translateY(0) translateX(0px); }
-    50%  { transform: translateY(-200px) translateX(5px); }
-    100% { opacity: 0; transform: translateY(-400px) translateX(-3px); }
+    0%   { opacity:.7; transform:translateY(0) translateX(0); }
+    50%  { transform:translateY(-200px) translateX(5px); }
+    100% { opacity:0; transform:translateY(-400px) translateX(-3px); }
   }
 
-  #fishCanvas { position: absolute; top:0; left:0; width:100%; height:100%; z-index:3; }
-  #rodCanvas  { position: absolute; top:0; left:0; width:100%; height:100%; z-index:9; pointer-events:none; opacity:0; transition:opacity 0.35s; }
-  #rodCanvas.visible { opacity: 1; }
+  #fishCanvas { position:absolute; top:0; left:0; width:100%; height:100%; z-index:3; }
+  #rodCanvas  { position:absolute; top:0; left:0; width:100%; height:100%; z-index:9; pointer-events:none; opacity:0; transition:opacity .35s; }
+  #rodCanvas.visible { opacity:1; }
 
-  .bottom-ui {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-top: 14px; padding: 0 4px;
-  }
-  .legend { display: flex; gap: 14px; font-family: 'DM Mono', monospace; font-size: 11px; color: #777; }
-  .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .bottom-ui { display:flex; align-items:center; justify-content:space-between; margin-top:14px; padding:0 4px; }
+  .legend { display:flex; gap:14px; font-family:'DM Mono',monospace; font-size:11px; color:#777; }
+  .legend-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; vertical-align:middle; }
 
   .fish-btn {
-    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.08em;
-    color: #555; background: white; border: 0.5px solid rgba(0,0,0,0.15);
-    border-radius: 20px; padding: 7px 18px; cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
+    font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.08em;
+    color:#555; background:white; border:.5px solid rgba(0,0,0,.15);
+    border-radius:20px; padding:7px 18px; cursor:pointer; transition:background .15s,transform .1s;
   }
-  .fish-btn:hover  { background: #f5f5f5; }
-  .fish-btn:active { transform: scale(0.97); }
-  .fish-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+  .fish-btn:hover  { background:#f5f5f5; }
+  .fish-btn:active { transform:scale(.97); }
+  .fish-btn:disabled { opacity:.4; cursor:default; transform:none; }
 
   /* 당첨 오버레이 */
   .winner-overlay {
-    position: absolute; inset: 0;
-    background: rgba(0,0,0,0.18);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 20; pointer-events: none; opacity: 0;
-    transition: opacity 0.4s; border-radius: 12px;
+    position:absolute; inset:0; background:rgba(0,0,0,.18);
+    display:flex; align-items:center; justify-content:center;
+    z-index:20; pointer-events:none; opacity:0; transition:opacity .4s; border-radius:12px;
   }
-  .winner-overlay.show { opacity: 1; pointer-events: auto; }
-  .winner-card {
-    background: white; border-radius: 14px;
-    border: 0.5px solid rgba(0,0,0,0.08);
-    padding: 30px 40px; text-align: center; cursor: pointer;
-  }
-  .winner-label  { font-family:'DM Mono',monospace; font-size:10px; color:#bbb; letter-spacing:0.14em; text-transform:uppercase; margin-bottom:12px; }
-  .winner-name   { font-size: 26px; font-weight: 400; color: #1a1a1a; margin-bottom: 4px; }
-  .winner-handle { font-family:'DM Mono',monospace; font-size:12px; color:#aaa; margin-bottom:10px; }
+  .winner-overlay.show { opacity:1; pointer-events:auto; }
+  .winner-card { background:white; border-radius:14px; border:.5px solid rgba(0,0,0,.08); padding:30px 40px; text-align:center; cursor:pointer; }
+  .winner-label    { font-family:'DM Mono',monospace; font-size:10px; color:#bbb; letter-spacing:.14em; text-transform:uppercase; margin-bottom:12px; }
+  .winner-name     { font-size:26px; font-weight:400; color:#1a1a1a; margin-bottom:4px; }
+  .winner-handle   { font-family:'DM Mono',monospace; font-size:12px; color:#aaa; margin-bottom:10px; }
   .winner-template { font-family:'DM Mono',monospace; font-size:11px; color:#7b3fa0; background:#f3e8ff; border-radius:6px; padding:4px 12px; display:inline-block; margin-bottom:18px; }
-  .winner-close  { font-family:'DM Mono',monospace; font-size:10px; color:#ccc; letter-spacing:0.1em; }
+  .winner-close    { font-family:'DM Mono',monospace; font-size:10px; color:#ccc; letter-spacing:.1em; }
 
-  /* ── 관리자 패널 ──────────────────────────────────────── */
-  .admin-wrap {
-    width: min(720px, 100%);
-    margin-top: 32px;
-  }
+  /* ── 관리자 패널 ── */
+  .admin-wrap { width:min(720px,100%); margin-top:28px; }
 
-  .admin-lock {
-    display: flex; gap: 8px; align-items: center;
-    margin-bottom: 20px;
-  }
-  .admin-lock input {
-    font-family: 'DM Mono', monospace; font-size: 12px;
-    border: 0.5px solid rgba(0,0,0,0.15); border-radius: 8px;
-    padding: 7px 12px; background: white; outline: none;
-    width: 160px; letter-spacing: 0.08em;
-  }
-  .admin-lock button {
-    font-family: 'DM Mono', monospace; font-size: 11px;
-    color: #555; background: white; border: 0.5px solid rgba(0,0,0,0.15);
-    border-radius: 8px; padding: 7px 14px; cursor: pointer;
-  }
-  .admin-lock button:hover { background: #f5f5f5; }
-
-  .admin-panel { display: none; }
-  .admin-panel.open { display: block; }
-
-  .admin-section-title {
-    font-family: 'DM Mono', monospace; font-size: 10px;
-    color: #aaa; letter-spacing: 0.14em; text-transform: uppercase;
-    margin-bottom: 12px;
+  .section-title {
+    font-family:'DM Mono',monospace; font-size:10px; color:#aaa;
+    letter-spacing:.14em; text-transform:uppercase; margin-bottom:12px;
   }
 
   /* 등록 폼 */
   .add-form {
-    background: white; border: 0.5px solid rgba(0,0,0,0.1);
-    border-radius: 12px; padding: 20px 24px;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-    margin-bottom: 24px;
+    background:white; border:.5px solid rgba(0,0,0,.1); border-radius:12px;
+    padding:20px 24px; display:grid; grid-template-columns:1fr 1fr; gap:10px;
+    margin-bottom:24px;
   }
-  .add-form input, .add-form select {
-    font-family: 'DM Mono', monospace; font-size: 12px;
-    border: 0.5px solid rgba(0,0,0,0.15); border-radius: 8px;
-    padding: 8px 12px; background: white; outline: none;
-    width: 100%;
+  .add-form input,
+  .add-form select {
+    font-family:'DM Mono',monospace; font-size:12px;
+    border:.5px solid rgba(0,0,0,.15); border-radius:8px;
+    padding:8px 12px; background:white; outline:none; width:100%;
+    color:#333;
   }
-  .add-form input:focus, .add-form select:focus {
-    border-color: rgba(0,0,0,0.3);
-  }
-  .add-form .full { grid-column: 1 / -1; }
+  .add-form input:focus,
+  .add-form select:focus { border-color:rgba(0,0,0,.3); }
+  .add-form .full { grid-column:1/-1; }
   .add-btn {
-    grid-column: 1 / -1;
-    font-family: 'DM Mono', monospace; font-size: 11px;
-    color: white; background: #333; border: none;
-    border-radius: 8px; padding: 9px; cursor: pointer;
-    transition: background 0.15s;
+    grid-column:1/-1; font-family:'DM Mono',monospace; font-size:11px;
+    color:white; background:#333; border:none; border-radius:8px;
+    padding:9px; cursor:pointer; transition:background .15s;
   }
-  .add-btn:hover { background: #111; }
-  .add-msg { grid-column:1/-1; font-family:'DM Mono',monospace; font-size:11px; color:#27ae60; min-height:16px; }
+  .add-btn:hover { background:#111; }
+  .add-msg { grid-column:1/-1; font-family:'DM Mono',monospace; font-size:11px; min-height:16px; }
 
   /* 구독자 목록 */
-  .sub-list {
-    background: white; border: 0.5px solid rgba(0,0,0,0.1);
-    border-radius: 12px; overflow: hidden;
-  }
+  .sub-list { background:white; border:.5px solid rgba(0,0,0,.1); border-radius:12px; overflow:hidden; }
   .sub-row {
-    display: grid;
-    grid-template-columns: 32px 1fr 90px 120px 80px 24px;
-    align-items: center; gap: 8px;
-    padding: 10px 16px;
-    border-bottom: 0.5px solid rgba(0,0,0,0.06);
-    font-family: 'DM Mono', monospace; font-size: 11px; color: #444;
+    display:grid; grid-template-columns:32px 1fr 100px 130px 70px 24px;
+    align-items:center; gap:8px; padding:10px 16px;
+    border-bottom:.5px solid rgba(0,0,0,.06);
+    font-family:'DM Mono',monospace; font-size:11px; color:#444;
   }
-  .sub-row:last-child { border-bottom: none; }
-  .sub-row.header { color: #aaa; font-size: 10px; background: #fafafa; padding: 8px 16px; }
-  .sub-row .channel-badge {
-    font-size: 10px; padding: 2px 7px; border-radius: 4px;
-    display: inline-block; text-align: center;
-  }
-  .sub-row .yt  { background: #fde8e7; color: #c0392b; }
-  .sub-row .ig  { background: #f0e6f8; color: #6c3483; }
-  .sub-row .eligible-dot {
-    width: 8px; height: 8px; border-radius: 50%; display: inline-block;
-  }
-  .sub-row .del-btn {
-    background: none; border: none; cursor: pointer;
-    color: #ddd; font-size: 14px; line-height: 1;
-    transition: color 0.15s;
-  }
-  .sub-row .del-btn:hover { color: #e74c3c; }
-  .sub-row .ineligible { opacity: 0.4; }
+  .sub-row:last-child { border-bottom:none; }
+  .sub-row.header { color:#aaa; font-size:10px; background:#fafafa; padding:8px 16px; }
+  .ch-badge { font-size:10px; padding:2px 7px; border-radius:4px; display:inline-block; }
+  .ch-yt  { background:#fde8e7; color:#c0392b; }
+  .ch-ig  { background:#f0e6f8; color:#6c3483; }
+  .eligible-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:4px; }
+  .del-btn { background:none; border:none; cursor:pointer; color:#ddd; font-size:14px; transition:color .15s; }
+  .del-btn:hover { color:#e74c3c; }
+  .row-faded { opacity:.4; }
 </style>
 </head>
 <body>
@@ -256,46 +199,36 @@
   </div>
 </div>
 
-<!-- 관리자 패널 -->
+<!-- 구독자 관리 -->
 <div class="admin-wrap">
-  <div class="admin-lock">
-    <input type="password" id="adminKeyInput" placeholder="관리자 비밀번호" />
-    <button onclick="unlockAdmin()">잠금 해제</button>
+  <p class="section-title">구독자 등록</p>
+  <div class="add-form">
+    <input  id="f-nickname" placeholder="닉네임" />
+    <select id="f-channel">
+      <option value="">채널 선택</option>
+      <option value="youtube">YouTube</option>
+      <option value="instagram">Instagram</option>
+    </select>
+    <input  id="f-handle"   placeholder="@handle" />
+    <select id="f-template">
+      <option value="">템플릿 선택</option>
+    </select>
+    <button class="add-btn" onclick="addSubscriber()">+ 등록</button>
+    <div class="add-msg" id="addMsg"></div>
   </div>
 
-  <div class="admin-panel" id="adminPanel">
-
-    <p class="admin-section-title">구독자 등록</p>
-    <div class="add-form">
-      <input id="f-nickname" placeholder="닉네임" />
-      <select id="f-channel">
-        <option value="">채널 선택</option>
-        <option value="youtube">YouTube</option>
-        <option value="instagram">Instagram</option>
-      </select>
-      <input id="f-handle" placeholder="@handle" />
-      <input id="f-template" placeholder="제공할 템플릿 이름" />
-      <button class="add-btn" onclick="addSubscriber()">+ 등록</button>
-      <div class="add-msg" id="addMsg"></div>
+  <p class="section-title">구독자 목록</p>
+  <div class="sub-list" id="subList">
+    <div class="sub-row header">
+      <span>#</span><span>닉네임</span><span>채널</span><span>handle</span><span>상태</span><span></span>
     </div>
-
-    <p class="admin-section-title">구독자 목록</p>
-    <div class="sub-list" id="subList">
-      <div class="sub-row header">
-        <span>#</span><span>닉네임</span><span>채널</span><span>handle</span><span>상태</span><span></span>
-      </div>
-    </div>
-
   </div>
 </div>
 
 <script>
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxIdfzaizUL88_Cu_6S5KoHoiEadfjsaRLrnRJEFBOQzkcxv9BrYt8RdPUaQ4EeQqjv/exec';
+const URL = 'https://script.google.com/macros/s/AKfycbzruH4yp7urj0_g4TBt4Siese9Jxngl6Ngqo1BXCsPhj5cY_pIQKWjg_We4-lz8r0CT/exec';
 
-let ADMIN_KEY = '';
-let fishList  = [];
-let isFishing = false;
-let allSubs   = [];
+let fishList = [], allSubs = [];
 
 const tankEl    = document.getElementById('tank');
 const canvas    = document.getElementById('fishCanvas');
@@ -324,69 +257,59 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
 // ── Fish 클래스 ──────────────────────────────────────────
 class Fish {
   constructor(sub) {
-    this.sub       = sub;
-    this.size      = 42 + Math.random() * 22;
-    this.isYT      = sub.channel === 'youtube';
-    this.tailPhase = Math.random() * Math.PI * 2;
-    this.swayPhase = Math.random() * Math.PI * 2;
-    this.tagPhase  = Math.random() * Math.PI * 2;
+    this.sub = sub; this.size = 42 + Math.random()*22; this.isYT = sub.channel==='youtube';
+    this.tailPhase=Math.random()*Math.PI*2; this.swayPhase=Math.random()*Math.PI*2; this.tagPhase=Math.random()*Math.PI*2;
     this.genColors(); this.place();
   }
   genColors() {
     if (this.isYT) {
-      const h = 2 + Math.floor(Math.random()*10);
-      this.bodyCol = `hsl(${h},80%,58%)`; this.finCol = `hsl(${h},80%,36%)`; this.bellyCol = `hsl(${h},55%,78%)`;
+      const h=2+Math.floor(Math.random()*10);
+      this.bodyCol=`hsl(${h},80%,58%)`; this.finCol=`hsl(${h},80%,36%)`; this.bellyCol=`hsl(${h},55%,78%)`;
     } else {
-      const h = 265 + Math.floor(Math.random()*26);
-      this.bodyCol = `hsl(${h},54%,55%)`; this.finCol = `hsl(${h},54%,34%)`; this.bellyCol = `hsl(${h},38%,75%)`;
+      const h=265+Math.floor(Math.random()*26);
+      this.bodyCol=`hsl(${h},54%,55%)`; this.finCol=`hsl(${h},54%,34%)`; this.bellyCol=`hsl(${h},38%,75%)`;
     }
   }
   place() {
-    const minY = TOP_H+14, maxY = H-SAND_H-this.size*0.6-30;
-    this.x = 60 + Math.random() * Math.max(10, W-120-this.size);
-    this.y = minY + Math.random() * Math.max(10, maxY-minY);
-    const spd = 0.18 + Math.random()*0.22, ang = (Math.random()-0.5)*0.4, dir = Math.random()>0.5?1:-1;
-    this.vx = dir*spd*Math.cos(ang); this.vy = spd*Math.sin(ang)*0.3;
-    this.facingRight = this.vx > 0;
+    const minY=TOP_H+14, maxY=H-SAND_H-this.size*0.6-30;
+    this.x=60+Math.random()*Math.max(10,W-120-this.size);
+    this.y=minY+Math.random()*Math.max(10,maxY-minY);
+    const spd=0.18+Math.random()*0.22, ang=(Math.random()-0.5)*0.4, dir=Math.random()>.5?1:-1;
+    this.vx=dir*spd*Math.cos(ang); this.vy=spd*Math.sin(ang)*0.3;
+    this.facingRight=this.vx>0;
   }
   update(frozen) {
     if (frozen) return;
-    this.tailPhase += 0.13; this.swayPhase += 0.04+Math.random()*0.01; this.tagPhase += 0.025+Math.random()*0.01;
-    this.vx += (Math.random()-0.5)*0.012; this.vy += (Math.random()-0.5)*0.008;
-    const spd = Math.hypot(this.vx,this.vy), maxS=0.45, minS=0.1;
-    if (spd>maxS){this.vx*=maxS/spd;this.vy*=maxS/spd;}
-    if (spd<minS&&spd>0){this.vx*=minS/spd;this.vy*=minS/spd;}
+    this.tailPhase+=0.13; this.swayPhase+=0.04+Math.random()*0.01; this.tagPhase+=0.025+Math.random()*0.01;
+    this.vx+=(Math.random()-0.5)*0.012; this.vy+=(Math.random()-0.5)*0.008;
+    const spd=Math.hypot(this.vx,this.vy);
+    if(spd>0.45){this.vx*=0.45/spd;this.vy*=0.45/spd;}
+    if(spd<0.1&&spd>0){this.vx*=0.1/spd;this.vy*=0.1/spd;}
     const minY=TOP_H+10, maxY=H-SAND_H-this.size*0.6-12, mg=36;
-    if (this.x<mg)              {this.vx= Math.abs(this.vx)+0.15;}
-    if (this.x>W-mg-this.size)  {this.vx=-Math.abs(this.vx)-0.15;}
-    if (this.y<minY){this.vy= Math.abs(this.vy)*0.7; this.y=minY;}
-    if (this.y>maxY){this.vy=-Math.abs(this.vy)*0.7; this.y=maxY;}
-    if (Math.abs(this.vx)>0.12) this.facingRight = this.vx>0;
+    if(this.x<mg)             {this.vx= Math.abs(this.vx)+0.15;}
+    if(this.x>W-mg-this.size) {this.vx=-Math.abs(this.vx)-0.15;}
+    if(this.y<minY){this.vy= Math.abs(this.vy)*0.7; this.y=minY;}
+    if(this.y>maxY){this.vy=-Math.abs(this.vy)*0.7; this.y=maxY;}
+    if(Math.abs(this.vx)>0.12) this.facingRight=this.vx>0;
     this.x+=this.vx; this.y+=this.vy;
   }
   draw(ctx, isHooked) {
     const s=this.size, bh=s*0.55, cx=this.x+s/2, cy=this.y+bh/2;
     ctx.save(); ctx.translate(cx,cy);
-    if (this.facingRight) ctx.scale(-1,1);
+    if(this.facingRight) ctx.scale(-1,1);
     ctx.rotate(Math.sin(this.swayPhase)*0.05);
-    if (isHooked){ctx.shadowColor='rgba(255,200,0,0.75)';ctx.shadowBlur=14;}
-    // 꼬리
+    if(isHooked){ctx.shadowColor='rgba(255,200,0,.75)';ctx.shadowBlur=14;}
     const tw=Math.sin(this.tailPhase)*0.3;
     ctx.save(); ctx.translate(s*0.33,0); ctx.rotate(tw);
     ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(s*0.32,-bh*0.44); ctx.lineTo(s*0.26,0); ctx.lineTo(s*0.32,bh*0.44); ctx.closePath();
     ctx.fillStyle=this.finCol; ctx.globalAlpha=0.9; ctx.fill(); ctx.globalAlpha=1; ctx.restore();
-    // 몸통
     ctx.beginPath(); ctx.ellipse(0,0,s*0.37,bh*0.5,0,0,Math.PI*2); ctx.fillStyle=this.bodyCol; ctx.fill();
-    // 배
     ctx.beginPath(); ctx.ellipse(s*0.05,bh*0.12,s*0.2,bh*0.27,-0.3,0,Math.PI*2);
     ctx.fillStyle=this.bellyCol; ctx.globalAlpha=0.32; ctx.fill(); ctx.globalAlpha=1;
-    // 등지느러미
     ctx.beginPath(); ctx.moveTo(s*0.1,-bh*0.45); ctx.quadraticCurveTo(-s*0.05,-bh*0.72,-s*0.2,-bh*0.45);
     ctx.fillStyle=this.finCol; ctx.globalAlpha=0.58; ctx.fill(); ctx.globalAlpha=1;
-    // 아가미
     ctx.beginPath(); ctx.arc(s*0.14,0,bh*0.36,Math.PI-0.85,Math.PI+0.85);
     ctx.strokeStyle=this.finCol; ctx.lineWidth=1.2; ctx.globalAlpha=0.32; ctx.stroke(); ctx.globalAlpha=1;
-    // 눈
     ctx.beginPath(); ctx.arc(-s*0.27,-bh*0.05,bh*0.14,0,Math.PI*2); ctx.fillStyle='white'; ctx.fill();
     ctx.beginPath(); ctx.arc(-s*0.26,-bh*0.05,bh*0.08,0,Math.PI*2); ctx.fillStyle='#111'; ctx.fill();
     ctx.beginPath(); ctx.arc(-s*0.28,-bh*0.09,bh*0.033,0,Math.PI*2); ctx.fillStyle='white'; ctx.fill();
@@ -394,23 +317,24 @@ class Fish {
     this.drawTag(ctx,cx,cy,s,bh);
   }
   drawTag(ctx,cx,cy,s,bh) {
-    const tailX = this.facingRight ? cx-s*0.61 : cx+s*0.61;
-    const tailY = cy+Math.sin(this.swayPhase)*(bh*0.05);
+    const tailX=this.facingRight?cx-s*0.61:cx+s*0.61;
+    const tailY=cy+Math.sin(this.swayPhase)*(bh*0.05);
     const swing=Math.sin(this.tagPhase)*5, ropLen=22+s*0.08;
     const tagX=tailX+swing, tagY=tailY+ropLen;
     ctx.beginPath(); ctx.moveTo(tailX,tailY);
     ctx.quadraticCurveTo(tailX+swing*0.5,tailY+ropLen*0.55,tagX,tagY);
-    ctx.strokeStyle='rgba(0,0,0,0.18)'; ctx.lineWidth=0.85; ctx.setLineDash([2.5,2.5]); ctx.stroke(); ctx.setLineDash([]);
+    ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=0.85; ctx.setLineDash([2.5,2.5]); ctx.stroke(); ctx.setLineDash([]);
     ctx.font='300 10px "DM Mono",monospace';
     const tw=ctx.measureText(this.sub.nickname).width, padX=7, padY=3, tagW=tw+padX*2, tagH=17, tx=tagX-tagW/2;
-    ctx.roundRect(tx,tagY,tagW,tagH,4); ctx.fillStyle='rgba(255,255,255,0.93)'; ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,0.1)'; ctx.lineWidth=0.5; ctx.stroke();
+    ctx.roundRect(tx,tagY,tagW,tagH,4); ctx.fillStyle='rgba(255,255,255,.93)'; ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,.1)'; ctx.lineWidth=0.5; ctx.stroke();
     ctx.fillStyle='#333'; ctx.fillText(this.sub.nickname,tx+padX,tagY+tagH-padY-1);
   }
 }
 
 // ── 낚싯대 ──────────────────────────────────────────────
 const rod={active:false,lineY:0,phase:'idle',winner:null,timer:0};
+let isFishing=false;
 
 function drawRod(){
   rctx.clearRect(0,0,W,H); if(!rod.active)return;
@@ -419,15 +343,16 @@ function drawRod(){
   rctx.beginPath(); rctx.moveTo(tipX-55,-8); rctx.lineTo(tipX-82,16); rctx.strokeStyle='#5a3e0a'; rctx.lineWidth=9; rctx.stroke();
   rctx.beginPath(); rctx.moveTo(tipX-82,16); rctx.lineTo(tipX,tipY); rctx.strokeStyle='#9a7520'; rctx.lineWidth=4; rctx.stroke();
   rctx.restore();
-  rctx.beginPath(); rctx.moveTo(tipX,tipY); rctx.lineTo(tipX,rod.lineY); rctx.strokeStyle='rgba(0,0,0,0.28)'; rctx.lineWidth=0.9; rctx.stroke();
+  rctx.beginPath(); rctx.moveTo(tipX,tipY); rctx.lineTo(tipX,rod.lineY);
+  rctx.strokeStyle='rgba(0,0,0,.28)'; rctx.lineWidth=0.9; rctx.stroke();
   rctx.beginPath(); rctx.arc(tipX,rod.lineY,4,0,Math.PI*2); rctx.fillStyle='#c0392b'; rctx.fill();
 }
 
 function updateRod(){
   if(!rod.active)return; rod.timer++;
   if(rod.phase==='dropping'){
-    const target=rod.winner.y+rod.winner.size*0.3; rod.lineY+=(target-rod.lineY)*0.045;
-    if(rod.timer>80&&Math.abs(rod.lineY-target)<8){rod.phase='waiting';rod.timer=0;}
+    const t=rod.winner.y+rod.winner.size*0.3; rod.lineY+=(t-rod.lineY)*0.045;
+    if(rod.timer>80&&Math.abs(rod.lineY-t)<8){rod.phase='waiting';rod.timer=0;}
   } else if(rod.phase==='waiting'){
     if(rod.timer>45){rod.phase='pulling';rod.timer=0;}
   } else if(rod.phase==='pulling'){
@@ -436,16 +361,14 @@ function updateRod(){
   }
 }
 
-// ── 당첨 처리 ────────────────────────────────────────────
 async function showWinner(sub) {
   document.getElementById('winnerName').textContent   = sub.nickname;
   document.getElementById('winnerHandle').textContent = sub.handle;
-  document.getElementById('winnerTemplate').textContent = sub.template ? `🎁 ${sub.template}` : '';
+  const tmpl = document.getElementById('winnerTemplate');
+  tmpl.textContent = sub.template ? `🎁 ${sub.template}` : '';
+  tmpl.style.display = sub.template ? 'inline-block' : 'none';
   document.getElementById('winnerOverlay').classList.add('show');
-
-  try {
-    await fetch(`${WEB_APP_URL}?type=catch&winner_id=${sub.id}&key=${encodeURIComponent(ADMIN_KEY)}`);
-  } catch(e) { console.warn('catch 기록 실패:', e); }
+  try { await fetch(`${URL}?type=catch&winner_id=${sub.id}`); } catch(e) {}
 }
 
 document.getElementById('winnerOverlay').addEventListener('click', () => {
@@ -458,7 +381,6 @@ document.getElementById('winnerOverlay').addEventListener('click', () => {
   btn.disabled=true; btn.textContent='이번 주 완료 ✓';
 });
 
-// ── 낚시 시작 ────────────────────────────────────────────
 function startFishing(){
   if(isFishing)return;
   const eligible=fishList.filter(f=>f.sub.eligible);
@@ -471,7 +393,6 @@ function startFishing(){
   rod.winner=eligible[Math.floor(Math.random()*eligible.length)]; rod.timer=0;
 }
 
-// ── 거품 ─────────────────────────────────────────────────
 function spawnBubble(){
   const b=document.createElement('div'); b.className='bubble';
   const sz=3+Math.random()*7, dur=4.5+Math.random()*4;
@@ -479,7 +400,6 @@ function spawnBubble(){
   tankEl.appendChild(b); setTimeout(()=>b.remove(),dur*1000);
 }
 
-// ── 메인 루프 ────────────────────────────────────────────
 function loop(){
   ctx.clearRect(0,0,W,H);
   fishList.forEach(f=>{const frozen=rod.winner===f; f.update(frozen); f.draw(ctx,frozen);});
@@ -487,87 +407,86 @@ function loop(){
   requestAnimationFrame(loop);
 }
 
-// ── 관리자 잠금 해제 ─────────────────────────────────────
-async function unlockAdmin(){
-  const key=document.getElementById('adminKeyInput').value.trim();
-  if(!key){alert('비밀번호를 입력해 주세요.');return;}
-  ADMIN_KEY=key;
-  document.getElementById('adminPanel').classList.add('open');
-  renderSubList();
-}
-
 // ── 구독자 목록 렌더 ─────────────────────────────────────
 function renderSubList(){
   const list=document.getElementById('subList');
   const rows=allSubs.map(s=>{
-    const chBadge=s.channel==='youtube'
-      ?`<span class="channel-badge yt">YouTube</span>`
-      :`<span class="channel-badge ig">Instagram</span>`;
-    const dot=`<span class="eligible-dot" style="background:${s.eligible?'#27ae60':'#ddd'}"></span>`;
-    const cls=s.eligible?'':' ineligible';
-    return `<div class="sub-row${cls}">
+    const badge=s.channel==='youtube'
+      ?`<span class="ch-badge ch-yt">YouTube</span>`
+      :`<span class="ch-badge ch-ig">Instagram</span>`;
+    const dot=`<span class="eligible-dot" style="background:${s.eligible?'#27ae60':'#ccc'}"></span>`;
+    return `<div class="sub-row${s.eligible?'':' row-faded'}">
       <span>${s.id}</span>
       <span>${s.nickname}</span>
-      <span>${chBadge}</span>
+      <span>${badge}</span>
       <span>${s.handle||''}</span>
-      <span>${dot} ${s.eligible?'대기중':'완료'}</span>
-      <button class="del-btn" onclick="deleteSubscriber(${s.id})">×</button>
+      <span>${dot}${s.eligible?'대기중':'완료'}</span>
+      <button class="del-btn" onclick="deleteSub(${s.id})">×</button>
     </div>`;
   }).join('');
-  list.innerHTML=`<div class="sub-row header"><span>#</span><span>닉네임</span><span>채널</span><span>handle</span><span>상태</span><span></span></div>${rows}`;
+  list.innerHTML=`<div class="sub-row header"><span>#</span><span>닉네임</span><span>채널</span><span>handle</span><span>상태</span><span></span></div>${rows||'<div style="padding:16px 20px;font-family:DM Mono,monospace;font-size:11px;color:#bbb;">등록된 구독자가 없어요</div>'}`;
 }
 
 // ── 구독자 추가 ──────────────────────────────────────────
 async function addSubscriber(){
-  const nickname =document.getElementById('f-nickname').value.trim();
-  const channel  =document.getElementById('f-channel').value;
-  const handle   =document.getElementById('f-handle').value.trim();
-  const template =document.getElementById('f-template').value.trim();
-  const msg      =document.getElementById('addMsg');
-
+  const nickname=document.getElementById('f-nickname').value.trim();
+  const channel =document.getElementById('f-channel').value;
+  const handle  =document.getElementById('f-handle').value.trim();
+  const template=document.getElementById('f-template').value;
+  const msg     =document.getElementById('addMsg');
   if(!nickname||!channel){msg.textContent='닉네임과 채널은 필수예요.'; msg.style.color='#e74c3c'; return;}
-
   msg.textContent='등록 중...'; msg.style.color='#aaa';
-  try {
-    const res=await fetch(`${WEB_APP_URL}?type=add&key=${encodeURIComponent(ADMIN_KEY)}&nickname=${encodeURIComponent(nickname)}&channel=${encodeURIComponent(channel)}&handle=${encodeURIComponent(handle)}&template=${encodeURIComponent(template)}`);
+  try{
+    const res=await fetch(`${URL}?type=add&nickname=${encodeURIComponent(nickname)}&channel=${encodeURIComponent(channel)}&handle=${encodeURIComponent(handle)}&template=${encodeURIComponent(template)}`);
     const data=await res.json();
     if(data.ok){
-      msg.textContent=`✓ 등록 완료 (id: ${data.id})`; msg.style.color='#27ae60';
+      msg.textContent=`✓ 등록 완료`; msg.style.color='#27ae60';
       document.getElementById('f-nickname').value='';
       document.getElementById('f-channel').value='';
       document.getElementById('f-handle').value='';
       document.getElementById('f-template').value='';
-      await loadSubs(); // 목록 새로고침
-    } else {
-      msg.textContent='등록 실패: '+JSON.stringify(data); msg.style.color='#e74c3c';
-    }
-  } catch(e){ msg.textContent='오류: '+e.message; msg.style.color='#e74c3c'; }
+      await loadSubs();
+    } else { msg.textContent='오류: '+JSON.stringify(data); msg.style.color='#e74c3c'; }
+  }catch(e){msg.textContent='오류: '+e.message; msg.style.color='#e74c3c';}
 }
 
 // ── 구독자 삭제 ──────────────────────────────────────────
-async function deleteSubscriber(id){
-  if(!confirm(`id ${id} 구독자를 삭제할까요?`))return;
+async function deleteSub(id){
+  if(!confirm(`구독자를 삭제할까요?`))return;
   try{
-    const res=await fetch(`${WEB_APP_URL}?type=delete&key=${encodeURIComponent(ADMIN_KEY)}&id=${id}`);
+    const res=await fetch(`${URL}?type=delete&id=${id}`);
     const data=await res.json();
-    if(data.ok){await loadSubs();}
-    else alert('삭제 실패: '+JSON.stringify(data));
+    if(data.ok) await loadSubs();
+    else alert('삭제 실패');
   }catch(e){alert('오류: '+e.message);}
 }
 
 // ── 데이터 로드 ──────────────────────────────────────────
 async function loadSubs(){
   try{
-    const res=await fetch(`${WEB_APP_URL}?type=subscribers`);
+    const res=await fetch(`${URL}?type=subscribers`);
     allSubs=await res.json();
     fishList=allSubs.map(s=>new Fish(s));
-    if(document.getElementById('adminPanel').classList.contains('open')) renderSubList();
+    renderSubList();
   }catch(e){console.warn('구독자 로드 실패:',e);}
+}
+
+async function loadMeta(){
+  try{
+    const res=await fetch(`${URL}?type=meta`);
+    const data=await res.json();
+    const sel=document.getElementById('f-template');
+    sel.innerHTML='<option value="">템플릿 선택</option>';
+    (data.templates||[]).forEach(t=>{
+      const opt=document.createElement('option');
+      opt.value=t; opt.textContent=t; sel.appendChild(opt);
+    });
+  }catch(e){console.warn('meta 로드 실패:',e);}
 }
 
 async function init(){
   resize(); window.addEventListener('resize',resize);
-  await loadSubs();
+  await Promise.all([loadSubs(), loadMeta()]);
   loop();
   setInterval(spawnBubble,2200);
 }
