@@ -106,7 +106,7 @@
 </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbwPjmU8xJs014Cv7KvyIwSB4nYOYbBoV2rpYy_i9XrUGnLFXV9LeunVA5AR1EAXqcLG/exec';
+const API = 'https://script.google.com/macros/s/AKfycbza5OQd9a73v1mJbhENE8Lrp5tQsZaPaWm7SSWP8j4sb__8nOlgCb6TmVHL76Nf68q_/exec';
 const POLL_INTERVAL = 5000; // 5초마다 폴링
 
 const tankEl    = document.getElementById('tank');
@@ -341,7 +341,7 @@ document.getElementById('winnerOverlay').addEventListener('click', ()=>{
     fishList=[];
     isFishing=false;
     const btn=document.getElementById('fishBtn');
-    btn.disabled=true; btn.textContent='이번 주 완료 ✓';
+    btn.disabled=false; btn.textContent='🎣 낚시하기';
   }
 });
 
