@@ -8,111 +8,62 @@
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Gowun+Dodum&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  :root {
-    --yt: #e8453c;
-    --ig: #7b3fa0;
-    --sand: #ddd4b8;
-    --sand-dark: #c4b898;
-  }
+  :root { --yt:#e8453c; --ig:#7b3fa0; --sand:#ddd4b8; --sand-dark:#c4b898; }
 
   body {
     background: #eef2ee;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start;
     min-height: 100vh;
     font-family: 'Gowun Dodum', sans-serif;
-    padding: 24px;
+    padding: 32px 24px 48px;
   }
 
   .tank-title {
     font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    font-weight: 300;
-    color: #999;
-    letter-spacing: 0.14em;
-    text-align: center;
-    margin-bottom: 10px;
+    font-size: 11px; font-weight: 300;
+    color: #999; letter-spacing: 0.14em;
+    text-align: center; margin-bottom: 10px;
     text-transform: uppercase;
   }
 
-  .tank-wrap {
-    position: relative;
-    width: min(720px, 100%);
-  }
+  .tank-wrap { position: relative; width: min(720px, 100%); }
 
   .tank {
-    position: relative;
-    width: 100%;
-    height: 440px;
+    position: relative; width: 100%; height: 440px;
     background: linear-gradient(180deg, #cce8f5 0%, #b4d8ee 65%, #8ec4e0 100%);
     border-radius: 14px;
     border: 2px solid rgba(255,255,255,0.55);
-    box-shadow:
-      inset 0 0 50px rgba(255,255,255,0.18),
-      inset 3px 3px 0 rgba(255,255,255,0.38),
-      0 10px 40px rgba(80,140,190,0.2);
+    box-shadow: inset 0 0 50px rgba(255,255,255,0.18), inset 3px 3px 0 rgba(255,255,255,0.38), 0 10px 40px rgba(80,140,190,0.2);
     overflow: hidden;
   }
-
   .tank::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 10px;
-    width: 22px; height: 100%;
+    content: ''; position: absolute;
+    top: 0; left: 10px; width: 22px; height: 100%;
     background: linear-gradient(90deg, rgba(255,255,255,0.2), transparent);
-    border-radius: 8px;
-    pointer-events: none;
-    z-index: 10;
+    border-radius: 8px; pointer-events: none; z-index: 10;
   }
-
   .surface {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 16px;
-    background: rgba(255,255,255,0.22);
-    border-radius: 14px 14px 0 0;
-    pointer-events: none;
-    z-index: 8;
+    position: absolute; top: 0; left: 0; right: 0; height: 16px;
+    background: rgba(255,255,255,0.22); border-radius: 14px 14px 0 0;
+    pointer-events: none; z-index: 8;
   }
-
   .sand {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 50px;
+    position: absolute; bottom: 0; left: 0; right: 0; height: 50px;
     background: linear-gradient(180deg, var(--sand) 0%, var(--sand-dark) 100%);
-    border-radius: 0 0 12px 12px;
-    pointer-events: none;
-    z-index: 8;
+    border-radius: 0 0 12px 12px; pointer-events: none; z-index: 8;
   }
   .sand::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 6px;
-    background:
-      radial-gradient(ellipse 50% 100% at 25% 50%, rgba(255,255,255,0.25), transparent),
-      radial-gradient(ellipse 40% 100% at 72% 50%, rgba(255,255,255,0.18), transparent);
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+    background: radial-gradient(ellipse 50% 100% at 25% 50%, rgba(255,255,255,0.25), transparent),
+                radial-gradient(ellipse 40% 100% at 72% 50%, rgba(255,255,255,0.18), transparent);
   }
-
-  .plants {
-    position: absolute;
-    bottom: 42px;
-    left: 0; right: 0;
-    pointer-events: none;
-    z-index: 7;
-  }
+  .plants { position: absolute; bottom: 42px; left: 0; right: 0; pointer-events: none; z-index: 7; }
 
   .bubble {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.42);
-    border: 1px solid rgba(255,255,255,0.6);
-    pointer-events: none;
-    z-index: 4;
-    animation: riseUp linear forwards;
+    position: absolute; border-radius: 50%;
+    background: rgba(255,255,255,0.42); border: 1px solid rgba(255,255,255,0.6);
+    pointer-events: none; z-index: 4; animation: riseUp linear forwards;
   }
   @keyframes riseUp {
     0%   { opacity: 0.7; transform: translateY(0) translateX(0px); }
@@ -120,113 +71,137 @@
     100% { opacity: 0; transform: translateY(-400px) translateX(-3px); }
   }
 
-  #fishCanvas {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 3;
-  }
-
-  #rodCanvas {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 9;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.35s;
-  }
+  #fishCanvas { position: absolute; top:0; left:0; width:100%; height:100%; z-index:3; }
+  #rodCanvas  { position: absolute; top:0; left:0; width:100%; height:100%; z-index:9; pointer-events:none; opacity:0; transition:opacity 0.35s; }
   #rodCanvas.visible { opacity: 1; }
 
   .bottom-ui {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 14px;
-    padding: 0 4px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 14px; padding: 0 4px;
   }
-
-  .legend {
-    display: flex;
-    gap: 14px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: #777;
-  }
-  .legend-dot {
-    display: inline-block;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    margin-right: 5px;
-    vertical-align: middle;
-  }
+  .legend { display: flex; gap: 14px; font-family: 'DM Mono', monospace; font-size: 11px; color: #777; }
+  .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
 
   .fish-btn {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    font-weight: 400;
-    letter-spacing: 0.08em;
-    color: #555;
-    background: white;
-    border: 0.5px solid rgba(0,0,0,0.15);
-    border-radius: 20px;
-    padding: 7px 18px;
-    cursor: pointer;
+    font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.08em;
+    color: #555; background: white; border: 0.5px solid rgba(0,0,0,0.15);
+    border-radius: 20px; padding: 7px 18px; cursor: pointer;
     transition: background 0.15s, transform 0.1s;
   }
   .fish-btn:hover  { background: #f5f5f5; }
   .fish-btn:active { transform: scale(0.97); }
   .fish-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
 
+  /* 당첨 오버레이 */
   .winner-overlay {
-    position: absolute;
-    inset: 0;
+    position: absolute; inset: 0;
     background: rgba(0,0,0,0.18);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 20;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.4s;
-    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 20; pointer-events: none; opacity: 0;
+    transition: opacity 0.4s; border-radius: 12px;
   }
   .winner-overlay.show { opacity: 1; pointer-events: auto; }
-
   .winner-card {
-    background: white;
-    border-radius: 14px;
+    background: white; border-radius: 14px;
     border: 0.5px solid rgba(0,0,0,0.08);
-    padding: 30px 40px;
-    text-align: center;
-    cursor: pointer;
+    padding: 30px 40px; text-align: center; cursor: pointer;
   }
-  .winner-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: #bbb;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    margin-bottom: 12px;
+  .winner-label  { font-family:'DM Mono',monospace; font-size:10px; color:#bbb; letter-spacing:0.14em; text-transform:uppercase; margin-bottom:12px; }
+  .winner-name   { font-size: 26px; font-weight: 400; color: #1a1a1a; margin-bottom: 4px; }
+  .winner-handle { font-family:'DM Mono',monospace; font-size:12px; color:#aaa; margin-bottom:10px; }
+  .winner-template { font-family:'DM Mono',monospace; font-size:11px; color:#7b3fa0; background:#f3e8ff; border-radius:6px; padding:4px 12px; display:inline-block; margin-bottom:18px; }
+  .winner-close  { font-family:'DM Mono',monospace; font-size:10px; color:#ccc; letter-spacing:0.1em; }
+
+  /* ── 관리자 패널 ──────────────────────────────────────── */
+  .admin-wrap {
+    width: min(720px, 100%);
+    margin-top: 32px;
   }
-  .winner-name {
-    font-size: 26px;
-    font-weight: 400;
-    color: #1a1a1a;
-    margin-bottom: 5px;
-  }
-  .winner-handle {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: #aaa;
+
+  .admin-lock {
+    display: flex; gap: 8px; align-items: center;
     margin-bottom: 20px;
   }
-  .winner-close {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: #ccc;
-    letter-spacing: 0.1em;
+  .admin-lock input {
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    border: 0.5px solid rgba(0,0,0,0.15); border-radius: 8px;
+    padding: 7px 12px; background: white; outline: none;
+    width: 160px; letter-spacing: 0.08em;
   }
+  .admin-lock button {
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    color: #555; background: white; border: 0.5px solid rgba(0,0,0,0.15);
+    border-radius: 8px; padding: 7px 14px; cursor: pointer;
+  }
+  .admin-lock button:hover { background: #f5f5f5; }
+
+  .admin-panel { display: none; }
+  .admin-panel.open { display: block; }
+
+  .admin-section-title {
+    font-family: 'DM Mono', monospace; font-size: 10px;
+    color: #aaa; letter-spacing: 0.14em; text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  /* 등록 폼 */
+  .add-form {
+    background: white; border: 0.5px solid rgba(0,0,0,0.1);
+    border-radius: 12px; padding: 20px 24px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    margin-bottom: 24px;
+  }
+  .add-form input, .add-form select {
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    border: 0.5px solid rgba(0,0,0,0.15); border-radius: 8px;
+    padding: 8px 12px; background: white; outline: none;
+    width: 100%;
+  }
+  .add-form input:focus, .add-form select:focus {
+    border-color: rgba(0,0,0,0.3);
+  }
+  .add-form .full { grid-column: 1 / -1; }
+  .add-btn {
+    grid-column: 1 / -1;
+    font-family: 'DM Mono', monospace; font-size: 11px;
+    color: white; background: #333; border: none;
+    border-radius: 8px; padding: 9px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .add-btn:hover { background: #111; }
+  .add-msg { grid-column:1/-1; font-family:'DM Mono',monospace; font-size:11px; color:#27ae60; min-height:16px; }
+
+  /* 구독자 목록 */
+  .sub-list {
+    background: white; border: 0.5px solid rgba(0,0,0,0.1);
+    border-radius: 12px; overflow: hidden;
+  }
+  .sub-row {
+    display: grid;
+    grid-template-columns: 32px 1fr 90px 120px 80px 24px;
+    align-items: center; gap: 8px;
+    padding: 10px 16px;
+    border-bottom: 0.5px solid rgba(0,0,0,0.06);
+    font-family: 'DM Mono', monospace; font-size: 11px; color: #444;
+  }
+  .sub-row:last-child { border-bottom: none; }
+  .sub-row.header { color: #aaa; font-size: 10px; background: #fafafa; padding: 8px 16px; }
+  .sub-row .channel-badge {
+    font-size: 10px; padding: 2px 7px; border-radius: 4px;
+    display: inline-block; text-align: center;
+  }
+  .sub-row .yt  { background: #fde8e7; color: #c0392b; }
+  .sub-row .ig  { background: #f0e6f8; color: #6c3483; }
+  .sub-row .eligible-dot {
+    width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+  }
+  .sub-row .del-btn {
+    background: none; border: none; cursor: pointer;
+    color: #ddd; font-size: 14px; line-height: 1;
+    transition: color 0.15s;
+  }
+  .sub-row .del-btn:hover { color: #e74c3c; }
+  .sub-row .ineligible { opacity: 0.4; }
 </style>
 </head>
 <body>
@@ -259,7 +234,6 @@
         <ellipse cx="642" cy="30" rx="6" ry="3.5" fill="#78b880" transform="rotate(-8,642,30)"/>
       </svg>
     </div>
-
     <div class="sand"></div>
 
     <div class="winner-overlay" id="winnerOverlay">
@@ -267,6 +241,7 @@
         <div class="winner-label">이번 주 당첨자</div>
         <div class="winner-name" id="winnerName"></div>
         <div class="winner-handle" id="winnerHandle"></div>
+        <div class="winner-template" id="winnerTemplate"></div>
         <div class="winner-close">click to close</div>
       </div>
     </div>
@@ -281,275 +256,183 @@
   </div>
 </div>
 
+<!-- 관리자 패널 -->
+<div class="admin-wrap">
+  <div class="admin-lock">
+    <input type="password" id="adminKeyInput" placeholder="관리자 비밀번호" />
+    <button onclick="unlockAdmin()">잠금 해제</button>
+  </div>
+
+  <div class="admin-panel" id="adminPanel">
+
+    <p class="admin-section-title">구독자 등록</p>
+    <div class="add-form">
+      <input id="f-nickname" placeholder="닉네임" />
+      <select id="f-channel">
+        <option value="">채널 선택</option>
+        <option value="youtube">YouTube</option>
+        <option value="instagram">Instagram</option>
+      </select>
+      <input id="f-handle" placeholder="@handle" />
+      <input id="f-template" placeholder="제공할 템플릿 이름" />
+      <button class="add-btn" onclick="addSubscriber()">+ 등록</button>
+      <div class="add-msg" id="addMsg"></div>
+    </div>
+
+    <p class="admin-section-title">구독자 목록</p>
+    <div class="sub-list" id="subList">
+      <div class="sub-row header">
+        <span>#</span><span>닉네임</span><span>채널</span><span>handle</span><span>상태</span><span></span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <script>
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby4dx_8pLUJWmYGBKaN4LDK-zPWtdVzsXdaZDIuscZUHPeymDoFATnOPFxorBL6pap9/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxIdfzaizUL88_Cu_6S5KoHoiEadfjsaRLrnRJEFBOQzkcxv9BrYt8RdPUaQ4EeQqjv/exec';
+
+let ADMIN_KEY = '';
+let fishList  = [];
+let isFishing = false;
+let allSubs   = [];
 
 const tankEl    = document.getElementById('tank');
 const canvas    = document.getElementById('fishCanvas');
 const rodCanvas = document.getElementById('rodCanvas');
 const ctx       = canvas.getContext('2d');
 const rctx      = rodCanvas.getContext('2d');
-
 const SAND_H = 50, TOP_H = 16;
 let W, H;
 
 function resize() {
-  W = tankEl.offsetWidth;
-  H = tankEl.offsetHeight;
-  canvas.width    = W; canvas.height    = H;
+  W = tankEl.offsetWidth; H = tankEl.offsetHeight;
+  canvas.width = W; canvas.height = H;
   rodCanvas.width = W; rodCanvas.height = H;
 }
 
 if (!CanvasRenderingContext2D.prototype.roundRect) {
   CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r){
     this.beginPath();
-    this.moveTo(x+r,y); this.lineTo(x+w-r,y);
-    this.quadraticCurveTo(x+w,y,x+w,y+r);
-    this.lineTo(x+w,y+h-r);
-    this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-    this.lineTo(x+r,y+h);
-    this.quadraticCurveTo(x,y+h,x,y+h-r);
-    this.lineTo(x,y+r);
-    this.quadraticCurveTo(x,y,x+r,y);
-    this.closePath();
+    this.moveTo(x+r,y); this.lineTo(x+w-r,y); this.quadraticCurveTo(x+w,y,x+w,y+r);
+    this.lineTo(x+w,y+h-r); this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+    this.lineTo(x+r,y+h); this.quadraticCurveTo(x,y+h,x,y+h-r);
+    this.lineTo(x,y+r); this.quadraticCurveTo(x,y,x+r,y); this.closePath();
   };
 }
 
 // ── Fish 클래스 ──────────────────────────────────────────
 class Fish {
   constructor(sub) {
-    this.sub        = sub;
-    this.size       = 42 + Math.random() * 22;
-    this.isYT       = sub.channel === 'youtube';
-    this.tailPhase  = Math.random() * Math.PI * 2;
-    this.swayPhase  = Math.random() * Math.PI * 2;
-    this.tagPhase   = Math.random() * Math.PI * 2;
-    this.genColors();
-    this.place();
+    this.sub       = sub;
+    this.size      = 42 + Math.random() * 22;
+    this.isYT      = sub.channel === 'youtube';
+    this.tailPhase = Math.random() * Math.PI * 2;
+    this.swayPhase = Math.random() * Math.PI * 2;
+    this.tagPhase  = Math.random() * Math.PI * 2;
+    this.genColors(); this.place();
   }
-
   genColors() {
     if (this.isYT) {
-      const h = 2 + Math.floor(Math.random() * 10);
-      this.bodyCol  = `hsl(${h},80%,58%)`;
-      this.finCol   = `hsl(${h},80%,36%)`;
-      this.bellyCol = `hsl(${h},55%,78%)`;
+      const h = 2 + Math.floor(Math.random()*10);
+      this.bodyCol = `hsl(${h},80%,58%)`; this.finCol = `hsl(${h},80%,36%)`; this.bellyCol = `hsl(${h},55%,78%)`;
     } else {
-      const h = 265 + Math.floor(Math.random() * 26);
-      this.bodyCol  = `hsl(${h},54%,55%)`;
-      this.finCol   = `hsl(${h},54%,34%)`;
-      this.bellyCol = `hsl(${h},38%,75%)`;
+      const h = 265 + Math.floor(Math.random()*26);
+      this.bodyCol = `hsl(${h},54%,55%)`; this.finCol = `hsl(${h},54%,34%)`; this.bellyCol = `hsl(${h},38%,75%)`;
     }
   }
-
   place() {
-    const minY = TOP_H + 14;
-    const maxY = H - SAND_H - this.size * 0.6 - 30;
-    this.x = 60 + Math.random() * Math.max(10, W - 120 - this.size);
-    this.y = minY + Math.random() * Math.max(10, maxY - minY);
-    const spd = 0.18 + Math.random() * 0.22;
-    const ang = (Math.random() - 0.5) * 0.4;
-    const dir = Math.random() > 0.5 ? 1 : -1;
-    this.vx = dir * spd * Math.cos(ang);
-    this.vy = spd * Math.sin(ang) * 0.3;
+    const minY = TOP_H+14, maxY = H-SAND_H-this.size*0.6-30;
+    this.x = 60 + Math.random() * Math.max(10, W-120-this.size);
+    this.y = minY + Math.random() * Math.max(10, maxY-minY);
+    const spd = 0.18 + Math.random()*0.22, ang = (Math.random()-0.5)*0.4, dir = Math.random()>0.5?1:-1;
+    this.vx = dir*spd*Math.cos(ang); this.vy = spd*Math.sin(ang)*0.3;
     this.facingRight = this.vx > 0;
   }
-
   update(frozen) {
     if (frozen) return;
-
-    this.tailPhase += 0.13;
-    this.swayPhase += 0.04 + Math.random() * 0.01;
-    this.tagPhase  += 0.025 + Math.random() * 0.01;
-
-    this.vx += (Math.random() - 0.5) * 0.012;
-    this.vy += (Math.random() - 0.5) * 0.008;
-
-    const spd    = Math.hypot(this.vx, this.vy);
-    const maxSpd = 0.45, minSpd = 0.1;
-    if (spd > maxSpd) { this.vx *= maxSpd/spd; this.vy *= maxSpd/spd; }
-    if (spd < minSpd && spd > 0) { this.vx *= minSpd/spd; this.vy *= minSpd/spd; }
-
-    const minY = TOP_H + 10;
-    const maxY = H - SAND_H - this.size * 0.6 - 12;
-    const margin = 36;
-
-    if (this.x < margin)                  { this.vx =  Math.abs(this.vx) + 0.15; }
-    if (this.x > W - margin - this.size)  { this.vx = -(Math.abs(this.vx) + 0.15); }
-    if (this.y < minY) { this.vy =  Math.abs(this.vy) * 0.7; this.y = minY; }
-    if (this.y > maxY) { this.vy = -Math.abs(this.vy) * 0.7; this.y = maxY; }
-
-    if (Math.abs(this.vx) > 0.12) this.facingRight = this.vx > 0;
-
-    this.x += this.vx;
-    this.y += this.vy;
+    this.tailPhase += 0.13; this.swayPhase += 0.04+Math.random()*0.01; this.tagPhase += 0.025+Math.random()*0.01;
+    this.vx += (Math.random()-0.5)*0.012; this.vy += (Math.random()-0.5)*0.008;
+    const spd = Math.hypot(this.vx,this.vy), maxS=0.45, minS=0.1;
+    if (spd>maxS){this.vx*=maxS/spd;this.vy*=maxS/spd;}
+    if (spd<minS&&spd>0){this.vx*=minS/spd;this.vy*=minS/spd;}
+    const minY=TOP_H+10, maxY=H-SAND_H-this.size*0.6-12, mg=36;
+    if (this.x<mg)              {this.vx= Math.abs(this.vx)+0.15;}
+    if (this.x>W-mg-this.size)  {this.vx=-Math.abs(this.vx)-0.15;}
+    if (this.y<minY){this.vy= Math.abs(this.vy)*0.7; this.y=minY;}
+    if (this.y>maxY){this.vy=-Math.abs(this.vy)*0.7; this.y=maxY;}
+    if (Math.abs(this.vx)>0.12) this.facingRight = this.vx>0;
+    this.x+=this.vx; this.y+=this.vy;
   }
-
   draw(ctx, isHooked) {
-    const s  = this.size;
-    const bh = s * 0.55;
-    const cx = this.x + s / 2;
-    const cy = this.y + bh / 2;
-
-    ctx.save();
-    ctx.translate(cx, cy);
-    // 기본 그림: 왼쪽을 바라봄 (눈=왼쪽, 꼬리=오른쪽)
-    // 오른쪽으로 갈 때만 scaleX(-1)로 뒤집기
-    if (this.facingRight) ctx.scale(-1, 1);
-    ctx.rotate(Math.sin(this.swayPhase) * 0.05);
-
-    if (isHooked) {
-      ctx.shadowColor = 'rgba(255,200,0,0.75)';
-      ctx.shadowBlur  = 14;
-    }
-
-    // 꼬리 (오른쪽 +x)
-    const tw = Math.sin(this.tailPhase) * 0.3;
-    ctx.save();
-    ctx.translate(s * 0.33, 0);
-    ctx.rotate(tw);
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(s * 0.32, -bh * 0.44);
-    ctx.lineTo(s * 0.26, 0);
-    ctx.lineTo(s * 0.32,  bh * 0.44);
-    ctx.closePath();
-    ctx.fillStyle = this.finCol;
-    ctx.globalAlpha = 0.9; ctx.fill(); ctx.globalAlpha = 1;
-    ctx.restore();
-
+    const s=this.size, bh=s*0.55, cx=this.x+s/2, cy=this.y+bh/2;
+    ctx.save(); ctx.translate(cx,cy);
+    if (this.facingRight) ctx.scale(-1,1);
+    ctx.rotate(Math.sin(this.swayPhase)*0.05);
+    if (isHooked){ctx.shadowColor='rgba(255,200,0,0.75)';ctx.shadowBlur=14;}
+    // 꼬리
+    const tw=Math.sin(this.tailPhase)*0.3;
+    ctx.save(); ctx.translate(s*0.33,0); ctx.rotate(tw);
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(s*0.32,-bh*0.44); ctx.lineTo(s*0.26,0); ctx.lineTo(s*0.32,bh*0.44); ctx.closePath();
+    ctx.fillStyle=this.finCol; ctx.globalAlpha=0.9; ctx.fill(); ctx.globalAlpha=1; ctx.restore();
     // 몸통
-    ctx.beginPath();
-    ctx.ellipse(0, 0, s * 0.37, bh * 0.5, 0, 0, Math.PI * 2);
-    ctx.fillStyle = this.bodyCol;
-    ctx.fill();
-
-    // 배 하이라이트
-    ctx.beginPath();
-    ctx.ellipse(s*0.05, bh*0.12, s*0.2, bh*0.27, -0.3, 0, Math.PI*2);
-    ctx.fillStyle = this.bellyCol;
-    ctx.globalAlpha = 0.32; ctx.fill(); ctx.globalAlpha = 1;
-
+    ctx.beginPath(); ctx.ellipse(0,0,s*0.37,bh*0.5,0,0,Math.PI*2); ctx.fillStyle=this.bodyCol; ctx.fill();
+    // 배
+    ctx.beginPath(); ctx.ellipse(s*0.05,bh*0.12,s*0.2,bh*0.27,-0.3,0,Math.PI*2);
+    ctx.fillStyle=this.bellyCol; ctx.globalAlpha=0.32; ctx.fill(); ctx.globalAlpha=1;
     // 등지느러미
-    ctx.beginPath();
-    ctx.moveTo(s*0.1, -bh*0.45);
-    ctx.quadraticCurveTo(-s*0.05, -bh*0.72, -s*0.2, -bh*0.45);
-    ctx.fillStyle = this.finCol;
-    ctx.globalAlpha = 0.58; ctx.fill(); ctx.globalAlpha = 1;
-
+    ctx.beginPath(); ctx.moveTo(s*0.1,-bh*0.45); ctx.quadraticCurveTo(-s*0.05,-bh*0.72,-s*0.2,-bh*0.45);
+    ctx.fillStyle=this.finCol; ctx.globalAlpha=0.58; ctx.fill(); ctx.globalAlpha=1;
     // 아가미
-    ctx.beginPath();
-    ctx.arc(s*0.14, 0, bh*0.36, Math.PI-0.85, Math.PI+0.85);
-    ctx.strokeStyle = this.finCol; ctx.lineWidth = 1.2;
-    ctx.globalAlpha = 0.32; ctx.stroke(); ctx.globalAlpha = 1;
-
-    // 눈 (왼쪽 -x, 머리 쪽)
-    ctx.beginPath();
-    ctx.arc(-s*0.27, -bh*0.05, bh*0.14, 0, Math.PI*2);
-    ctx.fillStyle = 'white'; ctx.fill();
-    ctx.beginPath();
-    ctx.arc(-s*0.26, -bh*0.05, bh*0.08, 0, Math.PI*2);
-    ctx.fillStyle = '#111'; ctx.fill();
-    ctx.beginPath();
-    ctx.arc(-s*0.28, -bh*0.09, bh*0.033, 0, Math.PI*2);
-    ctx.fillStyle = 'white'; ctx.fill();
-
-    ctx.restore();
-    ctx.shadowBlur = 0;
-
-    // 이름표는 scaleX 밖(세계 좌표)에서 그림
-    this.drawTag(ctx, cx, cy, s, bh);
+    ctx.beginPath(); ctx.arc(s*0.14,0,bh*0.36,Math.PI-0.85,Math.PI+0.85);
+    ctx.strokeStyle=this.finCol; ctx.lineWidth=1.2; ctx.globalAlpha=0.32; ctx.stroke(); ctx.globalAlpha=1;
+    // 눈
+    ctx.beginPath(); ctx.arc(-s*0.27,-bh*0.05,bh*0.14,0,Math.PI*2); ctx.fillStyle='white'; ctx.fill();
+    ctx.beginPath(); ctx.arc(-s*0.26,-bh*0.05,bh*0.08,0,Math.PI*2); ctx.fillStyle='#111'; ctx.fill();
+    ctx.beginPath(); ctx.arc(-s*0.28,-bh*0.09,bh*0.033,0,Math.PI*2); ctx.fillStyle='white'; ctx.fill();
+    ctx.restore(); ctx.shadowBlur=0;
+    this.drawTag(ctx,cx,cy,s,bh);
   }
-
-  drawTag(ctx, cx, cy, s, bh) {
-    // 기본 그림에서 꼬리는 오른쪽(+x)
-    // facingRight이면 그림이 뒤집혀 꼬리가 실제 왼쪽
-    const tailLocalX = s * 0.61;
-    const tailX = this.facingRight ? cx - tailLocalX : cx + tailLocalX;
-    const tailY = cy + Math.sin(this.swayPhase) * (bh * 0.05);
-
-    const swing  = Math.sin(this.tagPhase) * 5;
-    const ropLen = 22 + s * 0.08;
-    const tagX   = tailX + swing;
-    const tagY   = tailY + ropLen;
-
-    // 줄
-    ctx.beginPath();
-    ctx.moveTo(tailX, tailY);
-    ctx.quadraticCurveTo(tailX + swing * 0.5, tailY + ropLen * 0.55, tagX, tagY);
-    ctx.strokeStyle = 'rgba(0,0,0,0.18)';
-    ctx.lineWidth = 0.85;
-    ctx.setLineDash([2.5, 2.5]);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // 이름표
-    ctx.font = '300 10px "DM Mono", monospace';
-    const tw   = ctx.measureText(this.sub.nickname).width;
-    const padX = 7, padY = 3;
-    const tagW = tw + padX * 2;
-    const tagH = 17;
-    const tx   = tagX - tagW / 2;
-
-    ctx.roundRect(tx, tagY, tagW, tagH, 4);
-    ctx.fillStyle = 'rgba(255,255,255,0.93)'; ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,0.1)'; ctx.lineWidth = 0.5; ctx.stroke();
-    ctx.fillStyle = '#333';
-    ctx.fillText(this.sub.nickname, tx + padX, tagY + tagH - padY - 1);
+  drawTag(ctx,cx,cy,s,bh) {
+    const tailX = this.facingRight ? cx-s*0.61 : cx+s*0.61;
+    const tailY = cy+Math.sin(this.swayPhase)*(bh*0.05);
+    const swing=Math.sin(this.tagPhase)*5, ropLen=22+s*0.08;
+    const tagX=tailX+swing, tagY=tailY+ropLen;
+    ctx.beginPath(); ctx.moveTo(tailX,tailY);
+    ctx.quadraticCurveTo(tailX+swing*0.5,tailY+ropLen*0.55,tagX,tagY);
+    ctx.strokeStyle='rgba(0,0,0,0.18)'; ctx.lineWidth=0.85; ctx.setLineDash([2.5,2.5]); ctx.stroke(); ctx.setLineDash([]);
+    ctx.font='300 10px "DM Mono",monospace';
+    const tw=ctx.measureText(this.sub.nickname).width, padX=7, padY=3, tagW=tw+padX*2, tagH=17, tx=tagX-tagW/2;
+    ctx.roundRect(tx,tagY,tagW,tagH,4); ctx.fillStyle='rgba(255,255,255,0.93)'; ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.1)'; ctx.lineWidth=0.5; ctx.stroke();
+    ctx.fillStyle='#333'; ctx.fillText(this.sub.nickname,tx+padX,tagY+tagH-padY-1);
   }
 }
 
 // ── 낚싯대 ──────────────────────────────────────────────
-const rod = { active:false, lineY:0, phase:'idle', winner:null, timer:0 };
+const rod={active:false,lineY:0,phase:'idle',winner:null,timer:0};
 
-function drawRod() {
-  rctx.clearRect(0, 0, W, H);
-  if (!rod.active) return;
-
-  const tipX = W / 2, tipY = 22;
-
-  rctx.save();
-  rctx.lineCap = 'round';
-  rctx.beginPath();
-  rctx.moveTo(tipX - 55, -8);
-  rctx.lineTo(tipX - 82, 16);
-  rctx.strokeStyle = '#5a3e0a'; rctx.lineWidth = 9; rctx.stroke();
-  rctx.beginPath();
-  rctx.moveTo(tipX - 82, 16);
-  rctx.lineTo(tipX, tipY);
-  rctx.strokeStyle = '#9a7520'; rctx.lineWidth = 4; rctx.stroke();
+function drawRod(){
+  rctx.clearRect(0,0,W,H); if(!rod.active)return;
+  const tipX=W/2,tipY=22;
+  rctx.save(); rctx.lineCap='round';
+  rctx.beginPath(); rctx.moveTo(tipX-55,-8); rctx.lineTo(tipX-82,16); rctx.strokeStyle='#5a3e0a'; rctx.lineWidth=9; rctx.stroke();
+  rctx.beginPath(); rctx.moveTo(tipX-82,16); rctx.lineTo(tipX,tipY); rctx.strokeStyle='#9a7520'; rctx.lineWidth=4; rctx.stroke();
   rctx.restore();
-
-  rctx.beginPath();
-  rctx.moveTo(tipX, tipY);
-  rctx.lineTo(tipX, rod.lineY);
-  rctx.strokeStyle = 'rgba(0,0,0,0.28)'; rctx.lineWidth = 0.9; rctx.stroke();
-
-  rctx.beginPath();
-  rctx.arc(tipX, rod.lineY, 4, 0, Math.PI*2);
-  rctx.fillStyle = '#c0392b'; rctx.fill();
+  rctx.beginPath(); rctx.moveTo(tipX,tipY); rctx.lineTo(tipX,rod.lineY); rctx.strokeStyle='rgba(0,0,0,0.28)'; rctx.lineWidth=0.9; rctx.stroke();
+  rctx.beginPath(); rctx.arc(tipX,rod.lineY,4,0,Math.PI*2); rctx.fillStyle='#c0392b'; rctx.fill();
 }
 
-function updateRod() {
-  if (!rod.active) return;
-  rod.timer++;
-
-  if (rod.phase === 'dropping') {
-    const target = rod.winner.y + rod.winner.size * 0.3;
-    rod.lineY += (target - rod.lineY) * 0.045;
-    if (rod.timer > 80 && Math.abs(rod.lineY - target) < 8) {
-      rod.phase = 'waiting'; rod.timer = 0;
-    }
-  } else if (rod.phase === 'waiting') {
-    if (rod.timer > 45) { rod.phase = 'pulling'; rod.timer = 0; }
-  } else if (rod.phase === 'pulling') {
-    rod.lineY -= 4;
-    rod.winner.y -= 4;
-    rod.winner.x += (W/2 - rod.winner.x - rod.winner.size/2) * 0.07;
-    if (rod.lineY < 22) {
-      rod.phase = 'done';
-      showWinner(rod.winner.sub);
-    }
+function updateRod(){
+  if(!rod.active)return; rod.timer++;
+  if(rod.phase==='dropping'){
+    const target=rod.winner.y+rod.winner.size*0.3; rod.lineY+=(target-rod.lineY)*0.045;
+    if(rod.timer>80&&Math.abs(rod.lineY-target)<8){rod.phase='waiting';rod.timer=0;}
+  } else if(rod.phase==='waiting'){
+    if(rod.timer>45){rod.phase='pulling';rod.timer=0;}
+  } else if(rod.phase==='pulling'){
+    rod.lineY-=4; rod.winner.y-=4; rod.winner.x+=(W/2-rod.winner.x-rod.winner.size/2)*0.07;
+    if(rod.lineY<22){rod.phase='done'; showWinner(rod.winner.sub);}
   }
 }
 
@@ -557,86 +440,140 @@ function updateRod() {
 async function showWinner(sub) {
   document.getElementById('winnerName').textContent   = sub.nickname;
   document.getElementById('winnerHandle').textContent = sub.handle;
+  document.getElementById('winnerTemplate').textContent = sub.template ? `🎁 ${sub.template}` : '';
   document.getElementById('winnerOverlay').classList.add('show');
 
-  // 구글시트에 당첨 기록
   try {
-    await fetch(`${WEB_APP_URL}?type=catch&winner_id=${sub.id}&template=`);
+    await fetch(`${WEB_APP_URL}?type=catch&winner_id=${sub.id}&key=${encodeURIComponent(ADMIN_KEY)}`);
   } catch(e) { console.warn('catch 기록 실패:', e); }
 }
 
 document.getElementById('winnerOverlay').addEventListener('click', () => {
   document.getElementById('winnerOverlay').classList.remove('show');
   rodCanvas.classList.remove('visible');
-  rod.active = false; rod.phase = 'idle'; rod.winner = null;
-  fishList = [];
-  isFishing = false;
-  const btn = document.getElementById('fishBtn');
-  btn.disabled = true;
-  btn.textContent = '이번 주 완료 ✓';
+  rod.active=false; rod.phase='idle'; rod.winner=null;
+  fishList=[];
+  isFishing=false;
+  const btn=document.getElementById('fishBtn');
+  btn.disabled=true; btn.textContent='이번 주 완료 ✓';
 });
 
 // ── 낚시 시작 ────────────────────────────────────────────
-let fishList = [], isFishing = false;
-
-function startFishing() {
-  if (isFishing) return;
-  const eligible = fishList.filter(f => f.sub.eligible);
-  if (!eligible.length) return;
-
-  isFishing = true;
-  const btn = document.getElementById('fishBtn');
-  btn.disabled = true; btn.textContent = '낚시 중...';
-
+function startFishing(){
+  if(isFishing)return;
+  const eligible=fishList.filter(f=>f.sub.eligible);
+  if(!eligible.length)return;
+  isFishing=true;
+  const btn=document.getElementById('fishBtn');
+  btn.disabled=true; btn.textContent='낚시 중...';
   rodCanvas.classList.add('visible');
-  rod.active = true; rod.phase = 'dropping'; rod.lineY = 22;
-  rod.winner = eligible[Math.floor(Math.random() * eligible.length)];
-  rod.timer  = 0;
+  rod.active=true; rod.phase='dropping'; rod.lineY=22;
+  rod.winner=eligible[Math.floor(Math.random()*eligible.length)]; rod.timer=0;
 }
 
 // ── 거품 ─────────────────────────────────────────────────
-function spawnBubble() {
-  const b = document.createElement('div');
-  b.className = 'bubble';
-  const sz = 3 + Math.random() * 7;
-  const dur = 4.5 + Math.random() * 4;
-  b.style.cssText = `width:${sz}px;height:${sz}px;left:${8+Math.random()*84}%;bottom:55px;animation-duration:${dur}s;`;
-  tankEl.appendChild(b);
-  setTimeout(() => b.remove(), dur * 1000);
+function spawnBubble(){
+  const b=document.createElement('div'); b.className='bubble';
+  const sz=3+Math.random()*7, dur=4.5+Math.random()*4;
+  b.style.cssText=`width:${sz}px;height:${sz}px;left:${8+Math.random()*84}%;bottom:55px;animation-duration:${dur}s;`;
+  tankEl.appendChild(b); setTimeout(()=>b.remove(),dur*1000);
 }
 
 // ── 메인 루프 ────────────────────────────────────────────
-function loop() {
-  ctx.clearRect(0, 0, W, H);
-  fishList.forEach(f => {
-    const frozen = rod.winner === f;
-    f.update(frozen);
-    f.draw(ctx, frozen);
-  });
-  updateRod();
-  drawRod();
+function loop(){
+  ctx.clearRect(0,0,W,H);
+  fishList.forEach(f=>{const frozen=rod.winner===f; f.update(frozen); f.draw(ctx,frozen);});
+  updateRod(); drawRod();
   requestAnimationFrame(loop);
 }
 
-// ── 초기화 ───────────────────────────────────────────────
-async function init() {
-  resize();
-  window.addEventListener('resize', resize);
-
-  try {
-    const res  = await fetch(`${WEB_APP_URL}?type=subscribers`);
-    const data = await res.json();
-    fishList = data.map(s => new Fish(s));
-  } catch(e) {
-    console.warn('구독자 로드 실패:', e);
-  }
-
-  loop();
-  setInterval(spawnBubble, 2200);
+// ── 관리자 잠금 해제 ─────────────────────────────────────
+async function unlockAdmin(){
+  const key=document.getElementById('adminKeyInput').value.trim();
+  if(!key){alert('비밀번호를 입력해 주세요.');return;}
+  ADMIN_KEY=key;
+  document.getElementById('adminPanel').classList.add('open');
+  renderSubList();
 }
 
-document.getElementById('fishBtn').addEventListener('click', startFishing);
-window.addEventListener('load', init);
+// ── 구독자 목록 렌더 ─────────────────────────────────────
+function renderSubList(){
+  const list=document.getElementById('subList');
+  const rows=allSubs.map(s=>{
+    const chBadge=s.channel==='youtube'
+      ?`<span class="channel-badge yt">YouTube</span>`
+      :`<span class="channel-badge ig">Instagram</span>`;
+    const dot=`<span class="eligible-dot" style="background:${s.eligible?'#27ae60':'#ddd'}"></span>`;
+    const cls=s.eligible?'':' ineligible';
+    return `<div class="sub-row${cls}">
+      <span>${s.id}</span>
+      <span>${s.nickname}</span>
+      <span>${chBadge}</span>
+      <span>${s.handle||''}</span>
+      <span>${dot} ${s.eligible?'대기중':'완료'}</span>
+      <button class="del-btn" onclick="deleteSubscriber(${s.id})">×</button>
+    </div>`;
+  }).join('');
+  list.innerHTML=`<div class="sub-row header"><span>#</span><span>닉네임</span><span>채널</span><span>handle</span><span>상태</span><span></span></div>${rows}`;
+}
+
+// ── 구독자 추가 ──────────────────────────────────────────
+async function addSubscriber(){
+  const nickname =document.getElementById('f-nickname').value.trim();
+  const channel  =document.getElementById('f-channel').value;
+  const handle   =document.getElementById('f-handle').value.trim();
+  const template =document.getElementById('f-template').value.trim();
+  const msg      =document.getElementById('addMsg');
+
+  if(!nickname||!channel){msg.textContent='닉네임과 채널은 필수예요.'; msg.style.color='#e74c3c'; return;}
+
+  msg.textContent='등록 중...'; msg.style.color='#aaa';
+  try {
+    const res=await fetch(`${WEB_APP_URL}?type=add&key=${encodeURIComponent(ADMIN_KEY)}&nickname=${encodeURIComponent(nickname)}&channel=${encodeURIComponent(channel)}&handle=${encodeURIComponent(handle)}&template=${encodeURIComponent(template)}`);
+    const data=await res.json();
+    if(data.ok){
+      msg.textContent=`✓ 등록 완료 (id: ${data.id})`; msg.style.color='#27ae60';
+      document.getElementById('f-nickname').value='';
+      document.getElementById('f-channel').value='';
+      document.getElementById('f-handle').value='';
+      document.getElementById('f-template').value='';
+      await loadSubs(); // 목록 새로고침
+    } else {
+      msg.textContent='등록 실패: '+JSON.stringify(data); msg.style.color='#e74c3c';
+    }
+  } catch(e){ msg.textContent='오류: '+e.message; msg.style.color='#e74c3c'; }
+}
+
+// ── 구독자 삭제 ──────────────────────────────────────────
+async function deleteSubscriber(id){
+  if(!confirm(`id ${id} 구독자를 삭제할까요?`))return;
+  try{
+    const res=await fetch(`${WEB_APP_URL}?type=delete&key=${encodeURIComponent(ADMIN_KEY)}&id=${id}`);
+    const data=await res.json();
+    if(data.ok){await loadSubs();}
+    else alert('삭제 실패: '+JSON.stringify(data));
+  }catch(e){alert('오류: '+e.message);}
+}
+
+// ── 데이터 로드 ──────────────────────────────────────────
+async function loadSubs(){
+  try{
+    const res=await fetch(`${WEB_APP_URL}?type=subscribers`);
+    allSubs=await res.json();
+    fishList=allSubs.map(s=>new Fish(s));
+    if(document.getElementById('adminPanel').classList.contains('open')) renderSubList();
+  }catch(e){console.warn('구독자 로드 실패:',e);}
+}
+
+async function init(){
+  resize(); window.addEventListener('resize',resize);
+  await loadSubs();
+  loop();
+  setInterval(spawnBubble,2200);
+}
+
+document.getElementById('fishBtn').addEventListener('click',startFishing);
+window.addEventListener('load',init);
 </script>
 </body>
 </html>
