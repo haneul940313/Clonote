@@ -178,7 +178,6 @@
   .fish-btn:active { transform: scale(0.97); }
   .fish-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
 
-  /* 당첨 오버레이 */
   .winner-overlay {
     position: absolute;
     inset: 0;
@@ -237,7 +236,6 @@
 
   <div class="tank" id="tank">
     <div class="surface"></div>
-
     <canvas id="fishCanvas"></canvas>
     <canvas id="rodCanvas"></canvas>
 
@@ -249,12 +247,10 @@
         <ellipse cx="52" cy="4" rx="8" ry="4.5" fill="#5aa068" transform="rotate(16,52,4)"/>
         <path d="M58 88 Q55 70 51 50 Q48 36 53 25" stroke="#68a870" stroke-width="1.5" fill="none" stroke-linecap="round"/>
         <ellipse cx="53" cy="25" rx="6" ry="3.5" fill="#78b880" transform="rotate(-10,53,25)"/>
-
         <path d="M352 88 Q348 70 344 52 Q340 38 345 27" stroke="#72b07a" stroke-width="1.6" fill="none" stroke-linecap="round"/>
         <path d="M352 88 Q356 68 360 50 Q364 36 358 25" stroke="#62a06a" stroke-width="1.4" fill="none" stroke-linecap="round"/>
         <ellipse cx="345" cy="27" rx="7" ry="4" fill="#82c08a" transform="rotate(-12,345,27)"/>
         <ellipse cx="358" cy="25" rx="6" ry="3.5" fill="#72b07a" transform="rotate(10,358,25)"/>
-
         <path d="M672 88 Q668 62 660 38 Q652 18 660 7" stroke="#5a9a68" stroke-width="2" fill="none" stroke-linecap="round"/>
         <path d="M672 88 Q676 60 684 36 Q690 16 680 6" stroke="#4a8a58" stroke-width="1.7" fill="none" stroke-linecap="round"/>
         <ellipse cx="660" cy="7" rx="8" ry="4.5" fill="#6ab078" transform="rotate(-18,660,7)"/>
@@ -267,7 +263,7 @@
     <div class="sand"></div>
 
     <div class="winner-overlay" id="winnerOverlay">
-      <div class="winner-card" id="winnerCard">
+      <div class="winner-card">
         <div class="winner-label">이번 주 당첨자</div>
         <div class="winner-name" id="winnerName"></div>
         <div class="winner-handle" id="winnerHandle"></div>
@@ -286,18 +282,7 @@
 </div>
 
 <script>
-const WEB_APP_URL = 'YOUR_WEB_APP_URL_HERE';
-
-const SAMPLE_DATA = [
-  { id:1, nickname:'바다물고기', channel:'youtube',   handle:'@ocean_fish',    eligible:true  },
-  { id:2, nickname:'별빛가오리', channel:'instagram', handle:'@starray_gram',  eligible:true  },
-  { id:3, nickname:'노랑복어',   channel:'youtube',   handle:'@puffer_yellow', eligible:false },
-  { id:4, nickname:'분홍돌고래', channel:'instagram', handle:'@pink_dolphin',  eligible:true  },
-  { id:5, nickname:'초록해마',   channel:'youtube',   handle:'@seahorse_g',    eligible:true  },
-  { id:6, nickname:'은빛청어',   channel:'instagram', handle:'@silver_herring',eligible:true  },
-  { id:7, nickname:'파랑고래',   channel:'youtube',   handle:'@blue_whale7',   eligible:true  },
-  { id:8, nickname:'작은새우',   channel:'instagram', handle:'@tiny_shrimp',   eligible:true  },
-];
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby4dx_8pLUJWmYGBKaN4LDK-zPWtdVzsXdaZDIuscZUHPeymDoFATnOPFxorBL6pap9/exec';
 
 const tankEl    = document.getElementById('tank');
 const canvas    = document.getElementById('fishCanvas');
@@ -315,7 +300,6 @@ function resize() {
   rodCanvas.width = W; rodCanvas.height = H;
 }
 
-// roundRect polyfill
 if (!CanvasRenderingContext2D.prototype.roundRect) {
   CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r){
     this.beginPath();
@@ -334,13 +318,13 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
 // ── Fish 클래스 ──────────────────────────────────────────
 class Fish {
   constructor(sub) {
-    this.sub = sub;
-    this.size = 42 + Math.random() * 22;
-    this.isYT = sub.channel === 'youtube';
-    this.genColors();
+    this.sub        = sub;
+    this.size       = 42 + Math.random() * 22;
+    this.isYT       = sub.channel === 'youtube';
     this.tailPhase  = Math.random() * Math.PI * 2;
     this.swayPhase  = Math.random() * Math.PI * 2;
     this.tagPhase   = Math.random() * Math.PI * 2;
+    this.genColors();
     this.place();
   }
 
@@ -361,8 +345,8 @@ class Fish {
   place() {
     const minY = TOP_H + 14;
     const maxY = H - SAND_H - this.size * 0.6 - 30;
-    this.x = 60 + Math.random() * (W - 120 - this.size);
-    this.y = minY + Math.random() * Math.max(0, maxY - minY);
+    this.x = 60 + Math.random() * Math.max(10, W - 120 - this.size);
+    this.y = minY + Math.random() * Math.max(10, maxY - minY);
     const spd = 0.18 + Math.random() * 0.22;
     const ang = (Math.random() - 0.5) * 0.4;
     const dir = Math.random() > 0.5 ? 1 : -1;
@@ -378,31 +362,21 @@ class Fish {
     this.swayPhase += 0.04 + Math.random() * 0.01;
     this.tagPhase  += 0.025 + Math.random() * 0.01;
 
-    // 부드러운 방향 흔들림
     this.vx += (Math.random() - 0.5) * 0.012;
     this.vy += (Math.random() - 0.5) * 0.008;
 
-    // 속도 제한
-    const spd = Math.hypot(this.vx, this.vy);
-    const maxSpd = 0.45;
-    const minSpd = 0.1;
+    const spd    = Math.hypot(this.vx, this.vy);
+    const maxSpd = 0.45, minSpd = 0.1;
     if (spd > maxSpd) { this.vx *= maxSpd/spd; this.vy *= maxSpd/spd; }
     if (spd < minSpd && spd > 0) { this.vx *= minSpd/spd; this.vy *= minSpd/spd; }
 
-    // 경계 처리
     const minY = TOP_H + 10;
     const maxY = H - SAND_H - this.size * 0.6 - 12;
     const margin = 36;
 
-    if (this.x < margin) {
-      this.vx = Math.abs(this.vx) + 0.2;
-      this.facingRight = true;
-    }
-    if (this.x > W - margin - this.size) {
-      this.vx = -(Math.abs(this.vx) + 0.2);
-      this.facingRight = false;
-    }
-    if (this.y < minY) { this.vy = Math.abs(this.vy) * 0.7; this.y = minY; }
+    if (this.x < margin)                  { this.vx =  Math.abs(this.vx) + 0.15; }
+    if (this.x > W - margin - this.size)  { this.vx = -(Math.abs(this.vx) + 0.15); }
+    if (this.y < minY) { this.vy =  Math.abs(this.vy) * 0.7; this.y = minY; }
     if (this.y > maxY) { this.vy = -Math.abs(this.vy) * 0.7; this.y = maxY; }
 
     if (Math.abs(this.vx) > 0.12) this.facingRight = this.vx > 0;
@@ -419,19 +393,17 @@ class Fish {
 
     ctx.save();
     ctx.translate(cx, cy);
-    // 기본 그림이 왼쪽을 바라봄 — 오른쪽 갈 때만 뒤집기
+    // 기본 그림: 왼쪽을 바라봄 (눈=왼쪽, 꼬리=오른쪽)
+    // 오른쪽으로 갈 때만 scaleX(-1)로 뒤집기
     if (this.facingRight) ctx.scale(-1, 1);
-
-    // 흔들림
-    const sway = Math.sin(this.swayPhase) * 0.05;
-    ctx.rotate(sway);
+    ctx.rotate(Math.sin(this.swayPhase) * 0.05);
 
     if (isHooked) {
       ctx.shadowColor = 'rgba(255,200,0,0.75)';
       ctx.shadowBlur  = 14;
     }
 
-    // 꼬리 — 오른쪽(+x)에 위치
+    // 꼬리 (오른쪽 +x)
     const tw = Math.sin(this.tailPhase) * 0.3;
     ctx.save();
     ctx.translate(s * 0.33, 0);
@@ -443,9 +415,7 @@ class Fish {
     ctx.lineTo(s * 0.32,  bh * 0.44);
     ctx.closePath();
     ctx.fillStyle = this.finCol;
-    ctx.globalAlpha = 0.9;
-    ctx.fill();
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = 0.9; ctx.fill(); ctx.globalAlpha = 1;
     ctx.restore();
 
     // 몸통
@@ -458,70 +428,55 @@ class Fish {
     ctx.beginPath();
     ctx.ellipse(s*0.05, bh*0.12, s*0.2, bh*0.27, -0.3, 0, Math.PI*2);
     ctx.fillStyle = this.bellyCol;
-    ctx.globalAlpha = 0.32;
-    ctx.fill();
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = 0.32; ctx.fill(); ctx.globalAlpha = 1;
 
     // 등지느러미
     ctx.beginPath();
     ctx.moveTo(s*0.1, -bh*0.45);
     ctx.quadraticCurveTo(-s*0.05, -bh*0.72, -s*0.2, -bh*0.45);
     ctx.fillStyle = this.finCol;
-    ctx.globalAlpha = 0.58;
-    ctx.fill();
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = 0.58; ctx.fill(); ctx.globalAlpha = 1;
 
     // 아가미
     ctx.beginPath();
-    ctx.arc(s*0.14, 0, bh*0.36, Math.PI - 0.85, Math.PI + 0.85);
-    ctx.strokeStyle = this.finCol;
-    ctx.lineWidth = 1.2;
-    ctx.globalAlpha = 0.32;
-    ctx.stroke();
-    ctx.globalAlpha = 1;
+    ctx.arc(s*0.14, 0, bh*0.36, Math.PI-0.85, Math.PI+0.85);
+    ctx.strokeStyle = this.finCol; ctx.lineWidth = 1.2;
+    ctx.globalAlpha = 0.32; ctx.stroke(); ctx.globalAlpha = 1;
 
-    // 눈 — 왼쪽에 위치 (머리 쪽)
+    // 눈 (왼쪽 -x, 머리 쪽)
     ctx.beginPath();
     ctx.arc(-s*0.27, -bh*0.05, bh*0.14, 0, Math.PI*2);
-    ctx.fillStyle = 'white';
-    ctx.fill();
+    ctx.fillStyle = 'white'; ctx.fill();
     ctx.beginPath();
     ctx.arc(-s*0.26, -bh*0.05, bh*0.08, 0, Math.PI*2);
-    ctx.fillStyle = '#111';
-    ctx.fill();
+    ctx.fillStyle = '#111'; ctx.fill();
     ctx.beginPath();
     ctx.arc(-s*0.28, -bh*0.09, bh*0.033, 0, Math.PI*2);
-    ctx.fillStyle = 'white';
-    ctx.fill();
+    ctx.fillStyle = 'white'; ctx.fill();
 
     ctx.restore();
     ctx.shadowBlur = 0;
 
-    // 이름표 — scaleX 영향 없는 세계좌표에서 그림
-    this.drawTag(ctx, isHooked, cx, cy, s, bh);
+    // 이름표는 scaleX 밖(세계 좌표)에서 그림
+    this.drawTag(ctx, cx, cy, s, bh);
   }
 
-  drawTag(ctx, isHooked, cx, cy, s, bh) {
-    // 기본 그림에서 꼬리는 +x(오른쪽)에 있음
-    // facingRight면 그림이 뒤집혀서 꼬리가 실제로는 왼쪽
+  drawTag(ctx, cx, cy, s, bh) {
+    // 기본 그림에서 꼬리는 오른쪽(+x)
+    // facingRight이면 그림이 뒤집혀 꼬리가 실제 왼쪽
     const tailLocalX = s * 0.61;
-    const tailX = this.facingRight
-      ? cx - tailLocalX
-      : cx + tailLocalX;
+    const tailX = this.facingRight ? cx - tailLocalX : cx + tailLocalX;
     const tailY = cy + Math.sin(this.swayPhase) * (bh * 0.05);
 
-    // 이름표 흔들림 (꼬리에서 아래로 늘어짐)
-    const swing   = Math.sin(this.tagPhase) * 5;
-    const tagX    = tailX + swing;
-    const ropeLen = 22 + s * 0.08;
-    const tagY    = tailY + ropeLen;
+    const swing  = Math.sin(this.tagPhase) * 5;
+    const ropLen = 22 + s * 0.08;
+    const tagX   = tailX + swing;
+    const tagY   = tailY + ropLen;
 
-    // 줄 — quadratic curve로 자연스럽게
+    // 줄
     ctx.beginPath();
     ctx.moveTo(tailX, tailY);
-    const cp1x = tailX + swing * 0.5;
-    const cp1y = tailY + ropeLen * 0.55;
-    ctx.quadraticCurveTo(cp1x, cp1y, tagX, tagY);
+    ctx.quadraticCurveTo(tailX + swing * 0.5, tailY + ropLen * 0.55, tagX, tagY);
     ctx.strokeStyle = 'rgba(0,0,0,0.18)';
     ctx.lineWidth = 0.85;
     ctx.setLineDash([2.5, 2.5]);
@@ -535,71 +490,47 @@ class Fish {
     const tagW = tw + padX * 2;
     const tagH = 17;
     const tx   = tagX - tagW / 2;
-    const ty   = tagY;
 
-    ctx.roundRect(tx, ty, tagW, tagH, 4);
-    ctx.fillStyle = 'rgba(255,255,255,0.93)';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,0.1)';
-    ctx.lineWidth = 0.5;
-    ctx.stroke();
-
+    ctx.roundRect(tx, tagY, tagW, tagH, 4);
+    ctx.fillStyle = 'rgba(255,255,255,0.93)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.1)'; ctx.lineWidth = 0.5; ctx.stroke();
     ctx.fillStyle = '#333';
-    ctx.fillText(this.sub.nickname, tx + padX, ty + tagH - padY - 1);
+    ctx.fillText(this.sub.nickname, tx + padX, tagY + tagH - padY - 1);
   }
 }
 
-// ── 낚싯대 상태 ──────────────────────────────────────────
-const rod = {
-  active: false,
-  lineY: 0,
-  phase: 'idle',   // idle | dropping | waiting | pulling | done
-  winner: null,
-  timer: 0,
-};
+// ── 낚싯대 ──────────────────────────────────────────────
+const rod = { active:false, lineY:0, phase:'idle', winner:null, timer:0 };
 
 function drawRod() {
   rctx.clearRect(0, 0, W, H);
   if (!rod.active) return;
 
-  const tipX = W / 2;
-  const tipY = 22;
+  const tipX = W / 2, tipY = 22;
 
-  // 낚싯대 몸통
   rctx.save();
   rctx.lineCap = 'round';
-  // 그립
   rctx.beginPath();
   rctx.moveTo(tipX - 55, -8);
   rctx.lineTo(tipX - 82, 16);
-  rctx.strokeStyle = '#5a3e0a';
-  rctx.lineWidth = 9;
-  rctx.stroke();
-  // 대
+  rctx.strokeStyle = '#5a3e0a'; rctx.lineWidth = 9; rctx.stroke();
   rctx.beginPath();
   rctx.moveTo(tipX - 82, 16);
   rctx.lineTo(tipX, tipY);
-  rctx.strokeStyle = '#9a7520';
-  rctx.lineWidth = 4;
-  rctx.stroke();
+  rctx.strokeStyle = '#9a7520'; rctx.lineWidth = 4; rctx.stroke();
   rctx.restore();
 
-  // 낚싯줄
   rctx.beginPath();
   rctx.moveTo(tipX, tipY);
   rctx.lineTo(tipX, rod.lineY);
-  rctx.strokeStyle = 'rgba(0,0,0,0.28)';
-  rctx.lineWidth = 0.9;
-  rctx.stroke();
+  rctx.strokeStyle = 'rgba(0,0,0,0.28)'; rctx.lineWidth = 0.9; rctx.stroke();
 
-  // 찌
   rctx.beginPath();
   rctx.arc(tipX, rod.lineY, 4, 0, Math.PI*2);
-  rctx.fillStyle = '#c0392b';
-  rctx.fill();
+  rctx.fillStyle = '#c0392b'; rctx.fill();
 }
 
-function updateRod(fishList) {
+function updateRod() {
   if (!rod.active) return;
   rod.timer++;
 
@@ -607,17 +538,12 @@ function updateRod(fishList) {
     const target = rod.winner.y + rod.winner.size * 0.3;
     rod.lineY += (target - rod.lineY) * 0.045;
     if (rod.timer > 80 && Math.abs(rod.lineY - target) < 8) {
-      rod.phase = 'waiting';
-      rod.timer = 0;
+      rod.phase = 'waiting'; rod.timer = 0;
     }
   } else if (rod.phase === 'waiting') {
-    if (rod.timer > 45) {
-      rod.phase = 'pulling';
-      rod.timer = 0;
-    }
+    if (rod.timer > 45) { rod.phase = 'pulling'; rod.timer = 0; }
   } else if (rod.phase === 'pulling') {
     rod.lineY -= 4;
-    // 물고기 딸려오기
     rod.winner.y -= 4;
     rod.winner.x += (W/2 - rod.winner.x - rod.winner.size/2) * 0.07;
     if (rod.lineY < 22) {
@@ -627,32 +553,31 @@ function updateRod(fishList) {
   }
 }
 
-// ── 당첨 표시 ────────────────────────────────────────────
-function showWinner(sub) {
+// ── 당첨 처리 ────────────────────────────────────────────
+async function showWinner(sub) {
   document.getElementById('winnerName').textContent   = sub.nickname;
   document.getElementById('winnerHandle').textContent = sub.handle;
   document.getElementById('winnerOverlay').classList.add('show');
+
+  // 구글시트에 당첨 기록
+  try {
+    await fetch(`${WEB_APP_URL}?type=catch&winner_id=${sub.id}&template=`);
+  } catch(e) { console.warn('catch 기록 실패:', e); }
 }
 
 document.getElementById('winnerOverlay').addEventListener('click', () => {
   document.getElementById('winnerOverlay').classList.remove('show');
   rodCanvas.classList.remove('visible');
-  rod.active = false;
-  rod.phase  = 'idle';
-  rod.winner = null;
-
-  // 어항 전체 비우기 — 모든 물고기 제거
+  rod.active = false; rod.phase = 'idle'; rod.winner = null;
   fishList = [];
-
   isFishing = false;
   const btn = document.getElementById('fishBtn');
-  btn.disabled    = true;
+  btn.disabled = true;
   btn.textContent = '이번 주 완료 ✓';
 });
 
 // ── 낚시 시작 ────────────────────────────────────────────
-let fishList = [];
-let isFishing = false;
+let fishList = [], isFishing = false;
 
 function startFishing() {
   if (isFishing) return;
@@ -661,22 +586,19 @@ function startFishing() {
 
   isFishing = true;
   const btn = document.getElementById('fishBtn');
-  btn.disabled    = true;
-  btn.textContent = '낚시 중...';
+  btn.disabled = true; btn.textContent = '낚시 중...';
 
   rodCanvas.classList.add('visible');
-  rod.active  = true;
-  rod.phase   = 'dropping';
-  rod.lineY   = 22;
-  rod.winner  = eligible[Math.floor(Math.random() * eligible.length)];
-  rod.timer   = 0;
+  rod.active = true; rod.phase = 'dropping'; rod.lineY = 22;
+  rod.winner = eligible[Math.floor(Math.random() * eligible.length)];
+  rod.timer  = 0;
 }
 
 // ── 거품 ─────────────────────────────────────────────────
 function spawnBubble() {
-  const b   = document.createElement('div');
+  const b = document.createElement('div');
   b.className = 'bubble';
-  const sz  = 3 + Math.random() * 7;
+  const sz = 3 + Math.random() * 7;
   const dur = 4.5 + Math.random() * 4;
   b.style.cssText = `width:${sz}px;height:${sz}px;left:${8+Math.random()*84}%;bottom:55px;animation-duration:${dur}s;`;
   tankEl.appendChild(b);
@@ -691,7 +613,7 @@ function loop() {
     f.update(frozen);
     f.draw(ctx, frozen);
   });
-  updateRod(fishList);
+  updateRod();
   drawRod();
   requestAnimationFrame(loop);
 }
@@ -701,17 +623,14 @@ async function init() {
   resize();
   window.addEventListener('resize', resize);
 
-  let data;
-  if (WEB_APP_URL === 'YOUR_WEB_APP_URL_HERE') {
-    data = SAMPLE_DATA;
-  } else {
-    try {
-      const res = await fetch(`${WEB_APP_URL}?type=subscribers`);
-      data = await res.json();
-    } catch(e) { data = SAMPLE_DATA; }
+  try {
+    const res  = await fetch(`${WEB_APP_URL}?type=subscribers`);
+    const data = await res.json();
+    fishList = data.map(s => new Fish(s));
+  } catch(e) {
+    console.warn('구독자 로드 실패:', e);
   }
 
-  fishList = data.map(s => new Fish(s));
   loop();
   setInterval(spawnBubble, 2200);
 }
