@@ -90,7 +90,8 @@
   }
   .winner-overlay.show { opacity:1; pointer-events:auto; }
   .winner-card { background:white; border-radius:14px; border:.5px solid rgba(0,0,0,.08); padding:30px 40px; text-align:center; cursor:pointer; }
-  .winner-label    { font-family:'DM Mono',monospace; font-size:10px; color:#bbb; letter-spacing:.14em; text-transform:uppercase; margin-bottom:12px; }
+  .winner-label    { font-family:'DM Mono',monospace; font-size:10px; color:#bbb; letter-spacing:.14em; text-transform:uppercase; margin-bottom:8px; }
+  .winner-channel  { font-family:'DM Mono',monospace; font-size:11px; color:#888; margin-bottom:6px; }
   .winner-name     { font-size:26px; font-weight:400; color:#1a1a1a; margin-bottom:4px; }
   .winner-handle   { font-family:'DM Mono',monospace; font-size:12px; color:#aaa; margin-bottom:10px; }
   .winner-template { font-family:'DM Mono',monospace; font-size:11px; color:#7b3fa0; background:#f3e8ff; border-radius:6px; padding:4px 12px; display:inline-block; margin-bottom:18px; }
@@ -182,6 +183,7 @@
     <div class="winner-overlay" id="winnerOverlay">
       <div class="winner-card">
         <div class="winner-label">이번 주 당첨자</div>
+        <div class="winner-channel" id="winnerChannel"></div>
         <div class="winner-name" id="winnerName"></div>
         <div class="winner-handle" id="winnerHandle"></div>
         <div class="winner-template" id="winnerTemplate"></div>
@@ -311,8 +313,8 @@ class Fish {
     ctx.beginPath(); ctx.arc(s*0.14,0,bh*0.36,Math.PI-0.85,Math.PI+0.85);
     ctx.strokeStyle=this.finCol; ctx.lineWidth=1.2; ctx.globalAlpha=0.32; ctx.stroke(); ctx.globalAlpha=1;
     ctx.beginPath(); ctx.arc(-s*0.27,-bh*0.05,bh*0.14,0,Math.PI*2); ctx.fillStyle='white'; ctx.fill();
-    ctx.beginPath(); ctx.arc(-s*0.26,-bh*0.05,bh*0.08,0,Math.PI*2); ctx.fillStyle='#111'; ctx.fill();
-    ctx.beginPath(); ctx.arc(-s*0.28,-bh*0.09,bh*0.033,0,Math.PI*2); ctx.fillStyle='white'; ctx.fill();
+    ctx.beginPath(); ctx.arc(-s*0.30,-bh*0.05,bh*0.08,0,Math.PI*2); ctx.fillStyle='#111'; ctx.fill();
+    ctx.beginPath(); ctx.arc(-s*0.32,-bh*0.09,bh*0.033,0,Math.PI*2); ctx.fillStyle='white'; ctx.fill();
     ctx.restore(); ctx.shadowBlur=0;
     this.drawTag(ctx,cx,cy,s,bh);
   }
@@ -335,6 +337,20 @@ class Fish {
 // ── 낚싯대 ──────────────────────────────────────────────
 const rod={active:false,lineY:0,phase:'idle',winner:null,timer:0};
 let isFishing=false;
+
+// ── 낚싯대 ──────────────────────────────────────────────
+const rod={active:false,lineY:0,phase:'idle',winner:null,timer:0};
+let isFishing=false;
+let winnerQueue=[];   // [ytFish, igFish] 순서
+let winnerIdx=0;
+
+function castNext(){
+  if(winnerIdx>=winnerQueue.length) return;
+  const fish=winnerQueue[winnerIdx];
+  rodCanvas.classList.add('visible');
+  rod.active=true; rod.phase='dropping'; rod.lineY=22;
+  rod.winner=fish; rod.timer=0;
+}
 
 function drawRod(){
   rctx.clearRect(0,0,W,H); if(!rod.active)return;
@@ -364,6 +380,8 @@ function updateRod(){
 async function showWinner(sub) {
   document.getElementById('winnerName').textContent   = sub.nickname;
   document.getElementById('winnerHandle').textContent = sub.handle;
+  const ch = sub.channel==='youtube' ? '🔴 YouTube' : '🟣 Instagram';
+  document.getElementById('winnerChannel').textContent = ch;
   const tmpl = document.getElementById('winnerTemplate');
   tmpl.textContent = sub.template ? `🎁 ${sub.template}` : '';
   tmpl.style.display = sub.template ? 'inline-block' : 'none';
@@ -375,23 +393,34 @@ document.getElementById('winnerOverlay').addEventListener('click', () => {
   document.getElementById('winnerOverlay').classList.remove('show');
   rodCanvas.classList.remove('visible');
   rod.active=false; rod.phase='idle'; rod.winner=null;
-  fishList=[]; allSubs=[];
-  renderSubList();
-  isFishing=false;
-  const btn=document.getElementById('fishBtn');
-  btn.disabled=true; btn.textContent='이번 주 완료 ✓';
+  winnerIdx++;
+
+  // 다음 당첨자 있으면 이어서 낚시
+  if(winnerIdx < winnerQueue.length){
+    setTimeout(()=>castNext(), 600);
+  } else {
+    // 둘 다 끝났으면 어항 비우기
+    fishList=[]; allSubs=[];
+    renderSubList();
+    isFishing=false;
+    const btn=document.getElementById('fishBtn');
+    btn.disabled=true; btn.textContent='이번 주 완료 ✓';
+  }
 });
 
 function startFishing(){
   if(isFishing)return;
-  const eligible=fishList.filter(f=>f.sub.eligible);
-  if(!eligible.length)return;
-  isFishing=true;
+  const ytPool=fishList.filter(f=>f.sub.eligible&&f.sub.channel==='youtube');
+  const igPool=fishList.filter(f=>f.sub.eligible&&f.sub.channel==='instagram');
+  winnerQueue=[];
+  if(ytPool.length) winnerQueue.push(ytPool[Math.floor(Math.random()*ytPool.length)]);
+  if(igPool.length) winnerQueue.push(igPool[Math.floor(Math.random()*igPool.length)]);
+  if(!winnerQueue.length) return;
+
+  isFishing=true; winnerIdx=0;
   const btn=document.getElementById('fishBtn');
   btn.disabled=true; btn.textContent='낚시 중...';
-  rodCanvas.classList.add('visible');
-  rod.active=true; rod.phase='dropping'; rod.lineY=22;
-  rod.winner=eligible[Math.floor(Math.random()*eligible.length)]; rod.timer=0;
+  castNext();
 }
 
 function spawnBubble(){
