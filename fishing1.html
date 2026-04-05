@@ -12,9 +12,9 @@
 
   body {
     background:#eef2ee;
-    display:flex; flex-direction:column; align-items:center;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
     min-height:100vh; font-family:'Gowun Dodum',sans-serif;
-    padding:32px 24px 48px;
+    padding:32px 24px;
   }
 
   .tank-title {
@@ -68,31 +68,8 @@
   .winner-label    { font-family:'DM Mono',monospace; font-size:10px; color:#bbb; letter-spacing:.14em; text-transform:uppercase; margin-bottom:6px; }
   .winner-channel  { font-family:'DM Mono',monospace; font-size:11px; color:#888; margin-bottom:8px; }
   .winner-name     { font-size:26px; font-weight:400; color:#1a1a1a; margin-bottom:4px; }
-  .winner-handle   { font-family:'DM Mono',monospace; font-size:12px; color:#aaa; margin-bottom:10px; }
   .winner-template { font-family:'DM Mono',monospace; font-size:11px; color:#7b3fa0; background:#f3e8ff; border-radius:6px; padding:4px 12px; display:none; margin-bottom:18px; }
   .winner-close    { font-family:'DM Mono',monospace; font-size:10px; color:#ccc; letter-spacing:.1em; }
-
-  .admin-wrap { width:min(720px,100%); margin-top:28px; }
-  .section-title { font-family:'DM Mono',monospace; font-size:10px; color:#aaa; letter-spacing:.14em; text-transform:uppercase; margin-bottom:12px; }
-
-  .add-form { background:white; border:.5px solid rgba(0,0,0,.1); border-radius:12px; padding:20px 24px; display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:24px; }
-  .add-form input, .add-form select { font-family:'DM Mono',monospace; font-size:12px; border:.5px solid rgba(0,0,0,.15); border-radius:8px; padding:8px 12px; background:white; outline:none; width:100%; color:#333; }
-  .add-form input:focus, .add-form select:focus { border-color:rgba(0,0,0,.3); }
-  .add-btn { grid-column:1/-1; font-family:'DM Mono',monospace; font-size:11px; color:white; background:#333; border:none; border-radius:8px; padding:9px; cursor:pointer; transition:background .15s; }
-  .add-btn:hover { background:#111; }
-  .add-msg { grid-column:1/-1; font-family:'DM Mono',monospace; font-size:11px; min-height:16px; }
-
-  .sub-list { background:white; border:.5px solid rgba(0,0,0,.1); border-radius:12px; overflow:hidden; }
-  .sub-row { display:grid; grid-template-columns:32px 1fr 100px 1fr 70px 24px; align-items:center; gap:8px; padding:10px 16px; border-bottom:.5px solid rgba(0,0,0,.06); font-family:'DM Mono',monospace; font-size:11px; color:#444; }
-  .sub-row:last-child { border-bottom:none; }
-  .sub-row.header { color:#aaa; font-size:10px; background:#fafafa; padding:8px 16px; }
-  .ch-badge { font-size:10px; padding:2px 7px; border-radius:4px; display:inline-block; }
-  .ch-yt { background:#fde8e7; color:#c0392b; }
-  .ch-ig { background:#f0e6f8; color:#6c3483; }
-  .eligible-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:4px; vertical-align:middle; }
-  .del-btn { background:none; border:none; cursor:pointer; color:#ddd; font-size:14px; transition:color .15s; }
-  .del-btn:hover { color:#e74c3c; }
-  .row-faded { opacity:.4; }
 </style>
 </head>
 <body>
@@ -132,7 +109,6 @@
         <div class="winner-label">이번 주 당첨자</div>
         <div class="winner-channel" id="winnerChannel"></div>
         <div class="winner-name" id="winnerName"></div>
-        <div class="winner-handle" id="winnerHandle"></div>
         <div class="winner-template" id="winnerTemplate"></div>
         <div class="winner-close">click to continue</div>
       </div>
@@ -148,33 +124,9 @@
   </div>
 </div>
 
-<div class="admin-wrap">
-  <p class="section-title">구독자 등록</p>
-  <div class="add-form">
-    <input  id="f-nickname" placeholder="닉네임" />
-    <select id="f-channel">
-      <option value="">채널 선택</option>
-      <option value="youtube">YouTube</option>
-      <option value="instagram">Instagram</option>
-    </select>
-    <input  id="f-handle" placeholder="@handle" />
-    <select id="f-template"><option value="">템플릿 선택</option></select>
-    <button class="add-btn" onclick="addSubscriber()">+ 등록</button>
-    <div class="add-msg" id="addMsg"></div>
-  </div>
-
-  <p class="section-title">구독자 목록</p>
-  <div class="sub-list" id="subList">
-    <div class="sub-row header">
-      <span>#</span><span>닉네임</span><span>채널</span><span>템플릿</span><span>상태</span><span></span>
-    </div>
-  </div>
-</div>
-
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbwwVDuz8QYmQpzWOwGJghRzcuwiQyd765nIXNvvPlGosi3Oq8rpj06z3FDbyNxBMOaq/exec';
+const API = 'https://script.google.com/macros/s/AKfycbwb1qPxd1QC9ea2SBhRGhA-ZNW7yJ3ML_E5Z9ScPc2rhLgsBHIIY6HG1Hz-10GFXvbj/exec';
 
-// ── 캔버스 세팅 ──────────────────────────────────────────
 const tankEl    = document.getElementById('tank');
 const canvas    = document.getElementById('fishCanvas');
 const rodCanvas = document.getElementById('rodCanvas');
@@ -245,35 +197,25 @@ class Fish {
     const s=this.size, bh=s*0.55, cx=this.x+s/2, cy=this.y+bh/2;
     ctx.save();
     ctx.translate(cx,cy);
-    // 기본 그림: 왼쪽 바라봄 (눈=왼쪽 -x, 꼬리=오른쪽 +x)
-    // 오른쪽으로 갈 때만 뒤집기
     if(this.facingRight) ctx.scale(-1,1);
     ctx.rotate(Math.sin(this.swayPhase)*0.05);
     if(isHooked){ ctx.shadowColor='rgba(255,200,0,.75)'; ctx.shadowBlur=14; }
 
-    // 꼬리 (+x 방향)
     const tw=Math.sin(this.tailPhase)*0.3;
     ctx.save(); ctx.translate(s*0.33,0); ctx.rotate(tw);
     ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(s*0.32,-bh*0.44); ctx.lineTo(s*0.26,0); ctx.lineTo(s*0.32,bh*0.44); ctx.closePath();
     ctx.fillStyle=this.finCol; ctx.globalAlpha=0.9; ctx.fill(); ctx.globalAlpha=1;
     ctx.restore();
 
-    // 몸통
     ctx.beginPath(); ctx.ellipse(0,0,s*0.37,bh*0.5,0,0,Math.PI*2); ctx.fillStyle=this.bodyCol; ctx.fill();
-
-    // 배 하이라이트
     ctx.beginPath(); ctx.ellipse(s*0.05,bh*0.12,s*0.2,bh*0.27,-0.3,0,Math.PI*2);
     ctx.fillStyle=this.bellyCol; ctx.globalAlpha=0.32; ctx.fill(); ctx.globalAlpha=1;
-
-    // 등지느러미
     ctx.beginPath(); ctx.moveTo(s*0.1,-bh*0.45); ctx.quadraticCurveTo(-s*0.05,-bh*0.72,-s*0.2,-bh*0.45);
     ctx.fillStyle=this.finCol; ctx.globalAlpha=0.58; ctx.fill(); ctx.globalAlpha=1;
-
-    // 아가미
     ctx.beginPath(); ctx.arc(s*0.14,0,bh*0.36,Math.PI-0.85,Math.PI+0.85);
     ctx.strokeStyle=this.finCol; ctx.lineWidth=1.2; ctx.globalAlpha=0.32; ctx.stroke(); ctx.globalAlpha=1;
 
-    // 눈: 흰자는 -s*0.27, 눈동자는 머리쪽(-x)으로 치우치게 -s*0.31
+    // 눈 — 눈동자를 머리 방향으로 치우치게
     ctx.beginPath(); ctx.arc(-s*0.27,-bh*0.05,bh*0.14,0,Math.PI*2); ctx.fillStyle='white'; ctx.fill();
     ctx.beginPath(); ctx.arc(-s*0.31,-bh*0.05,bh*0.08,0,Math.PI*2); ctx.fillStyle='#111'; ctx.fill();
     ctx.beginPath(); ctx.arc(-s*0.33,-bh*0.08,bh*0.033,0,Math.PI*2); ctx.fillStyle='white'; ctx.fill();
@@ -282,16 +224,13 @@ class Fish {
     this.drawTag(ctx,cx,cy,s,bh);
   }
   drawTag(ctx,cx,cy,s,bh){
-    // 기본 그림에서 꼬리는 +x → facingRight이면 실제로는 왼쪽
-    const tailX = this.facingRight ? cx-s*0.61 : cx+s*0.61;
-    const tailY = cy+Math.sin(this.swayPhase)*(bh*0.05);
+    const tailX=this.facingRight?cx-s*0.61:cx+s*0.61;
+    const tailY=cy+Math.sin(this.swayPhase)*(bh*0.05);
     const swing=Math.sin(this.tagPhase)*5, ropLen=22+s*0.08;
     const tagX=tailX+swing, tagY=tailY+ropLen;
-
     ctx.beginPath(); ctx.moveTo(tailX,tailY);
     ctx.quadraticCurveTo(tailX+swing*0.5,tailY+ropLen*0.55,tagX,tagY);
     ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=0.85; ctx.setLineDash([2.5,2.5]); ctx.stroke(); ctx.setLineDash([]);
-
     ctx.font='300 10px "DM Mono",monospace';
     const tw=ctx.measureText(this.sub.nickname).width, padX=7, padY=3, tagW=tw+padX*2, tagH=17, tx=tagX-tagW/2;
     ctx.roundRect(tx,tagY,tagW,tagH,4); ctx.fillStyle='rgba(255,255,255,.93)'; ctx.fill();
@@ -301,7 +240,14 @@ class Fish {
 }
 
 // ── 낚싯대 ──────────────────────────────────────────────
-const rod = { active:false, lineY:0, phase:'idle', winner:null, timer:0 };
+const rod={active:false,lineY:0,phase:'idle',winner:null,timer:0};
+let isFishing=false, winnerQueue=[], winnerIdx=0;
+
+function castNext(){
+  const fish=winnerQueue[winnerIdx];
+  rodCanvas.classList.add('visible');
+  rod.active=true; rod.phase='dropping'; rod.lineY=22; rod.winner=fish; rod.timer=0;
+}
 
 function drawRod(){
   rctx.clearRect(0,0,W,H); if(!rod.active) return;
@@ -330,38 +276,9 @@ function updateRod(){
   }
 }
 
-// ── 낚시 큐 ──────────────────────────────────────────────
-let isFishing=false;
-let winnerQueue=[];
-let winnerIdx=0;
-
-function castNext(){
-  const fish=winnerQueue[winnerIdx];
-  rodCanvas.classList.add('visible');
-  rod.active=true; rod.phase='dropping'; rod.lineY=22; rod.winner=fish; rod.timer=0;
-}
-
-function startFishing(){
-  if(isFishing) return;
-
-  const ytPool=fishList.filter(f=>f.sub.eligible&&f.sub.channel==='youtube');
-  const igPool=fishList.filter(f=>f.sub.eligible&&f.sub.channel==='instagram');
-  winnerQueue=[];
-  if(ytPool.length) winnerQueue.push(ytPool[Math.floor(Math.random()*ytPool.length)]);
-  if(igPool.length) winnerQueue.push(igPool[Math.floor(Math.random()*igPool.length)]);
-  if(!winnerQueue.length) return;
-
-  isFishing=true; winnerIdx=0;
-  document.getElementById('fishBtn').disabled=true;
-  document.getElementById('fishBtn').textContent='낚시 중...';
-  castNext();
-}
-
-// ── 당첨 카드 ─────────────────────────────────────────────
 async function showWinner(sub){
   document.getElementById('winnerChannel').textContent = sub.channel==='youtube' ? '🔴 YouTube' : '🟣 Instagram';
   document.getElementById('winnerName').textContent    = sub.nickname;
-  document.getElementById('winnerHandle').textContent  = sub.handle || '';
   const tmpl=document.getElementById('winnerTemplate');
   if(sub.template){ tmpl.textContent=`🎁 ${sub.template}`; tmpl.style.display='inline-block'; }
   else { tmpl.style.display='none'; }
@@ -376,17 +293,28 @@ document.getElementById('winnerOverlay').addEventListener('click', ()=>{
   winnerIdx++;
 
   if(winnerIdx < winnerQueue.length){
-    // 다음 당첨자 낚시
     setTimeout(()=>castNext(), 700);
   } else {
-    // 전부 끝 → 어항·목록 비우기
-    fishList=[]; allSubs=[];
-    renderSubList();
+    fishList=[];
     isFishing=false;
     const btn=document.getElementById('fishBtn');
     btn.disabled=true; btn.textContent='이번 주 완료 ✓';
   }
 });
+
+function startFishing(){
+  if(isFishing) return;
+  const ytPool=fishList.filter(f=>f.sub.eligible&&f.sub.channel==='youtube');
+  const igPool=fishList.filter(f=>f.sub.eligible&&f.sub.channel==='instagram');
+  winnerQueue=[];
+  if(ytPool.length) winnerQueue.push(ytPool[Math.floor(Math.random()*ytPool.length)]);
+  if(igPool.length) winnerQueue.push(igPool[Math.floor(Math.random()*igPool.length)]);
+  if(!winnerQueue.length) return;
+  isFishing=true; winnerIdx=0;
+  document.getElementById('fishBtn').disabled=true;
+  document.getElementById('fishBtn').textContent='낚시 중...';
+  castNext();
+}
 
 // ── 거품 ─────────────────────────────────────────────────
 function spawnBubble(){
@@ -397,7 +325,7 @@ function spawnBubble(){
 }
 
 // ── 메인 루프 ────────────────────────────────────────────
-let fishList=[], allSubs=[];
+let fishList=[];
 
 function loop(){
   ctx.clearRect(0,0,W,H);
@@ -406,84 +334,17 @@ function loop(){
   requestAnimationFrame(loop);
 }
 
-// ── 구독자 목록 렌더 ─────────────────────────────────────
-function renderSubList(){
-  const list=document.getElementById('subList');
-  const rows=allSubs.map(s=>{
-    const badge=s.channel==='youtube'
-      ?`<span class="ch-badge ch-yt">YouTube</span>`
-      :`<span class="ch-badge ch-ig">Instagram</span>`;
-    const dot=`<span class="eligible-dot" style="background:${s.eligible?'#27ae60':'#ccc'}"></span>`;
-    return `<div class="sub-row${s.eligible?'':' row-faded'}">
-      <span>${s.id}</span>
-      <span>${s.nickname}</span>
-      <span>${badge}</span>
-      <span>${s.template||'—'}</span>
-      <span>${dot}${s.eligible?'대기':'완료'}</span>
-      <button class="del-btn" onclick="deleteSub(${s.id})">×</button>
-    </div>`;
-  }).join('');
-  list.innerHTML=`<div class="sub-row header"><span>#</span><span>닉네임</span><span>채널</span><span>템플릿</span><span>상태</span><span></span></div>`
-    +(rows||'<div style="padding:16px 20px;font-family:DM Mono,monospace;font-size:11px;color:#bbb;">등록된 구독자가 없어요</div>');
-}
-
-// ── CRUD ─────────────────────────────────────────────────
-async function addSubscriber(){
-  const nickname=document.getElementById('f-nickname').value.trim();
-  const channel =document.getElementById('f-channel').value;
-  const handle  =document.getElementById('f-handle').value.trim();
-  const template=document.getElementById('f-template').value;
-  const msg=document.getElementById('addMsg');
-  if(!nickname||!channel){ msg.textContent='닉네임과 채널은 필수예요.'; msg.style.color='#e74c3c'; return; }
-  msg.textContent='등록 중...'; msg.style.color='#aaa';
-  try{
-    const res=await fetch(`${API}?type=add&nickname=${encodeURIComponent(nickname)}&channel=${encodeURIComponent(channel)}&handle=${encodeURIComponent(handle)}&template=${encodeURIComponent(template)}`);
-    const data=await res.json();
-    if(data.ok){
-      msg.textContent='✓ 등록 완료'; msg.style.color='#27ae60';
-      ['f-nickname','f-handle'].forEach(id=>document.getElementById(id).value='');
-      document.getElementById('f-channel').value='';
-      document.getElementById('f-template').value='';
-      await loadSubs();
-    } else { msg.textContent='오류: '+JSON.stringify(data); msg.style.color='#e74c3c'; }
-  } catch(e){ msg.textContent='오류: '+e.message; msg.style.color='#e74c3c'; }
-}
-
-async function deleteSub(id){
-  if(!confirm('구독자를 삭제할까요?')) return;
-  try{
-    const res=await fetch(`${API}?type=delete&id=${id}`);
-    const data=await res.json();
-    if(data.ok) await loadSubs();
-    else alert('삭제 실패');
-  } catch(e){ alert('오류: '+e.message); }
-}
-
 async function loadSubs(){
   try{
     const res=await fetch(`${API}?type=subscribers`);
-    allSubs=await res.json();
-    fishList=allSubs.map(s=>new Fish(s));
-    renderSubList();
-  } catch(e){ console.warn('구독자 로드 실패:',e); }
-}
-
-async function loadMeta(){
-  try{
-    const res=await fetch(`${API}?type=meta`);
     const data=await res.json();
-    const sel=document.getElementById('f-template');
-    sel.innerHTML='<option value="">템플릿 선택</option>';
-    (data.templates||[]).forEach(t=>{
-      const opt=document.createElement('option');
-      opt.value=t; opt.textContent=t; sel.appendChild(opt);
-    });
-  } catch(e){ console.warn('meta 로드 실패:',e); }
+    fishList=data.map(s=>new Fish(s));
+  } catch(e){ console.warn('구독자 로드 실패:',e); }
 }
 
 async function init(){
   resize(); window.addEventListener('resize',resize);
-  await Promise.all([loadSubs(), loadMeta()]);
+  await loadSubs();
   loop();
   setInterval(spawnBubble,2200);
 }
