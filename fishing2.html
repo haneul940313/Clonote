@@ -51,7 +51,7 @@
     display:flex; align-items:center; justify-content:space-between;
     padding:0 20px; z-index:15;
   }
-  .legend { display:flex; gap:12px; font-family:'DM Mono',monospace; font-size:10px; color:rgba(255,255,255,0.75); }
+  .legend { display:flex; gap:14px; font-family:'DM Mono',monospace; font-size:13px; font-weight:400; color:rgba(255,255,255,0.95); }
   .legend-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; vertical-align:middle; }
 
   .fish-btn {
@@ -106,7 +106,7 @@
 </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbwwVDuz8QYmQpzWOwGJghRzcuwiQyd765nIXNvvPlGosi3Oq8rpj06z3FDbyNxBMOaq/exec';
+const API = 'https://script.google.com/macros/s/AKfycbza5OQd9a73v1mJbhENE8Lrp5tQsZaPaWm7SSWP8j4sb__8nOlgCb6TmVHL76Nf68q_/exec';
 const POLL_INTERVAL = 5000; // 5초마다 폴링
 
 const tankEl    = document.getElementById('tank');
@@ -319,7 +319,9 @@ function updateRod(){
 }
 
 async function showWinner(sub){
-  document.getElementById('winnerChannel').textContent = sub.channel==='youtube' ? '🔴 YouTube' : '🟣 Instagram';
+  const ch = (sub.channel||'').toLowerCase();
+  const isYT = ch==='youtube'||ch==='유튜브';
+  document.getElementById('winnerChannel').textContent = isYT ? '🔴 YouTube' : '🟣 Instagram';
   document.getElementById('winnerName').textContent    = sub.nickname;
   const tmpl=document.getElementById('winnerTemplate');
   if(sub.template){ tmpl.textContent=`🎁 ${sub.template}`; tmpl.style.display='inline-block'; }
@@ -347,10 +349,10 @@ document.getElementById('winnerOverlay').addEventListener('click', ()=>{
 
 function startFishing(){
   if(isFishing) return;
-  const isYT = s => { const c=(s.sub.channel||'').toLowerCase(); return c==='youtube'||c==='유튜브'; };
-  const isIG = s => { const c=(s.sub.channel||'').toLowerCase(); return c==='instagram'||c==='인스타그램'; };
-  const ytPool=fishList.filter(f=>f.sub.eligible && isYT(f));
-  const igPool=fishList.filter(f=>f.sub.eligible && isIG(f));
+  const chYT = f => { const c=(f.sub.channel||'').toLowerCase(); return c==='youtube'||c==='유튜브'; };
+  const chIG = f => { const c=(f.sub.channel||'').toLowerCase(); return c==='instagram'||c==='인스타그램'; };
+  const ytPool = fishList.filter(chYT);
+  const igPool = fishList.filter(chIG);
   winnerQueue=[];
   if(ytPool.length) winnerQueue.push(ytPool[Math.floor(Math.random()*ytPool.length)]);
   if(igPool.length) winnerQueue.push(igPool[Math.floor(Math.random()*igPool.length)]);
@@ -377,14 +379,14 @@ function updateLegend(){
   const igCount = fishList.filter(isIGFish).length;
 
   document.getElementById('legendYT').innerHTML =
-    `<span style="display:inline-flex;align-items:center;gap:5px;">
-      <span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#e8453c;color:white;font-family:'DM Mono',monospace;font-size:8px;font-weight:bold;line-height:1;">U</span>
-      YouTube <span style="opacity:.6">${ytCount}</span>
+    `<span style="display:inline-flex;align-items:center;gap:6px;">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#e8453c;color:white;font-family:'DM Mono',monospace;font-size:10px;font-weight:bold;">U</span>
+      YouTube <span style="opacity:.75;margin-left:2px;">${ytCount}</span>
     </span>`;
   document.getElementById('legendIG').innerHTML =
-    `<span style="display:inline-flex;align-items:center;gap:5px;">
-      <span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#c2185b;color:white;font-family:'DM Mono',monospace;font-size:8px;font-weight:bold;line-height:1;">I</span>
-      Instagram <span style="opacity:.6">${igCount}</span>
+    `<span style="display:inline-flex;align-items:center;gap:6px;">
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#c2185b;color:white;font-family:'DM Mono',monospace;font-size:10px;font-weight:bold;">I</span>
+      Instagram <span style="opacity:.75;margin-left:2px;">${igCount}</span>
     </span>`;
 }
 let fishList=[];
