@@ -375,7 +375,8 @@ document.getElementById('winnerOverlay').addEventListener('click', () => {
   document.getElementById('winnerOverlay').classList.remove('show');
   rodCanvas.classList.remove('visible');
   rod.active=false; rod.phase='idle'; rod.winner=null;
-  fishList=[];
+  fishList=[]; allSubs=[];
+  renderSubList();
   isFishing=false;
   const btn=document.getElementById('fishBtn');
   btn.disabled=true; btn.textContent='이번 주 완료 ✓';
