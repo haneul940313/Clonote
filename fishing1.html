@@ -106,7 +106,7 @@
 </div>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbyX3B_xanf95Y7U_l0edm76fGbJvbGzyZ4cGyI7xNaDuYGmgTD-utXtJRYc0kEwwfax/exec';
+const API = 'https://script.google.com/macros/s/AKfycbwPjmU8xJs014Cv7KvyIwSB4nYOYbBoV2rpYy_i9XrUGnLFXV9LeunVA5AR1EAXqcLG/exec';
 const POLL_INTERVAL = 5000; // 5초마다 폴링
 
 const tankEl    = document.getElementById('tank');
@@ -336,6 +336,8 @@ document.getElementById('winnerOverlay').addEventListener('click', ()=>{
   if(winnerIdx < winnerQueue.length){
     setTimeout(()=>castNext(), 700);
   } else {
+    // 남은 등록 상태 → 완료 처리 (구글시트 + 노션)
+    try{ fetch(`${API}?type=closeWeek`); } catch(e){}
     fishList=[];
     isFishing=false;
     const btn=document.getElementById('fishBtn');
