@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>픽셀 구독자 뽑기</title>
+<style>
+  :root{
+    --bg:#f7f3e8;
+    --panel:#fffaf0;
+    --line:#2f2a24;
+    --shadow:#b8aa93;
+    --glass:#dfeef7;
+    --glass2:#b8d8ea;
+    --yt:#e8453c;
+    --ig:#c2185b;
+    --accent:#2f2a24;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{
+    width:100%;
+    height:100%;
+    background:
+      linear-gradient(0deg, rgba(0,0,0,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,.03) 1px, transparent 1px),
+      var(--bg);
+    background-size:8px 8px, 8px 8px, auto;
+    overflow:hidden;
+    image-rendering:pixelated;
+    font-family:
+      "Press Start 2P",
+      "DungGeunMo",
+      "Galmuri9",
+      monospace;
+  }
+
+  .app{
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:14px;
+    padding:18px;
+  }
+
+  .title{
+    font-size:12px;
+    line-height:1.6;
+    color:var(--accent);
+    text-align:center;
+    letter-spacing:.04em;
+    text-shadow:2px 2px 0 #fff;
+  }
+
+  .frame{
+    position:relative;
+    width:min(100%, 560px);
+    padding:12px;
+    background:var(--panel);
+    border:4px solid var(--line);
+    box-shadow:6px 6px 0 var(--shadow);
+  }
+
+  canvas{
+    display:block;
+    width:100%;
+    max-width:100%;
+    margin:0 auto;
+    image-rendering:pixelated;
+    image-rendering:crisp-edges;
+  }
+
+  .hud{
+    margin-top:10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .legend{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 10px;
+    background:#fff;
+    border:3px solid var(--line);
+    box-shadow:3px 3px 0 var(--shadow);
+    font-size:10px;
+    line-height:1.4;
+    color:var(--accent);
+  }
+
+  .dot{
+    width:16px;
+    height:16px;
+    border:2px solid var(--line);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:8px;
+  }
+
+  .yt{background:var(--yt)}
+  .ig{background:var(--ig)}
+
+  .btns{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  button{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    background:#ffd45c;
+    color:#2f2a24;
+    border:3px solid var(--line);
+    box-shadow:4px 4px 0 var(--shadow);
+    padding:10px 14px;
+    font:inherit;
+    font-size:10px;
+    line-height:1.4;
+  }
+
+  button:active{
+    transform:translate(2px,2px);
+    box-shadow:2px 2px 0 var(--shadow);
+  }
+
+  button:disabled{
+    opacity:.5;
+    cursor:default;
+    transform:none;
+    box-shadow:4px 4px 0 var(--shadow);
+  }
+
+  .ghost{
+    background:#d9edf8;
+  }
+
+  .statusbar{
+    width:min(100%,560px);
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    flex-wrap:wrap;
+    font-size:10px;
+    color:var(--accent);
+  }
+
+  .statusbox{
+    background:#fff;
+    border:3px solid var(--line);
+    box-shadow:3px 3px 0 var(--shadow);
+    padding:8px 10px;
+    min-height:36px;
+    display:flex;
+    align-items:center;
+  }
+
+  .blink{
+    animation:blink 1s steps(2,end) infinite;
+  }
+  @keyframes blink{
+    50%{opacity:.35}
+  }
+
+  @media (max-width: 480px){
+    .title{font-size:10px}
+    .chip, button, .statusbox{font-size:9px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="title">PIXEL FISHING MACHINE</div>
+
+  <div class="frame">
+    <canvas id="gc"></canvas>
+
+    <div class="hud">
+      <div class="legend">
+        <span class="chip"><span class="dot yt">Y</span>YOUTUBE <span id="ytCount">0</span></span>
+        <span class="chip"><span class="dot ig">I</span>INSTAGRAM <span id="igCount">0</span></span>
+      </div>
+
+      <div class="btns">
+        <button id="btn" onclick="doPick()">1회 뽑기</button>
+        <button class="ghost" onclick="forceSync()">새로고침</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="statusbar">
+    <div class="statusbox" id="netStatus">대기 중</div>
+    <div class="statusbox">후보 <span id="totalCount" style="margin-left:8px">0</span>명</div>
+  </div>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbx_fME7HCUhuOFl1yjIu0-ZulL6dtr1LIXluxvPhhvdOc7lklDAAtVu--d5S6xy5ce9/exec';
+
+// 기존 5000ms보다 훨씬 짧게
+const POLL_MS = 1200;
+// 등록 직후 좀 더 빠르게 반영되도록 짧은 버스트 폴링
+const BURST_MS = 350;
+const BURST_COUNT = 8;
+
+const cv = document.getElementById('gc');
+const cx = cv.getContext('2d');
+
+let W, H;
+const BASE_W = 480, BASE_H = 580;
+const R = 30;
+
+const TX = 40, TY = 24, TW = 400, TH = 360;
+const NCX_R = TW/2 + TX;
+const NTOP_R = TY + TH;
+const NW = 72, NH = 90;
+const TRAY_Y_R = NTOP_R + NH;
+const TRAY_W = 150, TRAY_H = 32;
+const SLOT_X_R = TW/2 + TX;
+
+function setupCanvas() {
+  const maxW = Math.min(window.innerWidth - 40, 560);
+  const maxH = window.innerHeight - 180;
+  const scale = Math.min(maxW / BASE_W, maxH / BASE_H, 1.12);
+  W = Math.round(BASE_W * scale);
+  H = Math.round(BASE_H * scale);
+  cv.width = W;
+  cv.height = H;
+  cv.style.width = W + 'px';
+  cv.style.height = H + 'px';
+}
+function sf(){ return W / BASE_W; }
+function sx(v){ return v * sf(); }
+function sy(v){ return v * sf(); }
+
+const COLORS = [
+  '#e8453c','#ff6d3b','#d4ac00','#43a047','#1e88e5',
+  '#7b3fa0','#c2185b','#00897b','#e65100','#3949ab',
+  '#558b2f','#00838f','#6d4c41','#4527a0',
+];
+
+const GRAVITY = 0.42;
+function ease(t){ return t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2; }
+
+function setStatus(msg, loading=false){
+  const el = document.getElementById('netStatus');
+  el.textContent = msg;
+  el.classList.toggle('blink', loading);
+}
+
+function fitName(name, maxW, fontSize) {
+  cx.font = `bold ${fontSize}px monospace`;
+  if (cx.measureText(name).width <= maxW) return name;
+  let t = name;
+  while (t.length > 1 && cx.measureText(t + '…').width > maxW) t = t.slice(0,-1);
+  return t + '…';
+}
+
+class Ball {
+  constructor(sub, color) {
+    this.sub = sub;
+    this.color = color;
+    this.r = R * sf();
+    this.x = sx(SLOT_X_R) + (Math.random()-0.5)*sx(28);
+    this.y = sy(TY) + this.r;
+    this.vx = (Math.random()-0.5)*1.8;
+    this.vy = 0;
+    this.done = false;
+    this.dropping = false;
+  }
+
+  update(others) {
+    if (this.done || this.dropping) return;
+
+    const txl = sx(TX)+2, txr = sx(TX+TW)-2;
+    const tyb = sy(TY+TH)-4;
+
+    this.vy += GRAVITY;
+    this.vx *= 0.984;
+    this.x += this.vx;
+    this.y += this.vy;
+
+    if (this.x - this.r < txl) { this.x = txl + this.r; this.vx = Math.abs(this.vx)*0.52; }
+    if (this.x + this.r > txr) { this.x = txr - this.r; this.vx = -Math.abs(this.vx)*0.52; }
+    if (this.y + this.r > tyb) { this.y = tyb - this.r; this.vy = -Math.abs(this.vy)*0.26; this.vx *= 0.70; }
+
+    for (const o of others) {
+      if (o === this || o.dropping || o.done) continue;
+      const dx=this.x-o.x, dy=this.y-o.y, d=Math.hypot(dx,dy);
+      if (d < this.r + o.r - 0.5 && d > 0.01) {
+        const nx=dx/d, ny=dy/d, ov=(this.r+o.r-d)/2;
+        this.x+=nx*ov*0.5; this.y+=ny*ov*0.5;
+        o.x-=nx*ov*0.5; o.y-=ny*ov*0.5;
+        const rv=this.vy*ny-o.vy*ny;
+        if (rv<0) { this.vy-=rv*ny*0.4; o.vy+=rv*ny*0.4; this.vx-=rv*nx*0.2; o.vx+=rv*nx*0.2; }
+      }
+    }
+  }
+
+  draw(bx, by, br) {
+    const x = bx ?? this.x, y = by ?? this.y, r = br ?? this.r;
+
+    // 픽셀 느낌 그림자
+    cx.fillStyle = 'rgba(0,0,0,.12)';
+    cx.fillRect(Math.round(x-r+3), Math.round(y-r+3), Math.round(r*2), Math.round(r*2));
+
+    // 위쪽 반
+    cx.fillStyle = this.color;
+    cx.fillRect(Math.round(x-r), Math.round(y-r), Math.round(r*2), Math.round(r));
+
+    // 아래쪽 반
+    cx.fillStyle = '#f3eee7';
+    cx.fillRect(Math.round(x-r), Math.round(y), Math.round(r*2), Math.round(r));
+
+    // 하이라이트
+    cx.fillStyle = 'rgba(255,255,255,.35)';
+    cx.fillRect(Math.round(x-r+4), Math.round(y-r+4), Math.round(r*.8), Math.round(r*.35));
+
+    // 테두리
+    cx.strokeStyle = '#2f2a24';
+    cx.lineWidth = 2;
+    cx.strokeRect(Math.round(x-r), Math.round(y-r), Math.round(r*2), Math.round(r*2));
+
+    // 중간 라인
+    cx.beginPath();
+    cx.moveTo(Math.round(x-r), Math.round(y));
+    cx.lineTo(Math.round(x+r), Math.round(y));
+    cx.stroke();
+
+    // 이름
+    const fs = Math.max(7, Math.round(r * 0.28));
+    const name = fitName(this.sub.nickname || this.sub.name || '', r*1.5, fs);
+    cx.font = `bold ${fs}px monospace`;
+    cx.textAlign='center';
+    cx.textBaseline='middle';
+    cx.fillStyle = '#fff';
+    cx.fillText(name, x, y - r*0.25);
+
+    // 채널 문자
+    cx.fillStyle = '#4a433b';
+    cx.font = `bold ${Math.max(7, Math.round(r * 0.25))}px monospace`;
+    cx.fillText(this.isYT() ? 'Y' : 'I', x, y + r*0.28);
+  }
+
+  isYT() {
+    const c = (this.sub.channel || '').toLowerCase();
+    return c === 'youtube' || c === '유튜브';
+  }
+}
+
+function drawMachine() {
+  const tx=sx(TX), ty=sy(TY), tw=sx(TW), th=sy(TH);
+  const ncx=sx(NCX_R), ntop=sy(NTOP_R);
+  const nw=sx(NW), nh=sy(NH);
+  const tray_y=sy(TRAY_Y_R), tray_w=sx(TRAY_W), tray_h=sy(TRAY_H);
+
+  // 외곽 프레임
+  cx.fillStyle = '#9bc3d8';
+  cx.fillRect(tx, ty, tw, th);
+  cx.strokeStyle = '#2f2a24';
+  cx.lineWidth = 4;
+  cx.strokeRect(tx, ty, tw, th);
+
+  // 유리
+  cx.fillStyle = '#dff1fa';
+  cx.fillRect(tx+sx(8), ty+sy(8), tw-sx(16), th-sy(16));
+  cx.fillStyle = 'rgba(255,255,255,.28)';
+  cx.fillRect(tx+sx(14), ty+sy(12), sx(22), th-sy(24));
+
+  // 위 슬롯
+  cx.fillStyle = '#4d7d98';
+  cx.fillRect(ncx-sx(16), ty-sy(4), sx(32), sy(12));
+  cx.strokeStyle = '#2f2a24';
+  cx.strokeRect(ncx-sx(16), ty-sy(4), sx(32), sy(12));
+
+  // 넥
+  cx.fillStyle = '#b8d8ea';
+  cx.fillRect(ncx-nw/2, ntop, nw, nh);
+  cx.strokeRect(ncx-nw/2, ntop, nw, nh);
+
+  // 트레이
+  cx.fillStyle = '#78aec8';
+  cx.fillRect(ncx-tray_w/2, tray_y, tray_w, tray_h);
+  cx.strokeRect(ncx-tray_w/2, tray_y, tray_w, tray_h);
+
+  cx.fillStyle = '#d8edf8';
+  cx.fillRect(ncx-tray_w/2+sx(8), tray_y+sy(5), tray_w-sx(16), tray_h-sy(10));
+  cx.strokeRect(ncx-tray_w/2+sx(8), tray_y+sy(5), tray_w-sx(16), tray_h-sy(10));
+
+  // 받침
+  cx.fillStyle = '#d9edf8';
+  cx.fillRect(tx+sx(20), tray_y+tray_h, tw-sx(40), sy(24));
+  cx.strokeRect(tx+sx(20), tray_y+tray_h, tw-sx(40), sy(24));
+
+  // 레버
+  cx.fillStyle = '#e8453c';
+  cx.fillRect(tx+tw-sx(16), ntop+sy(10), sx(16), sy(54));
+  cx.strokeRect(tx+tw-sx(16), ntop+sy(10), sx(16), sy(54));
+  cx.fillStyle = '#c0392b';
+  cx.fillRect(tx+tw-sx(22), ntop+sy(2), sx(28), sy(16));
+  cx.strokeRect(tx+tw-sx(22), ntop+sy(2), sx(28), sy(16));
+}
+
+let balls=[], state='idle', dropBall=null, dropY=0;
+let zoomT=0, openT=0, showT=0, zoomBall=null;
+let winnerQueue=[], winnerIdx=0;
+const ZOOM_DUR=90, OPEN_DUR=90, SHOW_DUR=120;
+let knownIds=new Set(), colorIdx=0;
+let isPolling = false;
+
+function updateLegend() {
+  const yt = balls.filter(b=>b.isYT()).length;
+  const ig = balls.filter(b=>!b.isYT()).length;
+  document.getElementById('ytCount').textContent = yt;
+  document.getElementById('igCount').textContent = ig;
+  document.getElementById('totalCount').textContent = yt + ig;
+}
+
+async function fetchJSON(url, label='처리 중') {
+  setStatus(label, true);
+  const res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  setStatus('완료');
+  return data;
+}
+
+async function pollSubs(force=false) {
+  if (isPolling) return;
+  if (!force && state !== 'idle') return;
+
+  isPolling = true;
+  try {
+    const data = await fetchJSON(`${API}?type=subscribers&_=${Date.now()}`, '명단 불러오는 중');
+    if (!Array.isArray(data)) return;
+
+    const incomingIds = new Set(data.map(s => s.id));
+
+    // 새 후보 추가
+    data.forEach((s, i) => {
+      if (!knownIds.has(s.id)) {
+        knownIds.add(s.id);
+        const color = COLORS[colorIdx % COLORS.length];
+        colorIdx++;
+        setTimeout(() => {
+          balls.push(new Ball(s, color));
+          updateLegend();
+        }, i * 60);
+      }
+    });
+
+    // 사라진 후보 제거
+    balls = balls.filter(b => incomingIds.has(b.sub.id));
+    knownIds = incomingIds;
+    updateLegend();
+  } catch (e) {
+    console.warn('poll error:', e);
+    setStatus('연결 확인 필요');
+  } finally {
+    isPolling = false;
+  }
+}
+
+async function burstPoll() {
+  for (let i = 0; i < BURST_COUNT; i++) {
+    await pollSubs(true);
+    await new Promise(r => setTimeout(r, BURST_MS));
+  }
+}
+
+async function forceSync() {
+  await pollSubs(true);
+  await burstPoll();
+}
+
+function doPick() {
+  if (state !== 'idle' || balls.length === 0) return;
+  document.getElementById('btn').disabled = true;
+
+  const ytPool = balls.filter(b => b.isYT());
+  const igPool = balls.filter(b => !b.isYT());
+
+  winnerQueue = [];
+  if (ytPool.length) winnerQueue.push(ytPool[Math.floor(Math.random()*ytPool.length)]);
+  if (igPool.length) winnerQueue.push(igPool[Math.floor(Math.random()*igPool.length)]);
+
+  if (!winnerQueue.length) {
+    document.getElementById('btn').disabled = false;
+    return;
+  }
+
+  winnerIdx = 0;
+  startDrop(winnerQueue[0]);
+}
+
+function startDrop(ball) {
+  dropBall = ball;
+  balls = balls.filter(b => b !== ball);
+  dropBall.dropping = true;
+  dropBall.x = sx(NCX_R);
+  dropBall.y = sy(TY+TH) - dropBall.r - sy(2);
+  dropY = dropBall.y;
+  state = 'dropping';
+  updateLegend();
+}
+
+async function onCardClose() {
+  const winner = zoomBall;
+  zoomBall = null;
+  dropBall = null;
+
+  try {
+    await fetchJSON(`${API}?type=catch&winner_id=${winner.sub.id}&_=${Date.now()}`, '당첨 반영 중');
+  } catch(e) {
+    console.warn(e);
+  }
+
+  winnerIdx++;
+
+  if (winnerIdx < winnerQueue.length) {
+    state = 'idle_between';
+    setTimeout(() => startDrop(winnerQueue[winnerIdx]), 500);
+  } else {
+    try {
+      await fetchJSON(`${API}?type=closeWeek&_=${Date.now()}`, '회차 마감 중');
+    } catch(e) {
+      console.warn(e);
+    }
+
+    // 화면은 즉시 비우고
+    balls = [];
+    knownIds = new Set();
+    updateLegend();
+
+    // 바로 짧게 여러 번 다시 조회해서 신규 등록이 빨리 뜨게 함
+    await burstPoll();
+
+    state = 'idle';
+    document.getElementById('btn').disabled = false;
+  }
+}
+
+function drawZooming() {
+  const t = ease(Math.min(zoomT/ZOOM_DUR,1));
+  const fromX = sx(NCX_R), fromY = sy(TRAY_Y_R)+sy(TRAY_H)/2;
+  const toX = W/2, toY = H/2 - sy(10);
+  const x = fromX+(toX-fromX)*t;
+  const y = fromY+(toY-fromY)*t;
+  const r = zoomBall.r + (sx(MAX_R)-zoomBall.r)*t;
+
+  cx.fillStyle = `rgba(47,42,36,${0.45*t})`;
+  cx.fillRect(0,0,W,H);
+  zoomBall.draw(x,y,r);
+  zoomT++;
+  if (zoomT >= ZOOM_DUR) { state='opening'; openT=0; }
+}
+
+const MAX_R = 100;
+
+function drawOpening() {
+  const t = ease(Math.min(openT/OPEN_DUR,1));
+  const gap = t * sx(MAX_R) * 1.12;
+  const x=W/2, y=H/2-sy(10), r=sx(MAX_R);
+
+  cx.fillStyle='rgba(47,42,36,0.45)';
+  cx.fillRect(0,0,W,H);
+
+  cx.fillStyle = zoomBall.color;
+  cx.fillRect(Math.round(x-r), Math.round(y-gap-r), Math.round(r*2), Math.round(r));
+  cx.strokeStyle = '#2f2a24';
+  cx.lineWidth = 2;
+  cx.strokeRect(Math.round(x-r), Math.round(y-gap-r), Math.round(r*2), Math.round(r));
+
+  cx.fillStyle = '#f3eee7';
+  cx.fillRect(Math.round(x-r), Math.round(y+gap), Math.round(r*2), Math.round(r));
+  cx.strokeRect(Math.round(x-r), Math.round(y+gap), Math.round(r*2), Math.round(r));
+
+  openT++;
+  if (openT >= OPEN_DUR) { state='showing'; showT=0; }
+}
+
+function drawShowing() {
+  const t = ease(Math.min(showT/SHOW_DUR,1));
+  const gap = sx(MAX_R)*1.12;
+  const x=W/2, y=H/2-sy(10), r=sx(MAX_R);
+  const sub = zoomBall.sub;
+  const isYT = zoomBall.isYT();
+
+  cx.fillStyle='rgba(47,42,36,0.45)';
+  cx.fillRect(0,0,W,H);
+
+  cx.fillStyle = zoomBall.color;
+  cx.fillRect(Math.round(x-r), Math.round(y-gap-r), Math.round(r*2), Math.round(r));
+  cx.strokeStyle = '#2f2a24';
+  cx.strokeRect(Math.round(x-r), Math.round(y-gap-r), Math.round(r*2), Math.round(r));
+
+  cx.fillStyle = '#f3eee7';
+  cx.fillRect(Math.round(x-r), Math.round(y+gap), Math.round(r*2), Math.round(r));
+  cx.strokeRect(Math.round(x-r), Math.round(y+gap), Math.round(r*2), Math.round(r));
+
+  cx.save();
+  cx.globalAlpha = t;
+
+  const cw=Math.min(sx(280),W-sx(40)), ch=sy(192);
+  const cardX=x-cw/2, cardY=y-ch/2;
+
+  cx.fillStyle='#fff8e8';
+  cx.fillRect(cardX, cardY, cw, ch);
+  cx.strokeStyle='#2f2a24';
+  cx.lineWidth=3;
+  cx.strokeRect(cardX, cardY, cw, ch);
+
+  cx.fillStyle=zoomBall.color;
+  cx.fillRect(cardX, cardY, cw, sy(42));
+  cx.strokeRect(cardX, cardY, cw, sy(42));
+
+  cx.font=`10px monospace`;
+  cx.textAlign='center';
+  cx.textBaseline='middle';
+  cx.fillStyle='#fff';
+  cx.fillText(isYT ? 'YOUTUBE WINNER' : 'INSTAGRAM WINNER', x, cardY+sy(21));
+
+  cx.font=`bold ${sy(24)}px monospace`;
+  cx.fillStyle='#2f2a24';
+  cx.fillText(sub.nickname || sub.name || '', x, cardY+sy(88));
+
+  cx.beginPath();
+  cx.moveTo(cardX+sx(24), cardY+sy(114));
+  cx.lineTo(cardX+cw-sx(24), cardY+sy(114));
+  cx.stroke();
+
+  if (sub.template) {
+    cx.font=`12px monospace`;
+    cx.fillStyle='#7b3fa0';
+    cx.fillText(`[ ${sub.template} ]`, x, cardY+sy(144));
+  }
+
+  cx.font=`10px monospace`;
+  cx.fillStyle='rgba(47,42,36,.7)';
+  cx.fillText('TAP TO CONTINUE', x, cardY+sy(170));
+
+  cx.restore();
+
+  showT++;
+  if (showT >= SHOW_DUR) state='showDone';
+}
+
+cv.addEventListener('click', () => {
+  if (state==='showDone' || state==='showing') {
+    onCardClose();
+  }
+});
+
+function loop() {
+  balls.forEach(b => b.update(balls));
+
+  if ((state==='dropping' || state==='idle_between') && dropBall) {
+    const targetY = sy(TRAY_Y_R) + sy(TRAY_H)/2;
+    dropY += (targetY - dropY)*0.03 + 0.7;
+    dropBall.x += (sx(NCX_R) - dropBall.x)*0.07;
+    dropBall.y = dropY;
+
+    if (dropY >= targetY-1) {
+      dropBall.y = targetY;
+      dropBall.x = sx(NCX_R);
+      zoomBall = dropBall;
+      dropBall = null;
+      state='zooming';
+      zoomT=0;
+    }
+  }
+
+  cx.clearRect(0,0,W,H);
+  drawMachine();
+
+  cx.save();
+  cx.beginPath();
+  cx.rect(sx(TX)+2, sy(TY)+2, sx(TW)-4, sy(TH)-4);
+  cx.clip();
+  balls.forEach(b => b.draw());
+  cx.restore();
+
+  if (state==='dropping' && dropBall) dropBall.draw();
+  if (state==='zooming') drawZooming();
+  if (state==='opening') drawOpening();
+  if (state==='showing' || state==='showDone') drawShowing();
+
+  requestAnimationFrame(loop);
+}
+
+async function init() {
+  setupCanvas();
+  window.addEventListener('resize', setupCanvas);
+  await forceSync();
+  setInterval(() => pollSubs(false), POLL_MS);
+  loop();
+}
+
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
