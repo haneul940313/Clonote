@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>구독자 뽑기</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body {
+    width:100%; height:100%;
+    background:transparent;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-family:'DM Mono',monospace;
+    overflow:hidden;
+  }
+  .wrap {
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:14px;
+    width:100%; height:100%;
+    padding:16px;
+  }
+  canvas { display:block; max-width:100%; }
+  .bottom-ui {
+    display:flex; align-items:center; justify-content:space-between;
+    width:100%; max-width:480px; padding:0 4px;
+  }
+  .legend { display:flex; gap:14px; font-size:12px; color:rgba(255,255,255,0.85); }
+  .ldot { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; font-size:9px; font-weight:bold; color:white; margin-right:5px; vertical-align:middle; }
+  .lcount { opacity:.7; margin-left:3px; }
+  .btn {
+    font-family:'DM Mono',monospace; font-size:12px; letter-spacing:.06em;
+    color:#555; background:rgba(255,255,255,0.92); border:.5px solid rgba(0,0,0,.12);
+    border-radius:20px; padding:8px 22px; cursor:pointer;
+    transition:background .15s, transform .1s; backdrop-filter:blur(4px);
+  }
+  .btn:hover { background:white; }
+  .btn:active { transform:scale(.97); }
+  .btn:disabled { opacity:.45; cursor:default; transform:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <canvas id="gc"></canvas>
+  <div class="bottom-ui">
+    <div class="legend">
+      <span><span class="ldot" style="background:#e8453c">U</span>YouTube<span class="lcount" id="ytCount">0</span></span>
+      <span><span class="ldot" style="background:#c2185b">I</span>Instagram<span class="lcount" id="igCount">0</span></span>
+    </div>
+    <button class="btn" id="btn" onclick="doPick()">🎲 뽑기</button>
+  </div>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbwwVDuz8QYmQpzWOwGJghRzcuwiQyd765nIXNvvPlGosi3Oq8rpj06z3FDbyNxBMOaq/exec';
+const POLL_MS = 5000;
+
+const cv = document.getElementById('gc');
+const cx = cv.getContext('2d');
+let W, H;
+
+// ── 기계 크기 설정 ────────────────────────────────────────
+const BASE_W = 480, BASE_H = 580;
+const R = 30; // 캡슐 반지름
+
+// 기계 파라미터 (BASE_W 기준)
+const TX = 40, TY = 24, TW = 400, TH = 360;
+const NCX_R = TW/2 + TX; // = 240
+const NTOP_R = TY + TH;
+const NW = 72, NH = 90;
+const TRAY_Y_R = NTOP_R + NH;
+const TRAY_W = 150, TRAY_H = 32;
+const SLOT_X_R = TW/2 + TX;
+
+// 캔버스 크기 설정
+function setupCanvas() {
+  const maxW = Math.min(window.innerWidth - 32, 520);
+  const maxH = window.innerHeight - 120;
+  const scale = Math.min(maxW / BASE_W, maxH / BASE_H, 1.1);
+  W = Math.round(BASE_W * scale);
+  H = Math.round(BASE_H * scale);
+  cv.width = W; cv.height = H;
+  cv.style.width  = W + 'px';
+  cv.style.height = H + 'px';
+}
+
+// 스케일 팩터
+function sf() { return W / BASE_W; }
+function sx(v) { return v * sf(); }
+function sy(v) { return v * sf(); }
+
+const COLORS = [
+  '#e8453c','#ff6d3b','#d4ac00','#43a047','#1e88e5',
+  '#7b3fa0','#c2185b','#00897b','#e65100','#3949ab',
+  '#558b2f','#00838f','#6d4c41','#4527a0',
+];
+
+const GRAVITY = 0.42;
+
+function ease(t){ return t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2; }
+
+function fitName(name, maxW, fontSize) {
+  const font = `bold ${fontSize}px sans-serif`;
+  cx.font = font;
+  if (cx.measureText(name).width <= maxW) return name;
+  let t = name;
+  while (t.length > 1 && cx.measureText(t + '…').width > maxW) t = t.slice(0,-1);
+  return t + '…';
+}
+
+// ── Ball 클래스 ──────────────────────────────────────────
+class Ball {
+  constructor(sub, color) {
+    const s = sf();
+    this.sub = sub; this.color = color; this.r = R * s;
+    this.x = sx(SLOT_X_R) + (Math.random()-0.5)*sx(28);
+    this.y = sy(TY) + this.r;
+    this.vx = (Math.random()-0.5)*1.8;
+    this.vy = 0;
+    this.done = false; this.dropping = false;
+  }
+  update(others) {
+    if (this.done || this.dropping) return;
+    const s = sf();
+    const txl = sx(TX)+2, txr = sx(TX+TW)-2;
+    const tyb = sy(TY+TH)-4;
+
+    this.vy += GRAVITY; this.vx *= 0.984;
+    this.x += this.vx; this.y += this.vy;
+
+    if (this.x - this.r < txl) { this.x = txl + this.r; this.vx = Math.abs(this.vx)*0.52; }
+    if (this.x + this.r > txr) { this.x = txr - this.r; this.vx = -Math.abs(this.vx)*0.52; }
+    if (this.y + this.r > tyb) { this.y = tyb - this.r; this.vy = -Math.abs(this.vy)*0.26; this.vx *= 0.70; }
+
+    for (const o of others) {
+      if (o === this || o.dropping || o.done) continue;
+      const dx=this.x-o.x, dy=this.y-o.y, d=Math.hypot(dx,dy);
+      if (d < this.r + o.r - 0.5 && d > 0.01) {
+        const nx=dx/d, ny=dy/d, ov=(this.r+o.r-d)/2;
+        this.x+=nx*ov*0.5; this.y+=ny*ov*0.5;
+        o.x-=nx*ov*0.5; o.y-=ny*ov*0.5;
+        const rv=this.vy*ny-o.vy*ny;
+        if (rv<0) { this.vy-=rv*ny*0.4; o.vy+=rv*ny*0.4; this.vx-=rv*nx*0.2; o.vx+=rv*nx*0.2; }
+      }
+    }
+  }
+  draw(bx, by, br) {
+    const x = bx ?? this.x, y = by ?? this.y, r = br ?? this.r;
+    cx.save();
+    // 위 절반
+    cx.beginPath(); cx.arc(x,y,r,Math.PI,0); cx.lineTo(x+r,y); cx.lineTo(x-r,y); cx.closePath();
+    cx.fillStyle = this.color; cx.fill();
+    // 아래 절반
+    cx.beginPath(); cx.arc(x,y,r,0,Math.PI); cx.lineTo(x-r,y); cx.lineTo(x+r,y); cx.closePath();
+    cx.fillStyle = 'rgba(255,255,255,0.68)'; cx.fill();
+    // 테두리
+    cx.beginPath(); cx.arc(x,y,r,0,Math.PI*2);
+    cx.strokeStyle='rgba(0,0,0,0.1)'; cx.lineWidth=1.5; cx.stroke();
+    // 이름 (위 절반)
+    const fs = Math.max(7, Math.round(r * 0.32));
+    const name = fitName(this.sub.nickname || this.sub.name, r*1.55, fs);
+    cx.font = `bold ${fs}px sans-serif`;
+    cx.fillStyle = 'rgba(255,255,255,0.95)';
+    cx.textAlign='center'; cx.textBaseline='middle';
+    cx.fillText(name, x, y - r*0.22);
+    // 채널 뱃지 (아래 절반, 무채색)
+    const isYT = this.isYT();
+    cx.font = `500 ${Math.max(7, Math.round(r*0.26))}px sans-serif`;
+    cx.fillStyle = 'rgba(80,80,80,0.42)';
+    cx.fillText(isYT ? 'Y' : 'I', x, y + r*0.3);
+    cx.restore();
+  }
+  isYT() {
+    const c = (this.sub.channel||'').toLowerCase();
+    return c==='youtube'||c==='유튜브';
+  }
+}
+
+// ── 기계 그리기 ──────────────────────────────────────────
+function drawMachine() {
+  const s=sf();
+  const tx=sx(TX), ty=sy(TY), tw=sx(TW), th=sy(TH);
+  const ncx=sx(NCX_R), ntop=sy(NTOP_R);
+  const nw=sx(NW), nh=sy(NH);
+  const tray_y=sy(TRAY_Y_R), tray_w=sx(TRAY_W), tray_h=sy(TRAY_H);
+
+  // 탱크 본체
+  cx.beginPath(); cx.roundRect(tx,ty,tw,th,sy(16));
+  cx.fillStyle='rgba(200,228,246,0.48)'; cx.fill();
+  cx.strokeStyle='#8bbdd8'; cx.lineWidth=sx(3); cx.stroke();
+
+  // 유리 반사
+  cx.beginPath(); cx.roundRect(tx+sx(10),ty+sy(12),sx(16),th-sy(24),sy(8));
+  cx.fillStyle='rgba(255,255,255,0.17)'; cx.fill();
+
+  // 돔
+  cx.beginPath(); cx.ellipse(tx+tw/2,ty+sy(6),tw/2-sx(8),sy(20),0,Math.PI,0);
+  cx.fillStyle='#6aaed0'; cx.fill();
+  cx.strokeStyle='#4a8eb8'; cx.lineWidth=sx(2); cx.stroke();
+
+  // 투입 슬롯
+  cx.beginPath(); cx.roundRect(ncx-sx(14),ty-sy(5),sx(28),sy(11),sy(4));
+  cx.fillStyle='#3a7ea8'; cx.fill();
+
+  // 넥
+  cx.beginPath(); cx.rect(ncx-nw/2,ntop,nw,nh);
+  cx.fillStyle='#b8d8ec'; cx.fill();
+  cx.strokeStyle='#7aaec8'; cx.lineWidth=sx(2); cx.stroke();
+  cx.beginPath(); cx.rect(ncx-sx(13),ntop,sx(26),nh);
+  cx.fillStyle='rgba(255,255,255,0.28)'; cx.fill();
+
+  // 트레이
+  cx.beginPath(); cx.roundRect(ncx-tray_w/2,tray_y,tray_w,tray_h,sy(10));
+  cx.fillStyle='#6aaed0'; cx.fill();
+  cx.strokeStyle='#4a8eb8'; cx.lineWidth=sx(2); cx.stroke();
+  cx.beginPath(); cx.roundRect(ncx-tray_w/2+sx(9),tray_y+sy(5),tray_w-sx(18),tray_h-sy(10),sy(5));
+  cx.fillStyle='rgba(255,255,255,0.25)'; cx.fill();
+
+  // 받침대
+  cx.beginPath(); cx.roundRect(tx+sx(20),tray_y+tray_h,tw-sx(40),sy(24),sy(7));
+  cx.fillStyle='#c8e4f4'; cx.fill();
+  cx.strokeStyle='#8bbdd8'; cx.lineWidth=sx(1.5); cx.stroke();
+
+  // 레버
+  cx.beginPath(); cx.roundRect(tx+tw-sx(16),ntop+sy(12),sx(16),sy(54),sy(8));
+  cx.fillStyle='#e8453c'; cx.fill();
+  cx.beginPath(); cx.arc(tx+tw-sx(8),ntop+sy(12),sx(13),0,Math.PI*2);
+  cx.fillStyle='#c0392b'; cx.fill();
+}
+
+// ── 상태 ─────────────────────────────────────────────────
+let balls=[], spawning=false, spawnQ=[];
+let state='idle', dropBall=null, dropY=0;
+let zoomT=0, openT=0, showT=0, zoomBall=null;
+let winnerQueue=[], winnerIdx=0;
+const ZOOM_DUR=110, OPEN_DUR=120, SHOW_DUR=160;
+let knownIds=new Set(), allSubs=[];
+
+function isYTch(s) { const c=(s.channel||'').toLowerCase(); return c==='youtube'||c==='유튜브'; }
+function isIGch(s) { const c=(s.channel||'').toLowerCase(); return c==='instagram'||c==='인스타그램'; }
+
+function updateLegend() {
+  document.getElementById('ytCount').textContent = balls.filter(b=>b.isYT()).length;
+  document.getElementById('igCount').textContent = balls.filter(b=>!b.isYT()).length;
+}
+
+function spawnBall(sub, color) {
+  balls.push(new Ball(sub, color));
+}
+
+function addColorIndex(idx) { return COLORS[idx % COLORS.length]; }
+
+// ── 폴링 ─────────────────────────────────────────────────
+async function pollSubs() {
+  if (state !== 'idle') return;
+  try {
+    const res  = await fetch(`${API}?type=subscribers`);
+    const data = await res.json();
+    let ci = knownIds.size;
+    data.forEach(s => {
+      if (!knownIds.has(s.id)) {
+        knownIds.add(s.id);
+        spawnBall(s, COLORS[ci % COLORS.length]);
+        ci++;
+      }
+    });
+    // 삭제된 것 제거
+    const cur = new Set(data.map(s=>s.id));
+    balls = balls.filter(b => cur.has(b.sub.id));
+    knownIds = cur;
+    allSubs = data;
+    updateLegend();
+  } catch(e) { console.warn('poll error:', e); }
+}
+
+// ── 뽑기 ─────────────────────────────────────────────────
+function doPick() {
+  if (state !== 'idle' || balls.length === 0) return;
+  document.getElementById('btn').disabled = true;
+
+  const ytPool = balls.filter(b=> b.isYT());
+  const igPool = balls.filter(b=>!b.isYT());
+  winnerQueue = [];
+  if (ytPool.length) winnerQueue.push(ytPool[Math.floor(Math.random()*ytPool.length)]);
+  if (igPool.length) winnerQueue.push(igPool[Math.floor(Math.random()*igPool.length)]);
+  if (!winnerQueue.length) { document.getElementById('btn').disabled=false; return; }
+
+  winnerIdx = 0;
+  startDrop(winnerQueue[0]);
+}
+
+function startDrop(ball) {
+  dropBall = ball;
+  balls = balls.filter(b => b !== ball);
+  dropBall.dropping = true;
+  dropBall.x = sx(NCX_R);
+  dropBall.y = sy(TY+TH) - dropBall.r - sy(2);
+  dropY = dropBall.y;
+  state = 'dropping';
+  updateLegend();
+}
+
+function nextWinner() {
+  winnerIdx++;
+  if (winnerIdx < winnerQueue.length) {
+    setTimeout(() => startDrop(winnerQueue[winnerIdx]), 600);
+  } else {
+    // 모두 완료 → closeWeek
+    try { fetch(`${API}?type=closeWeek`); } catch(e){}
+    state = 'idle';
+    document.getElementById('btn').disabled = false;
+    updateLegend();
+  }
+}
+
+// ── 오버레이 드로우 ───────────────────────────────────────
+function drawZooming() {
+  const t = ease(Math.min(zoomT/ZOOM_DUR,1));
+  const fromX = sx(NCX_R), fromY = sy(TRAY_Y_R)+sy(TRAY_H)/2;
+  const toX = W/2, toY = H/2 - sy(10);
+  const x = fromX+(toX-fromX)*t;
+  const y = fromY+(toY-fromY)*t;
+  const r = zoomBall.r + (sx(MAX_R)-zoomBall.r)*t;
+
+  cx.fillStyle = `rgba(0,0,0,${0.52*t})`; cx.fillRect(0,0,W,H);
+  zoomBall.draw(x,y,r);
+  zoomT++;
+  if (zoomT >= ZOOM_DUR) { state='opening'; openT=0; }
+}
+
+const MAX_R = 100;
+
+function drawOpening() {
+  const t = ease(Math.min(openT/OPEN_DUR,1));
+  const gap = t * sx(MAX_R) * 1.12;
+  const x=W/2, y=H/2-sy(10), r=sx(MAX_R);
+
+  cx.fillStyle='rgba(0,0,0,0.52)'; cx.fillRect(0,0,W,H);
+  cx.save();
+  cx.beginPath(); cx.arc(x,y-gap,r,Math.PI,0); cx.lineTo(x+r,y-gap); cx.lineTo(x-r,y-gap); cx.closePath();
+  cx.fillStyle=zoomBall.color; cx.fill();
+  cx.beginPath(); cx.arc(x,y-gap,r,Math.PI,0); cx.strokeStyle='rgba(0,0,0,0.1)'; cx.lineWidth=2; cx.stroke();
+  cx.beginPath(); cx.arc(x,y+gap,r,0,Math.PI); cx.lineTo(x-r,y+gap); cx.lineTo(x+r,y+gap); cx.closePath();
+  cx.fillStyle='rgba(255,255,255,0.68)'; cx.fill();
+  cx.beginPath(); cx.arc(x,y+gap,r,0,Math.PI); cx.strokeStyle='rgba(0,0,0,0.1)'; cx.lineWidth=2; cx.stroke();
+  cx.restore();
+
+  openT++;
+  if (openT >= OPEN_DUR) { state='showing'; showT=0; }
+}
+
+function drawShowing() {
+  const t = ease(Math.min(showT/SHOW_DUR,1));
+  const gap = sx(MAX_R)*1.12;
+  const x=W/2, y=H/2-sy(10), r=sx(MAX_R);
+  const sub = zoomBall.sub;
+  const isYT = zoomBall.isYT();
+
+  cx.fillStyle='rgba(0,0,0,0.52)'; cx.fillRect(0,0,W,H);
+
+  // 절반들 유지
+  cx.save();
+  cx.beginPath(); cx.arc(x,y-gap,r,Math.PI,0); cx.lineTo(x+r,y-gap); cx.lineTo(x-r,y-gap); cx.closePath();
+  cx.fillStyle=zoomBall.color; cx.fill();
+  cx.beginPath(); cx.arc(x,y+gap,r,0,Math.PI); cx.lineTo(x-r,y+gap); cx.lineTo(x+r,y+gap); cx.closePath();
+  cx.fillStyle='rgba(255,255,255,0.68)'; cx.fill();
+  cx.restore();
+
+  // 종이 카드
+  cx.save(); cx.globalAlpha=t;
+  const cw=Math.min(sx(260),W-sx(40)), ch=sy(188);
+  const cx_=x-cw/2, cy_=y-ch/2;
+
+  cx.beginPath(); cx.roundRect(cx_,cy_,cw,ch,sy(16));
+  cx.fillStyle='#fefdf7'; cx.fill();
+  cx.strokeStyle='rgba(0,0,0,0.07)'; cx.lineWidth=1; cx.stroke();
+
+  // 상단 컬러바
+  cx.beginPath(); cx.roundRect(cx_,cy_,cw,sy(40),{upperLeft:sy(16),upperRight:sy(16),lowerLeft:0,lowerRight:0});
+  cx.fillStyle=zoomBall.color; cx.fill();
+
+  // 채널
+  cx.font=`500 ${sy(12)}px 'DM Mono',monospace`;
+  cx.fillStyle='rgba(255,255,255,0.92)';
+  cx.textAlign='center'; cx.textBaseline='middle';
+  cx.fillText(isYT?'🔴 YouTube':'🟣 Instagram', x, cy_+sy(20));
+
+  // 닉네임
+  cx.font=`bold ${sy(26)}px sans-serif`;
+  cx.fillStyle='#1a1a1a';
+  cx.fillText(sub.nickname||sub.name, x, cy_+sy(84));
+
+  // 구분선
+  cx.beginPath(); cx.moveTo(cx_+sx(28),cy_+sy(112)); cx.lineTo(cx_+cw-sx(28),cy_+sy(112));
+  cx.strokeStyle='rgba(0,0,0,0.07)'; cx.lineWidth=1; cx.stroke();
+
+  // 템플릿
+  if (sub.template) {
+    cx.font=`500 ${sy(14)}px 'DM Mono',monospace`;
+    cx.fillStyle='#7b3fa0';
+    cx.fillText('🎁 '+sub.template, x, cy_+sy(142));
+  }
+
+  // 닫기
+  cx.font=`${sy(11)}px 'DM Mono',monospace`;
+  cx.fillStyle='rgba(0,0,0,0.25)';
+  cx.fillText('tap to close', x, cy_+sy(170));
+  cx.restore();
+
+  showT++;
+  if (showT >= SHOW_DUR) state='showDone';
+}
+
+cv.addEventListener('click', () => {
+  if (state==='showDone'||state==='showing') {
+    // 당첨 처리
+    try { fetch(`${API}?type=catch&winner_id=${zoomBall.sub.id}`); } catch(e){}
+    zoomBall=null; dropBall=null;
+    state='done_wait';
+    setTimeout(() => nextWinner(), 300);
+  }
+});
+
+// ── 스폰 큐 ──────────────────────────────────────────────
+let spawnQueueArr=[], spawnTimer=null;
+function scheduleSpawn(subs) {
+  subs.forEach((s,i) => {
+    setTimeout(()=>{
+      if (!knownIds.has(s.id)){
+        knownIds.add(s.id);
+        spawnBall(s, COLORS[knownIds.size % COLORS.length]);
+        updateLegend();
+      }
+    }, i*150);
+  });
+}
+
+// ── 메인 루프 ────────────────────────────────────────────
+function loop() {
+  balls.forEach(b => b.update(balls));
+
+  if (state==='dropping' && dropBall) {
+    const targetY = sy(TRAY_Y_R) + sy(TRAY_H)/2;
+    dropY += (targetY - dropY)*0.018 + 0.45;
+    dropBall.x += (sx(NCX_R) - dropBall.x)*0.07;
+    dropBall.y = dropY;
+    if (dropY >= targetY-1) {
+      dropBall.y=targetY; dropBall.x=sx(NCX_R);
+      zoomBall=dropBall; dropBall=null;
+      state='zooming'; zoomT=0;
+    }
+  }
+
+  cx.clearRect(0,0,W,H);
+  drawMachine();
+
+  // 탱크 클립
+  cx.save();
+  cx.beginPath(); cx.roundRect(sx(TX)+2,sy(TY)+2,sx(TW)-4,sy(TH)-4,sy(14)); cx.clip();
+  balls.forEach(b=>b.draw());
+  cx.restore();
+
+  if (state==='dropping'&&dropBall) dropBall.draw();
+  if (state==='zooming')   drawZooming();
+  if (state==='opening')   drawOpening();
+  if (state==='showing'||state==='showDone') drawShowing();
+
+  requestAnimationFrame(loop);
+}
+
+// ── 초기화 ───────────────────────────────────────────────
+async function init() {
+  setupCanvas();
+  window.addEventListener('resize', () => { setupCanvas(); });
+  await pollSubs();
+  setInterval(pollSubs, POLL_MS);
+  loop();
+}
+
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
