@@ -23,11 +23,13 @@
   canvas { display:block; max-width:100%; }
   .bottom-ui {
     display:flex; align-items:center; justify-content:space-between;
-    width:100%; max-width:480px; padding:0 4px;
+    width:100%; max-width:480px; padding:8px 12px;
+    background:rgba(255,255,255,0.88); border-radius:12px;
+    backdrop-filter:blur(6px);
   }
-  .legend { display:flex; gap:14px; font-size:12px; color:rgba(255,255,255,0.85); }
+  .legend { display:flex; gap:14px; font-size:12px; color:#444; }
   .ldot { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; font-size:9px; font-weight:bold; color:white; margin-right:5px; vertical-align:middle; }
-  .lcount { opacity:.7; margin-left:3px; }
+  .lcount { opacity:.6; margin-left:3px; }
   .btn {
     font-family:'DM Mono',monospace; font-size:12px; letter-spacing:.06em;
     color:#555; background:rgba(255,255,255,0.92); border:.5px solid rgba(0,0,0,.12);
@@ -229,26 +231,16 @@ function drawMachine() {
 }
 
 // ── 상태 ─────────────────────────────────────────────────
-let balls=[], spawning=false, spawnQ=[];
-let state='idle', dropBall=null, dropY=0;
+let balls=[], state='idle', dropBall=null, dropY=0;
 let zoomT=0, openT=0, showT=0, zoomBall=null;
 let winnerQueue=[], winnerIdx=0;
 const ZOOM_DUR=110, OPEN_DUR=120, SHOW_DUR=160;
-let knownIds=new Set(), allSubs=[];
-
-function isYTch(s) { const c=(s.channel||'').toLowerCase(); return c==='youtube'||c==='유튜브'; }
-function isIGch(s) { const c=(s.channel||'').toLowerCase(); return c==='instagram'||c==='인스타그램'; }
+let knownIds=new Set(), colorIdx=0;
 
 function updateLegend() {
   document.getElementById('ytCount').textContent = balls.filter(b=>b.isYT()).length;
   document.getElementById('igCount').textContent = balls.filter(b=>!b.isYT()).length;
 }
-
-function spawnBall(sub, color) {
-  balls.push(new Ball(sub, color));
-}
-
-function addColorIndex(idx) { return COLORS[idx % COLORS.length]; }
 
 // ── 폴링 ─────────────────────────────────────────────────
 async function pollSubs() {
@@ -256,19 +248,25 @@ async function pollSubs() {
   try {
     const res  = await fetch(`${API}?type=subscribers`);
     const data = await res.json();
-    let ci = knownIds.size;
-    data.forEach(s => {
+    if (!Array.isArray(data)) return;
+
+    // 새로운 구독자 순차 스폰
+    data.forEach((s, i) => {
       if (!knownIds.has(s.id)) {
         knownIds.add(s.id);
-        spawnBall(s, COLORS[ci % COLORS.length]);
-        ci++;
+        const color = COLORS[colorIdx % COLORS.length];
+        colorIdx++;
+        setTimeout(() => {
+          balls.push(new Ball(s, color));
+          updateLegend();
+        }, i * 150);
       }
     });
-    // 삭제된 것 제거
-    const cur = new Set(data.map(s=>s.id));
+
+    // 삭제된 구독자 제거
+    const cur = new Set(data.map(s => s.id));
     balls = balls.filter(b => cur.has(b.sub.id));
     knownIds = cur;
-    allSubs = data;
     updateLegend();
   } catch(e) { console.warn('poll error:', e); }
 }
@@ -278,8 +276,8 @@ function doPick() {
   if (state !== 'idle' || balls.length === 0) return;
   document.getElementById('btn').disabled = true;
 
-  const ytPool = balls.filter(b=> b.isYT());
-  const igPool = balls.filter(b=>!b.isYT());
+  const ytPool = balls.filter(b => b.isYT());
+  const igPool = balls.filter(b => !b.isYT());
   winnerQueue = [];
   if (ytPool.length) winnerQueue.push(ytPool[Math.floor(Math.random()*ytPool.length)]);
   if (igPool.length) winnerQueue.push(igPool[Math.floor(Math.random()*igPool.length)]);
@@ -300,13 +298,24 @@ function startDrop(ball) {
   updateLegend();
 }
 
-function nextWinner() {
+// 카드 닫을 때 호출
+async function onCardClose() {
+  const winner = zoomBall;
+  zoomBall = null;
+  dropBall = null;
+
+  // 구글시트에 당첨 기록
+  try { await fetch(`${API}?type=catch&winner_id=${winner.sub.id}`); } catch(e){}
+
   winnerIdx++;
   if (winnerIdx < winnerQueue.length) {
-    setTimeout(() => startDrop(winnerQueue[winnerIdx]), 600);
+    // 다음 당첨자
+    state = 'idle_between';
+    setTimeout(() => startDrop(winnerQueue[winnerIdx]), 700);
   } else {
-    // 모두 완료 → closeWeek
-    try { fetch(`${API}?type=closeWeek`); } catch(e){}
+    // 모두 완료 → 나머지 등록 상태 완료 처리
+    try { await fetch(`${API}?type=closeWeek`); } catch(e){}
+    balls = [];
     state = 'idle';
     document.getElementById('btn').disabled = false;
     updateLegend();
@@ -412,12 +421,8 @@ function drawShowing() {
 }
 
 cv.addEventListener('click', () => {
-  if (state==='showDone'||state==='showing') {
-    // 당첨 처리
-    try { fetch(`${API}?type=catch&winner_id=${zoomBall.sub.id}`); } catch(e){}
-    zoomBall=null; dropBall=null;
-    state='done_wait';
-    setTimeout(() => nextWinner(), 300);
+  if (state==='showDone' || state==='showing') {
+    onCardClose();
   }
 });
 
@@ -439,9 +444,9 @@ function scheduleSpawn(subs) {
 function loop() {
   balls.forEach(b => b.update(balls));
 
-  if (state==='dropping' && dropBall) {
+  if ((state==='dropping' || state==='idle_between') && dropBall) {
     const targetY = sy(TRAY_Y_R) + sy(TRAY_H)/2;
-    dropY += (targetY - dropY)*0.018 + 0.45;
+    dropY += (targetY - dropY)*0.03 + 0.7;
     dropBall.x += (sx(NCX_R) - dropBall.x)*0.07;
     dropBall.y = dropY;
     if (dropY >= targetY-1) {
@@ -460,7 +465,7 @@ function loop() {
   balls.forEach(b=>b.draw());
   cx.restore();
 
-  if (state==='dropping'&&dropBall) dropBall.draw();
+  if (state==='dropping' && dropBall) dropBall.draw();
   if (state==='zooming')   drawZooming();
   if (state==='opening')   drawOpening();
   if (state==='showing'||state==='showDone') drawShowing();
@@ -471,7 +476,7 @@ function loop() {
 // ── 초기화 ───────────────────────────────────────────────
 async function init() {
   setupCanvas();
-  window.addEventListener('resize', () => { setupCanvas(); });
+  window.addEventListener('resize', setupCanvas);
   await pollSubs();
   setInterval(pollSubs, POLL_MS);
   loop();
