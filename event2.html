@@ -9,14 +9,12 @@
     --ink:#2e2a25;
     --panel:#fff7df;
     --shadow:#8a7d69;
-    --glass:#dff2fb;
-    --glass2:#b8d8ea;
     --yt:#e8453c;
     --ig:#c2185b;
     --yellow:#ffe04f;
-    --blue:#9dccec;
+    --blue:#98c9e3;
     --blue2:#6faacf;
-    --white:#ffffff;
+    --glass:#dff2fb;
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
@@ -41,8 +39,8 @@
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:18px;
-    padding:20px;
+    gap:16px;
+    padding:18px;
   }
 
   .title{
@@ -50,7 +48,7 @@
     line-height:0.9;
     color:var(--yellow);
     font-weight:900;
-    letter-spacing:.03em;
+    letter-spacing:.02em;
     text-transform:uppercase;
     text-shadow:
       3px 0 0 var(--ink),
@@ -63,13 +61,13 @@
 
   .title .t1{
     display:block;
-    font-size:clamp(28px, 6.4vw, 58px);
+    font-size:clamp(20px, 4.2vw, 34px);
   }
 
   .title .t2{
     display:block;
     margin-top:8px;
-    font-size:clamp(24px, 5.4vw, 46px);
+    font-size:clamp(28px, 6.2vw, 52px);
   }
 
   .frame{
@@ -84,6 +82,8 @@
     display:block;
     max-width:100%;
     margin:0 auto;
+    image-rendering:pixelated;
+    image-rendering:crisp-edges;
   }
 
   .hud{
@@ -187,7 +187,7 @@
   }
 
   .blink{
-    animation:blink 1s steps(2,end) infinite;
+    animation:blink .8s steps(2,end) infinite;
   }
 
   @keyframes blink{
@@ -223,16 +223,18 @@
   </div>
 
   <div class="statusbar">
-    <div class="statusbox" id="netStatus">명단 불러오는 중</div>
+    <div class="statusbox" id="netStatus">빠르게 불러오는 중</div>
     <div class="statusbox">후보 <span id="totalCount" style="margin-left:8px">0</span>명</div>
   </div>
 </div>
 
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbz4Cdo2i-5pj5HkelCn-907GxVmF7A5OL6-WmLu4NdyQ6B0y-oWPMMaCg0iSFm6nl81/exec';
-const POLL_MS = 1200;
-const BURST_MS = 350;
-const BURST_COUNT = 8;
+
+const POLL_MS = 700;
+const BURST_MS = 180;
+const BURST_COUNT = 12;
+const REQUEST_TIMEOUT = 5000;
 
 const cv = document.getElementById('gc');
 const cx = cv.getContext('2d');
@@ -250,9 +252,9 @@ const TRAY_W = 150, TRAY_H = 32;
 const SLOT_X_R = TW/2 + TX;
 
 function setupCanvas() {
-  const maxW = Math.min(window.innerWidth - 40, 600);
-  const maxH = window.innerHeight - 220;
-  const scale = Math.min(maxW / BASE_W, maxH / BASE_H, 1.15);
+  const maxW = Math.min(window.innerWidth - 36, 600);
+  const maxH = window.innerHeight - 210;
+  const scale = Math.min(maxW / BASE_W, maxH / BASE_H, 1.18);
   W = Math.round(BASE_W * scale);
   H = Math.round(BASE_H * scale);
   cv.width = W;
@@ -272,6 +274,19 @@ const COLORS = [
 const GRAVITY = 0.42;
 function ease(t){ return t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2; }
 
+function normalizeChannelName(v) {
+  const s = String(v || '').trim().toLowerCase();
+  if (s === 'youtube' || s === '유튜브' || s === 'you tube' || s === 'yt') return 'youtube';
+  if (s === 'instagram' || s === '인스타그램' || s === '인스타' || s === 'ig') return 'instagram';
+  return s;
+}
+function isYouTubeChannel(v) {
+  return normalizeChannelName(v) === 'youtube';
+}
+function isInstagramChannel(v) {
+  return normalizeChannelName(v) === 'instagram';
+}
+
 function setStatus(msg, loading=false){
   const el = document.getElementById('netStatus');
   el.textContent = msg;
@@ -284,6 +299,32 @@ function fitName(name, maxW, fontSize) {
   let t = name;
   while (t.length > 1 && cx.measureText(t + '…').width > maxW) t = t.slice(0,-1);
   return t + '…';
+}
+
+function drawPixelCircle(x, y, r, fill, stroke, pixel=3) {
+  cx.save();
+  const step = Math.max(2, Math.round(pixel));
+
+  for (let py = -r; py <= r; py += step) {
+    for (let px = -r; px <= r; px += step) {
+      const d = Math.hypot(px, py);
+      if (d <= r) {
+        cx.fillStyle = fill;
+        cx.fillRect(Math.round(x + px), Math.round(y + py), step, step);
+      }
+    }
+  }
+
+  for (let py = -r; py <= r; py += step) {
+    for (let px = -r; px <= r; px += step) {
+      const d = Math.hypot(px, py);
+      if (d <= r && d >= r - step * 1.6) {
+        cx.fillStyle = stroke;
+        cx.fillRect(Math.round(x + px), Math.round(y + py), step, step);
+      }
+    }
+  }
+  cx.restore();
 }
 
 class Ball {
@@ -329,39 +370,32 @@ class Ball {
     const x = bx ?? this.x;
     const y = by ?? this.y;
     const r = br ?? this.r;
+    const px = Math.max(2, Math.round(sf()*2.2));
 
-    cx.beginPath();
-    cx.ellipse(x + 3, y + 4, r*0.95, r*0.95, 0, 0, Math.PI*2);
-    cx.fillStyle = 'rgba(0,0,0,.12)';
-    cx.fill();
+    drawPixelCircle(x + 3, y + 4, r, 'rgba(0,0,0,0.10)', 'rgba(0,0,0,0.10)', px);
 
+    cx.save();
     cx.beginPath();
-    cx.arc(x, y, r, Math.PI, 0);
-    cx.closePath();
-    cx.fillStyle = this.color;
-    cx.fill();
+    cx.rect(x-r-4, y-r-4, r*2+8, r+4);
+    cx.clip();
+    drawPixelCircle(x, y, r, this.color, '#2e2a25', px);
+    cx.restore();
 
+    cx.save();
     cx.beginPath();
-    cx.arc(x, y, r, 0, Math.PI);
-    cx.closePath();
-    cx.fillStyle = '#f6f1e7';
-    cx.fill();
+    cx.rect(x-r-4, y, r*2+8, r+6);
+    cx.clip();
+    drawPixelCircle(x, y, r, '#f6f1e7', '#2e2a25', px);
+    cx.restore();
 
-    cx.beginPath();
-    cx.arc(x, y, r, 0, Math.PI*2);
     cx.strokeStyle = '#2e2a25';
     cx.lineWidth = 2;
-    cx.stroke();
-
     cx.beginPath();
     cx.moveTo(x-r, y);
     cx.lineTo(x+r, y);
     cx.stroke();
 
-    cx.beginPath();
-    cx.arc(x-r*0.28, y-r*0.28, r*0.18, 0, Math.PI*2);
-    cx.fillStyle = 'rgba(255,255,255,.35)';
-    cx.fill();
+    drawPixelCircle(x-r*0.28, y-r*0.28, r*0.16, 'rgba(255,255,255,0.35)', 'rgba(255,255,255,0.35)', px);
 
     const fs = Math.max(8, Math.round(r * 0.30));
     const name = fitName(this.sub.nickname || this.sub.name || '', r*1.55, fs);
@@ -377,8 +411,7 @@ class Ball {
   }
 
   isYT() {
-    const c = (this.sub.channel || '').toLowerCase();
-    return c === 'youtube' || c === '유튜브';
+    return isYouTubeChannel(this.sub.channel);
   }
 }
 
@@ -425,22 +458,23 @@ function drawMachine() {
   cx.strokeRect(tx+tw-sx(16), ntop+sy(10), sx(16), sy(54));
 
   cx.fillStyle = '#c0392b';
-  cx.beginPath();
-  cx.arc(tx+tw-sx(8), ntop+sy(10), sx(13), 0, Math.PI*2);
-  cx.fill();
-  cx.stroke();
+  drawPixelCircle(tx+tw-sx(8), ntop+sy(10), sx(12), '#c0392b', '#2e2a25', Math.max(2, Math.round(sf()*2)));
 }
 
 let balls=[], state='idle', dropBall=null, dropY=0;
 let zoomT=0, openT=0, showT=0, zoomBall=null;
 let winnerQueue=[], winnerIdx=0;
-const ZOOM_DUR=90, OPEN_DUR=90, SHOW_DUR=120;
+let isClosingWinner = false;
+let currentRoundWinners = [];
+
+const ZOOM_DUR=72, OPEN_DUR=72, SHOW_DUR=100;
 let knownIds=new Set(), colorIdx=0;
 let isPolling = false;
+let inflightController = null;
 
 function updateLegend() {
-  const yt = balls.filter(b=>b.isYT()).length;
-  const ig = balls.filter(b=>!b.isYT()).length;
+  const yt = balls.filter(b => isYouTubeChannel(b.sub.channel)).length;
+  const ig = balls.filter(b => isInstagramChannel(b.sub.channel)).length;
   document.getElementById('ytCount').textContent = yt;
   document.getElementById('igCount').textContent = ig;
   document.getElementById('totalCount').textContent = yt + ig;
@@ -448,11 +482,28 @@ function updateLegend() {
 
 async function fetchJSON(url, label='처리 중') {
   setStatus(label, true);
-  const res = await fetch(url, { cache: 'no-store' });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  setStatus('대기 중');
-  return data;
+
+  if (inflightController) {
+    try { inflightController.abort(); } catch (_) {}
+  }
+  inflightController = new AbortController();
+
+  const timeoutId = setTimeout(() => {
+    try { inflightController.abort(); } catch (_) {}
+  }, REQUEST_TIMEOUT);
+
+  try {
+    const res = await fetch(url, {
+      cache: 'no-store',
+      signal: inflightController.signal
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    setStatus('대기 중');
+    return data;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 async function pollSubs(force=false) {
@@ -461,7 +512,7 @@ async function pollSubs(force=false) {
 
   isPolling = true;
   try {
-    const data = await fetchJSON(`${API}?type=subscribers&_=${Date.now()}`, '명단 불러오는 중');
+    const data = await fetchJSON(`${API}?type=subscribers&_=${Date.now()}`, '명단 초고속 불러오는 중');
     if (!Array.isArray(data)) {
       setStatus('명단 형식 확인 필요');
       return;
@@ -477,7 +528,7 @@ async function pollSubs(force=false) {
         setTimeout(() => {
           balls.push(new Ball(s, color));
           updateLegend();
-        }, i * 60);
+        }, i * 25);
       }
     });
 
@@ -500,42 +551,54 @@ async function burstPoll() {
 }
 
 async function forceSync() {
-  await pollSubs(true);
   await burstPoll();
 }
 
 function doPick() {
   if (state !== 'idle' || balls.length === 0) return;
-  document.getElementById('btn').disabled = true;
+  if (isClosingWinner) return;
 
-  const ytPool = balls.filter(b => b.isYT());
-  const igPool = balls.filter(b => !b.isYT());
+  const ytPool = balls.filter(b => isYouTubeChannel(b.sub.channel));
+  const igPool = balls.filter(b => isInstagramChannel(b.sub.channel));
 
-  winnerQueue = [];
-  if (ytPool.length) winnerQueue.push(ytPool[Math.floor(Math.random()*ytPool.length)]);
-  if (igPool.length) winnerQueue.push(igPool[Math.floor(Math.random()*igPool.length)]);
-
-  if (!winnerQueue.length) {
-    document.getElementById('btn').disabled = false;
+  if (ytPool.length === 0 || igPool.length === 0) {
+    setStatus('유튜브 1명 + 인스타그램 1명이 모두 있어야 시작 가능');
     return;
   }
 
+  document.getElementById('btn').disabled = true;
+  setStatus('1회 뽑기 진행 중', true);
+
+  const ytWinner = ytPool[Math.floor(Math.random() * ytPool.length)];
+  const igWinner = igPool[Math.floor(Math.random() * igPool.length)];
+
+  winnerQueue = [ytWinner, igWinner];
+  currentRoundWinners = winnerQueue.map(w => w.sub.id);
   winnerIdx = 0;
+
   startDrop(winnerQueue[0]);
 }
 
 function startDrop(ball) {
+  if (!ball) return;
+
   dropBall = ball;
   balls = balls.filter(b => b !== ball);
   dropBall.dropping = true;
   dropBall.x = sx(NCX_R);
   dropBall.y = sy(TY+TH) - dropBall.r - sy(2);
   dropY = dropBall.y;
+
   state = 'dropping';
   updateLegend();
 }
 
 async function onCardClose() {
+  if (isClosingWinner) return;
+  if (!zoomBall) return;
+
+  isClosingWinner = true;
+
   const winner = zoomBall;
   zoomBall = null;
   dropBall = null;
@@ -546,27 +609,40 @@ async function onCardClose() {
     console.warn(e);
   }
 
-  winnerIdx++;
+  winnerIdx += 1;
 
   if (winnerIdx < winnerQueue.length) {
     state = 'idle_between';
-    setTimeout(() => startDrop(winnerQueue[winnerIdx]), 500);
-  } else {
-    try {
-      await fetchJSON(`${API}?type=closeWeek&_=${Date.now()}`, '회차 마감 중');
-    } catch(e) {
-      console.warn(e);
-    }
+    setStatus(`${winnerIdx + 1}번째 당첨자 추첨 중`, true);
 
-    balls = [];
-    knownIds = new Set();
-    updateLegend();
+    setTimeout(() => {
+      isClosingWinner = false;
+      startDrop(winnerQueue[winnerIdx]);
+    }, 350);
 
-    await burstPoll();
-
-    state = 'idle';
-    document.getElementById('btn').disabled = false;
+    return;
   }
+
+  try {
+    await fetchJSON(`${API}?type=closeWeek&_=${Date.now()}`, '회차 마감 중');
+  } catch(e) {
+    console.warn(e);
+  }
+
+  balls = [];
+  knownIds = new Set();
+  winnerQueue = [];
+  currentRoundWinners = [];
+  winnerIdx = 0;
+
+  updateLegend();
+
+  await burstPoll();
+
+  state = 'idle';
+  isClosingWinner = false;
+  document.getElementById('btn').disabled = false;
+  setStatus('1회 뽑기 완료');
 }
 
 function drawZooming() {
@@ -590,25 +666,24 @@ function drawOpening() {
   const t = ease(Math.min(openT/OPEN_DUR,1));
   const gap = t * sx(MAX_R) * 1.12;
   const x=W/2, y=H/2-sy(10), r=sx(MAX_R);
+  const px = Math.max(2, Math.round(sf()*2.5));
 
   cx.fillStyle='rgba(46,42,37,0.42)';
   cx.fillRect(0,0,W,H);
 
+  cx.save();
   cx.beginPath();
-  cx.arc(x, y-gap, r, Math.PI, 0);
-  cx.closePath();
-  cx.fillStyle=zoomBall.color;
-  cx.fill();
-  cx.strokeStyle='#2e2a25';
-  cx.lineWidth=2;
-  cx.stroke();
+  cx.rect(x-r-6, y-gap-r-6, r*2+12, r+8);
+  cx.clip();
+  drawPixelCircle(x, y-gap, r, zoomBall.color, '#2e2a25', px);
+  cx.restore();
 
+  cx.save();
   cx.beginPath();
-  cx.arc(x, y+gap, r, 0, Math.PI);
-  cx.closePath();
-  cx.fillStyle='#f6f1e7';
-  cx.fill();
-  cx.stroke();
+  cx.rect(x-r-6, y+gap, r*2+12, r+8);
+  cx.clip();
+  drawPixelCircle(x, y+gap, r, '#f6f1e7', '#2e2a25', px);
+  cx.restore();
 
   openT++;
   if (openT >= OPEN_DUR) { state='showing'; showT=0; }
@@ -620,25 +695,24 @@ function drawShowing() {
   const x=W/2, y=H/2-sy(10), r=sx(MAX_R);
   const sub = zoomBall.sub;
   const isYT = zoomBall.isYT();
+  const px = Math.max(2, Math.round(sf()*2.5));
 
   cx.fillStyle='rgba(46,42,37,0.42)';
   cx.fillRect(0,0,W,H);
 
+  cx.save();
   cx.beginPath();
-  cx.arc(x, y-gap, r, Math.PI, 0);
-  cx.closePath();
-  cx.fillStyle=zoomBall.color;
-  cx.fill();
-  cx.strokeStyle='#2e2a25';
-  cx.lineWidth=2;
-  cx.stroke();
+  cx.rect(x-r-6, y-gap-r-6, r*2+12, r+8);
+  cx.clip();
+  drawPixelCircle(x, y-gap, r, zoomBall.color, '#2e2a25', px);
+  cx.restore();
 
+  cx.save();
   cx.beginPath();
-  cx.arc(x, y+gap, r, 0, Math.PI);
-  cx.closePath();
-  cx.fillStyle='#f6f1e7';
-  cx.fill();
-  cx.stroke();
+  cx.rect(x-r-6, y+gap, r*2+12, r+8);
+  cx.clip();
+  drawPixelCircle(x, y+gap, r, '#f6f1e7', '#2e2a25', px);
+  cx.restore();
 
   cx.save();
   cx.globalAlpha = t;
@@ -688,7 +762,8 @@ function drawShowing() {
 }
 
 cv.addEventListener('click', () => {
-  if (state==='showDone' || state==='showing') {
+  if (isClosingWinner) return;
+  if (state === 'showDone' || state === 'showing') {
     onCardClose();
   }
 });
@@ -698,8 +773,8 @@ function loop() {
 
   if ((state==='dropping' || state==='idle_between') && dropBall) {
     const targetY = sy(TRAY_Y_R) + sy(TRAY_H)/2;
-    dropY += (targetY - dropY)*0.03 + 0.7;
-    dropBall.x += (sx(NCX_R) - dropBall.x)*0.07;
+    dropY += (targetY - dropY)*0.04 + 1.1;
+    dropBall.x += (sx(NCX_R) - dropBall.x)*0.09;
     dropBall.y = dropY;
 
     if (dropY >= targetY-1) {
@@ -733,7 +808,7 @@ function loop() {
 async function init() {
   setupCanvas();
   window.addEventListener('resize', setupCanvas);
-  await forceSync();
+  await burstPoll();
   setInterval(() => pollSubs(false), POLL_MS);
   loop();
 }
