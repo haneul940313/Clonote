@@ -90,7 +90,7 @@
     border-top:3px solid var(--ink);
     margin:0 -14px;
     padding:10px 14px;
-    transform:translateY(-34px);
+    transform:translateY(-52px);
   }
 
   .legend{display:flex;flex-wrap:wrap;gap:8px}
@@ -186,8 +186,8 @@
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbw54DXSKtLrJRXsTW6r3DqSftIns7IYV2EeA8Yir3GD76aJitiVM1aJ0KRXaeBi1rJH/exec';
 
-const POLL_INTERVAL_MS = 1000;
-const API_TIMEOUT_MS   = 12000;
+const POLL_INTERVAL_MS = 700;
+const API_TIMEOUT_MS   = 3500;
 
 const BASE_W = 530;
 const BASE_H = 620;
@@ -241,9 +241,10 @@ async function gasGet(params) {
 
   try {
     const res = await fetch(url, {
-      method:   'GET',
+      method: 'GET',
       redirect: 'follow',
-      signal:   ctrl.signal,
+      signal: ctrl.signal,
+      cache: 'no-store'
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -331,10 +332,10 @@ class Ball {
     this.r     = BALL_R * sf();
     this.x     = sx(NCX_R) + (Math.random()-0.5)*sx(30);
     this.y     = sy(TY) + this.r + Math.random()*sy(40);
-    this.vx    = (Math.random()-0.5)*1.1;
-    this.vy    = (Math.random()-0.5)*0.2;
-    this.angle = Math.random()*Math.PI*2;
-    this.spin  = (Math.random()-0.5)*0.006;
+    this.vx    = (Math.random()-0.5)*0.8;
+    this.vy    = (Math.random()-0.5)*0.12;
+    this.angle = 0;
+    this.spin  = 0;
     this.dropping = false;
     this.done  = false;
   }
@@ -348,14 +349,14 @@ class Ball {
     const txr = sx(TX+TW) - 2;
     const tyb = sy(TY+TH) - 4;
 
-    this.vy += 0.22;
-    this.vx *= 0.975;
-    this.vy *= 0.995;
-    this.spin *= 0.94;
+    this.vy += 0.24;
+    this.vx *= 0.94;
+    this.vy *= 0.99;
+    this.spin *= 0.78;
 
-    if (Math.abs(this.vx) < 0.02) this.vx = 0;
-    if (Math.abs(this.vy) < 0.02) this.vy = 0;
-    if (Math.abs(this.spin) < 0.0008) this.spin = 0;
+    if (Math.abs(this.vx) < 0.05) this.vx = 0;
+    if (Math.abs(this.vy) < 0.05) this.vy = 0;
+    if (Math.abs(this.spin) < 0.0003) this.spin = 0;
 
     this.x += this.vx;
     this.y += this.vy;
@@ -363,20 +364,20 @@ class Ball {
 
     if (this.x - this.r < txl) {
       this.x = txl + this.r;
-      this.vx = Math.abs(this.vx)*0.25;
-      this.spin += 0.001;
+      this.vx = Math.abs(this.vx)*0.12;
+      this.spin = 0;
     }
     if (this.x + this.r > txr) {
       this.x = txr - this.r;
-      this.vx = -Math.abs(this.vx)*0.25;
-      this.spin -= 0.001;
+      this.vx = -Math.abs(this.vx)*0.12;
+      this.spin = 0;
     }
     if (this.y + this.r > tyb) {
       this.y = tyb - this.r;
-      this.vy = -Math.abs(this.vy)*0.06;
-      this.vx *= 0.88;
-      this.spin += this.vx*0.0008;
-      if (Math.abs(this.vy) < 0.08) this.vy = 0;
+      this.vy = -Math.abs(this.vy)*0.02;
+      this.vx *= 0.82;
+      this.spin = 0;
+      if (Math.abs(this.vy) < 0.10) this.vy = 0;
     }
 
     for (const o of others) {
@@ -394,19 +395,19 @@ class Ball {
         o.x -= nx*ov*0.7;
         o.y -= ny*ov*0.7;
 
-        const imp = 0.025;
+        const imp = 0.012;
         this.vx += nx*imp;
-        this.vy += ny*imp*0.08;
+        this.vy += ny*imp*0.04;
         o.vx -= nx*imp;
-        o.vy -= ny*imp*0.08;
+        o.vy -= ny*imp*0.04;
 
-        this.vx *= 0.92;
-        this.vy *= 0.96;
-        o.vx *= 0.92;
-        o.vy *= 0.96;
+        this.vx *= 0.86;
+        this.vy *= 0.94;
+        o.vx *= 0.86;
+        o.vy *= 0.94;
 
-        this.spin += (Math.random()-0.5)*0.0015;
-        o.spin += (Math.random()-0.5)*0.0015;
+        this.spin = 0;
+        o.spin = 0;
       }
     }
   }
@@ -446,7 +447,6 @@ class Ball {
     cx.fillStyle = '#555';
     cx.fillText(this.isYT() ? 'Y' : 'I', 0, r*0.30);
 
-    drawPixelCircle(-r*0.28, -r*0.74, r*0.13, 'rgba(255,255,255,0.50)', 'rgba(255,255,255,0.50)', px);
     cx.restore();
   }
 }
@@ -607,8 +607,8 @@ function loop() {
 
   if (state==='dropping' && dropBall) {
     const targetY = sy(TRAY_Y_R)+sy(TRAY_H)/2;
-    dropY += (targetY-dropY)*0.14+2.0;
-    dropBall.x += (sx(NCX_R)-dropBall.x)*0.16;
+    dropY += (targetY-dropY)*0.20+3.6;
+    dropBall.x += (sx(NCX_R)-dropBall.x)*0.22;
     dropBall.y  = dropY;
 
     if (dropY >= targetY-1) {
@@ -662,9 +662,7 @@ async function syncSubs() {
   try {
     const data = await gasGet({ type: 'subscribers' });
     const list = Array.isArray(data) ? data : (data && Array.isArray(data.data) ? data.data : null);
-    if (list !== null) {
-      applySubData(list);
-    }
+    if (list !== null) applySubData(list);
   } catch (err) {
     console.error('syncSubs 오류:', err.message);
   } finally {
@@ -696,10 +694,7 @@ async function doPick() {
   const ytPool = balls.filter(b => b.isYT());
   const igPool = balls.filter(b => isIGch(b.sub.channel));
 
-  if (!ytPool.length || !igPool.length) {
-    alert(!ytPool.length ? '유튜브 참가자가 없습니다.' : '인스타그램 참가자가 없습니다.');
-    return;
-  }
+  if (!ytPool.length || !igPool.length) return;
 
   pickBtn.disabled    = true;
   refreshBtn.disabled = true;
@@ -740,12 +735,13 @@ async function onCardClose() {
       instagram_winner_id: roundWinners.instagram.sub.id
     });
 
-    balls = []; knownIds = new Set();
-    winnerQueue = []; winnerIdx = 0;
+    balls = [];
+    knownIds = new Set();
+    winnerQueue = [];
+    winnerIdx = 0;
     roundWinners = { youtube: null, instagram: null };
     updateLegend();
     await syncSubs();
-
   } catch (e) {
     console.error('finalizeRound 오류:', e.message);
   }
