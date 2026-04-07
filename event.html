@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>CLONOTE 구독 이벤트</title>
+<style>
+  :root{
+    --ink:#2e2a25;
+    --panel:#fff7df;
+    --shadow:#8a7d69;
+    --yt:#e8453c;
+    --ig:#c2185b;
+    --yellow:#ffe04f;
+    --blue:#98c9e3;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:transparent;
+    font-family:"Arial Black","Impact","DungGeunMo","Galmuri11",sans-serif;
+  }
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .app{
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    padding:18px;
+  }
+  .title{
+    text-align:center;
+    line-height:0.9;
+    color:var(--yellow);
+    font-weight:900;
+    letter-spacing:.02em;
+    text-transform:uppercase;
+    text-shadow:
+      3px 0 0 var(--ink), -3px 0 0 var(--ink),
+      0 3px 0 var(--ink), 0 -3px 0 var(--ink),
+      3px 3px 0 var(--ink), 6px 6px 0 rgba(0,0,0,.18);
+  }
+  .title .t1{display:block;font-size:clamp(20px,4.2vw,34px)}
+  .title .t2{display:block;margin-top:8px;font-size:clamp(28px,6.2vw,52px)}
+
+  .frame{
+    width:min(100%,680px);
+    background:var(--panel);
+    border:4px solid var(--ink);
+    box-shadow:7px 7px 0 var(--shadow);
+    padding:14px;
+  }
+
+  canvas{
+    display:block;
+    width:100%;
+    min-height:420px;
+    max-width:100%;
+    margin:0 auto;
+    image-rendering:pixelated;
+    image-rendering:crisp-edges;
+  }
+
+  .hud{
+    margin-top:12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .legend{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:9px 10px;
+    background:#fff;
+    border:3px solid var(--ink);
+    box-shadow:3px 3px 0 var(--shadow);
+    color:var(--ink);
+    font-size:11px;
+    font-weight:700;
+  }
+  .ldot{
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    border:2px solid var(--ink);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:8px;
+    font-weight:bold;
+  }
+  .ldot.yt{background:var(--yt)}
+  .ldot.ig{background:var(--ig)}
+
+  .btns{display:flex;gap:8px;flex-wrap:wrap}
+  button{
+    appearance:none;
+    border:none;
+    cursor:pointer;
+    padding:10px 14px;
+    background:#ffe16a;
+    color:var(--ink);
+    border:3px solid var(--ink);
+    box-shadow:4px 4px 0 var(--shadow);
+    font:inherit;
+    font-size:11px;
+    font-weight:700;
+  }
+  button:active{
+    transform:translate(2px,2px);
+    box-shadow:2px 2px 0 var(--shadow);
+  }
+  button:disabled{
+    opacity:.55;
+    cursor:default;
+    transform:none;
+  }
+  .ghost{background:#dff0fb}
+
+  .statusbar{
+    margin-top:10px;
+    min-height:18px;
+    font-size:12px;
+    font-weight:700;
+    color:var(--ink);
+    text-align:center;
+  }
+
+  @media (max-width:480px){
+    .chip,button{font-size:10px}
+    canvas{min-height:360px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="title">
+    <span class="t1">CLONOTE</span>
+    <span class="t2">구독 이벤트</span>
+  </div>
+
+  <div class="frame">
+    <canvas id="gc"></canvas>
+
+    <div class="hud">
+      <div class="legend">
+        <span class="chip"><span class="ldot yt">Y</span>YOUTUBE <span id="ytCount">0</span></span>
+        <span class="chip"><span class="ldot ig">I</span>INSTAGRAM <span id="igCount">0</span></span>
+      </div>
+
+      <div class="btns">
+        <button id="pickBtn" type="button">1회 뽑기 (2명)</button>
+        <button class="ghost" id="refreshBtn" type="button">새로고침</button>
+      </div>
+    </div>
+
+    <div class="statusbar" id="statusText">기계 준비 중</div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// 설정
+// ─────────────────────────────────────────────────────────────
+const API = 'https://script.google.com/macros/s/AKfycbxm33T1hbUIV7kGcXgA6lFjDUvQpBOlrQhzznziAQIKBIpnNBe7bm3CsDTQAqWDNlJh/exec';
+
+const POLL_BASE_MS = 5000;
+const POLL_MAX_MS = 20000;
+const POLL_BACKOFF = 1.8;
+const API_TIMEOUT_MS = 6000;
+
+const INIT_MAX_RETRY = 2;
+const INIT_RETRY_MS = 500;
+
+const BASE_W = 520;
+const BASE_H = 560;
+const BALL_R = 30;
+
+// 기계 레이아웃
+const TX = 32, TY = 34, TW = 456, TH = 332;     // 통 가로 확대
+const NCX_R = TW / 2 + TX;
+const NTOP_R = TY + TH;
+const NW = 82, NH = 48;                         // 목 짧게
+const TRAY_Y_R = NTOP_R + NH;
+const TRAY_W = 170, TRAY_H = 34;
+
+const COLORS = ['#e8453c','#ff6d3b','#d4ac00','#43a047','#1e88e5','#7b3fa0','#c2185b','#00897b','#e65100','#3949ab'];
+
+const cv = document.getElementById('gc');
+const cx = cv.getContext('2d');
+
+let W = 520;
+let H = 560;
+
+let balls = [];
+let knownIds = new Set();
+let colorIdx = 0;
+
+let state = 'idle';
+let dropBall = null;
+let dropY = 0;
+let zoomBall = null;
+let zoomT = 0;
+let openT = 0;
+let showT = 0;
+let winnerQueue = [];
+let winnerIdx = 0;
+let roundWinners = { youtube: null, instagram: null };
+let isClosingWinner = false;
+
+let isPolling = false;
+let pollTimer = null;
+let pollIntervalMs = POLL_BASE_MS;
+
+const ZOOM_DUR = 42;
+const OPEN_DUR = 34;
+const SHOW_DUR = 999999;
+const MAX_R = 100;
+
+const statusText = document.getElementById('statusText');
+const pickBtn = document.getElementById('pickBtn');
+const refreshBtn = document.getElementById('refreshBtn');
+
+function setStatus(msg=''){
+  statusText.textContent = msg;
+}
+
+function sf(){ return W / BASE_W; }
+function sx(v){ return v * sf(); }
+function sy(v){ return v * sf(); }
+
+function ease(t){
+  return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2;
+}
+function sleep(ms){
+  return new Promise(r => setTimeout(r, ms));
+}
+
+function normCh(v){
+  const s = String(v || '').trim().toLowerCase();
+  if (['youtube','유튜브','you tube','yt'].includes(s)) return 'youtube';
+  if (['instagram','인스타그램','인스타','ig'].includes(s)) return 'instagram';
+  return s;
+}
+function isYTch(v){ return normCh(v) === 'youtube'; }
+function isIGch(v){ return normCh(v) === 'instagram'; }
+
+function fitName(name, maxPx, fs){
+  cx.font = `bold ${fs}px sans-serif`;
+  if (cx.measureText(name).width <= maxPx) return name;
+  let t = name;
+  while (t.length > 1 && cx.measureText(t + '…').width > maxPx) t = t.slice(0,-1);
+  return t + '…';
+}
+
+function setupCanvas(){
+  const frame = document.querySelector('.frame');
+  const frameWidth = frame ? frame.clientWidth - 28 : 680;
+  const maxW = Math.max(320, Math.min(frameWidth, 680));
+  const vh = window.innerHeight || 800;
+  const maxH = Math.max(420, vh - 180);
+
+  const scale = Math.min(maxW / BASE_W, maxH / BASE_H, 1.25);
+
+  W = Math.max(320, Math.round(BASE_W * scale));
+  H = Math.max(420, Math.round(BASE_H * scale));
+
+  cv.width = W;
+  cv.height = H;
+  cv.style.width = W + 'px';
+  cv.style.height = H + 'px';
+
+  drawNow();
+}
+
+function drawPixelCircle(x, y, r, fill, stroke, pixel = 3){
+  const s = Math.max(2, Math.round(pixel));
+  cx.save();
+  for(let py = -r; py <= r; py += s){
+    for(let px2 = -r; px2 <= r; px2 += s){
+      if(Math.hypot(px2, py) <= r){
+        cx.fillStyle = fill;
+        cx.fillRect(Math.round(x + px2), Math.round(y + py), s, s);
+      }
+    }
+  }
+  for(let py = -r; py <= r; py += s){
+    for(let px2 = -r; px2 <= r; px2 += s){
+      const d = Math.hypot(px2, py);
+      if(d <= r && d >= r - s * 1.6){
+        cx.fillStyle = stroke;
+        cx.fillRect(Math.round(x + px2), Math.round(y + py), s, s);
+      }
+    }
+  }
+  cx.restore();
+}
+
+class Ball{
+  constructor(sub, color){
+    this.sub = sub;
+    this.color = color;
+    this.r = BALL_R * sf();
+    this.x = sx(NCX_R) + (Math.random() - 0.5) * sx(40);
+    this.y = sy(TY) + this.r + Math.random() * sy(60);
+    this.vx = (Math.random() - 0.5) * 2.8;
+    this.vy = (Math.random() - 0.5) * 1.2;
+    this.angle = Math.random() * Math.PI * 2;
+    this.spin = (Math.random() - 0.5) * 0.12;
+    this.dropping = false;
+    this.done = false;
+  }
+
+  isYT(){ return isYTch(this.sub.channel); }
+
+  update(others){
+    if(this.done || this.dropping) return;
+
+    const txl = sx(TX) + 2;
+    const txr = sx(TX + TW) - 2;
+    const tyb = sy(TY + TH) - 4;
+
+    this.vy += 0.28;
+    this.vx *= 0.992;
+    this.spin *= 0.995;
+
+    this.x += this.vx;
+    this.y += this.vy;
+    this.angle += this.spin;
+
+    if(this.x - this.r < txl){
+      this.x = txl + this.r;
+      this.vx = Math.abs(this.vx) * 0.72;
+      this.spin += 0.03;
+    }
+    if(this.x + this.r > txr){
+      this.x = txr - this.r;
+      this.vx = -Math.abs(this.vx) * 0.72;
+      this.spin -= 0.03;
+    }
+    if(this.y + this.r > tyb){
+      this.y = tyb - this.r;
+      this.vy = -Math.abs(this.vy) * 0.22;
+      this.vx *= 0.94;
+      this.spin += this.vx * 0.01;
+    }
+
+    for(const o of others){
+      if(o === this || o.dropping || o.done) continue;
+      const dx = this.x - o.x;
+      const dy = this.y - o.y;
+      const d = Math.hypot(dx, dy);
+      const minD = this.r + o.r - 0.5;
+
+      if(d < minD && d > 0.01){
+        const nx = dx / d;
+        const ny = dy / d;
+        const ov = (minD - d) / 2;
+
+        this.x += nx * ov;
+        this.y += ny * ov;
+        o.x -= nx * ov;
+        o.y -= ny * ov;
+
+        const impulse = 0.18;
+        this.vx += nx * impulse;
+        this.vy += ny * impulse * 0.4;
+        o.vx -= nx * impulse;
+        o.vy -= ny * impulse * 0.4;
+
+        this.spin += (Math.random() - 0.5) * 0.03;
+        o.spin += (Math.random() - 0.5) * 0.03;
+      }
+    }
+  }
+
+  draw(bx, by, br){
+    const x = bx ?? this.x;
+    const y = by ?? this.y;
+    const r = br ?? this.r;
+    const px = Math.max(2, Math.round(sf() * 2.2));
+
+    cx.save();
+    cx.translate(x, y);
+    cx.rotate(this.dropping ? 0 : this.angle);
+
+    drawPixelCircle(3, 4, r, 'rgba(0,0,0,0.10)', 'rgba(0,0,0,0.10)', px);
+
+    cx.save();
+    cx.beginPath();
+    cx.rect(-r - 4, 0, r * 2 + 8, r + 6);
+    cx.clip();
+    drawPixelCircle(0, 0, r, '#f0ece0', '#2e2a25', px);
+    cx.restore();
+
+    cx.save();
+    cx.beginPath();
+    cx.rect(-r - 4, -r - 4, r * 2 + 8, r + 4);
+    cx.clip();
+    drawPixelCircle(0, 0, r, this.color, '#2e2a25', px);
+    cx.restore();
+
+    cx.strokeStyle = '#2e2a25';
+    cx.lineWidth = 2;
+    cx.beginPath();
+    cx.moveTo(-r, 0);
+    cx.lineTo(r, 0);
+    cx.stroke();
+
+    const fs = Math.max(8, Math.round(r * 0.30));
+    cx.font = `bold ${fs}px sans-serif`;
+    cx.textAlign = 'center';
+    cx.textBaseline = 'middle';
+    cx.fillStyle = '#fff';
+    cx.fillText(fitName(this.sub.nickname || this.sub.name || '', r * 1.55, fs), 0, -r * 0.30);
+
+    cx.font = `bold ${Math.max(8, Math.round(r * 0.26))}px sans-serif`;
+    cx.fillStyle = '#555';
+    cx.fillText(this.isYT() ? 'Y' : 'I', 0, r * 0.30);
+
+    drawPixelCircle(-r * 0.28, -r * 0.74, r * 0.13, 'rgba(255,255,255,0.50)', 'rgba(255,255,255,0.50)', px);
+
+    cx.restore();
+  }
+}
+
+function drawMachine(){
+  const tx = sx(TX), ty = sy(TY), tw = sx(TW), th = sy(TH);
+  const ncx = sx(NCX_R), ntop = sy(NTOP_R), nw = sx(NW), nh = sy(NH);
+  const trayY = sy(TRAY_Y_R), trayW = sx(TRAY_W), trayH = sy(TRAY_H);
+  const p2 = Math.max(2, Math.round(sf() * 2));
+
+  cx.fillStyle = '#98c9e3';
+  cx.fillRect(tx, ty, tw, th);
+  cx.strokeStyle = '#2e2a25';
+  cx.lineWidth = 4;
+  cx.strokeRect(tx, ty, tw, th);
+
+  cx.fillStyle = '#dff2fb';
+  cx.fillRect(tx + sx(8), ty + sy(8), tw - sx(16), th - sy(16));
+
+  cx.fillStyle = 'rgba(255,255,255,.30)';
+  cx.fillRect(tx + sx(14), ty + sy(12), sx(22), th - sy(24));
+
+  cx.fillStyle = '#4a82a3';
+  cx.fillRect(ncx - sx(18), ty - sy(4), sx(36), sy(12));
+  cx.strokeRect(ncx - sx(18), ty - sy(4), sx(36), sy(12));
+
+  cx.fillStyle = '#b8d8ea';
+  cx.fillRect(ncx - nw / 2, ntop, nw, nh);
+  cx.strokeRect(ncx - nw / 2, ntop, nw, nh);
+
+  cx.fillStyle = '#6faacf';
+  cx.fillRect(ncx - trayW / 2, trayY, trayW, trayH);
+  cx.strokeRect(ncx - trayW / 2, trayY, trayW, trayH);
+
+  cx.fillStyle = '#d9eef8';
+  cx.fillRect(ncx - trayW / 2 + sx(8), trayY + sy(5), trayW - sx(16), trayH - sy(10));
+  cx.strokeRect(ncx - trayW / 2 + sx(8), trayY + sy(5), trayW - sx(16), trayH - sy(10));
+
+  cx.fillStyle = '#d8edf8';
+  cx.fillRect(tx + sx(20), trayY + trayH, tw - sx(40), sy(24));
+  cx.strokeRect(tx + sx(20), trayY + trayH, tw - sx(40), sy(24));
+
+  cx.fillStyle = '#e8453c';
+  cx.fillRect(tx + tw - sx(16), ntop + sy(4), sx(16), sy(40));
+  cx.strokeRect(tx + tw - sx(16), ntop + sy(4), sx(16), sy(40));
+
+  drawPixelCircle(tx + tw - sx(8), ntop + sy(4), sx(12), '#c0392b', '#2e2a25', p2);
+}
+
+function drawShowing(){
+  const sub = zoomBall.sub;
+  const ytW = zoomBall.isYT();
+  const x = W / 2;
+  const y = H / 2 - sy(6);
+  const r = sx(MAX_R);
+  const gap = sx(MAX_R) * 1.12;
+  const px = Math.max(2, Math.round(sf() * 2.5));
+
+  cx.fillStyle = 'rgba(46,42,37,0.42)';
+  cx.fillRect(0,0,W,H);
+
+  cx.save();
+  cx.beginPath();
+  cx.rect(x-r-6, y-gap-r-6, r*2+12, r+8);
+  cx.clip();
+  drawPixelCircle(x, y-gap, r, zoomBall.color, '#2e2a25', px);
+  cx.restore();
+
+  cx.save();
+  cx.beginPath();
+  cx.rect(x-r-6, y+gap, r*2+12, r+8);
+  cx.clip();
+  drawPixelCircle(x, y+gap, r, '#f0ece0', '#2e2a25', px);
+  cx.restore();
+
+  const cw = Math.min(sx(290), W - sx(40));
+  const ch = sy(192);
+  const cardX = x - cw / 2;
+  const cardY = y - ch / 2;
+
+  cx.fillStyle = '#fff8e8';
+  cx.fillRect(cardX, cardY, cw, ch);
+  cx.strokeStyle = '#2e2a25';
+  cx.lineWidth = 3;
+  cx.strokeRect(cardX, cardY, cw, ch);
+
+  cx.fillStyle = zoomBall.color;
+  cx.fillRect(cardX, cardY, cw, sy(42));
+  cx.strokeRect(cardX, cardY, cw, sy(42));
+
+  cx.font = 'bold 12px sans-serif';
+  cx.textAlign = 'center';
+  cx.textBaseline = 'middle';
+  cx.fillStyle = '#fff';
+  cx.fillText(ytW ? 'YOUTUBE WINNER' : 'INSTAGRAM WINNER', x, cardY + sy(21));
+
+  cx.font = `bold ${sy(26)}px sans-serif`;
+  cx.fillStyle = '#2e2a25';
+  cx.fillText(sub.nickname || sub.name || '', x, cardY + sy(88));
+
+  cx.strokeStyle = '#2e2a25';
+  cx.lineWidth = 1.5;
+  cx.beginPath();
+  cx.moveTo(cardX + sx(24), cardY + sy(114));
+  cx.lineTo(cardX + cw - sx(24), cardY + sy(114));
+  cx.stroke();
+
+  if(sub.template){
+    cx.font = 'bold 14px sans-serif';
+    cx.fillStyle = '#7b3fa0';
+    cx.fillText(`[ ${sub.template} ]`, x, cardY + sy(144));
+  }
+
+  cx.font = 'bold 11px sans-serif';
+  cx.fillStyle = 'rgba(46,42,37,.7)';
+  cx.fillText('TAP TO CONTINUE', x, cardY + sy(170));
+}
+
+function drawZooming(){
+  const t = ease(Math.min(zoomT / ZOOM_DUR, 1));
+  const fx = sx(NCX_R);
+  const fy = sy(TRAY_Y_R) + sy(TRAY_H) / 2;
+  const x = fx + (W / 2 - fx) * t;
+  const y = fy + (H / 2 - sy(6) - fy) * t;
+  const r = zoomBall.r + (sx(MAX_R) - zoomBall.r) * t;
+
+  cx.fillStyle = `rgba(46,42,37,${0.42 * t})`;
+  cx.fillRect(0,0,W,H);
+
+  zoomBall.draw(x, y, r);
+
+  zoomT++;
+  if(zoomT >= ZOOM_DUR){
+    state = 'opening';
+    openT = 0;
+  }
+}
+
+function drawOpening(){
+  const t = ease(Math.min(openT / OPEN_DUR, 1));
+  const gap = t * sx(MAX_R) * 1.12;
+  const x = W / 2, y = H / 2 - sy(6), r = sx(MAX_R);
+  const px = Math.max(2, Math.round(sf() * 2.5));
+
+  cx.fillStyle = 'rgba(46,42,37,0.42)';
+  cx.fillRect(0,0,W,H);
+
+  cx.save();
+  cx.beginPath();
+  cx.rect(x-r-6, y-gap-r-6, r*2+12, r+8);
+  cx.clip();
+  drawPixelCircle(x, y-gap, r, zoomBall.color, '#2e2a25', px);
+  cx.restore();
+
+  cx.save();
+  cx.beginPath();
+  cx.rect(x-r-6, y+gap, r*2+12, r+8);
+  cx.clip();
+  drawPixelCircle(x, y+gap, r, '#f0ece0', '#2e2a25', px);
+  cx.restore();
+
+  openT++;
+  if(openT >= OPEN_DUR){
+    state = 'showing';
+  }
+}
+
+function drawNow(){
+  cx.clearRect(0,0,W,H);
+  drawMachine();
+
+  cx.save();
+  cx.beginPath();
+  cx.rect(sx(TX)+2, sy(TY)+2, sx(TW)-4, sy(TH)-4);
+  cx.clip();
+  balls.forEach(b => b.draw());
+  cx.restore();
+
+  if(state === 'dropping' && dropBall) dropBall.draw();
+  if(state === 'zooming' && zoomBall) drawZooming();
+  if(state === 'opening' && zoomBall) drawOpening();
+  if((state === 'showing' || state === 'showDone') && zoomBall) drawShowing();
+}
+
+function loop(){
+  balls.forEach(b => b.update(balls));
+
+  if(state === 'dropping' && dropBall){
+    const targetY = sy(TRAY_Y_R) + sy(TRAY_H) / 2;
+    dropY += (targetY - dropY) * 0.14 + 2.0;
+    dropBall.x += (sx(NCX_R) - dropBall.x) * 0.16;
+    dropBall.y = dropY;
+
+    if(dropY >= targetY - 1){
+      dropBall.y = targetY;
+      dropBall.x = sx(NCX_R);
+      zoomBall = dropBall;
+      dropBall = null;
+      state = 'zooming';
+      zoomT = 0;
+    }
+  }
+
+  drawNow();
+  requestAnimationFrame(loop);
+}
+
+function updateLegend(){
+  document.getElementById('ytCount').textContent = balls.filter(b => b.isYT()).length;
+  document.getElementById('igCount').textContent = balls.filter(b => isIGch(b.sub.channel)).length;
+}
+
+async function gasGet(params){
+  const qs = new URLSearchParams({ ...params, _: Date.now() }).toString();
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), API_TIMEOUT_MS);
+
+  try{
+    const res = await fetch(`${API}?${qs}`, {
+      cache: 'no-store',
+      signal: ctrl.signal
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } finally {
+    clearTimeout(tid);
+  }
+}
+
+function applySubData(data){
+  if(!Array.isArray(data)) return;
+
+  const incoming = new Set(data.map(s => s.id));
+
+  data.forEach((s, i) => {
+    if(!knownIds.has(s.id)){
+      knownIds.add(s.id);
+      const color = COLORS[colorIdx % COLORS.length];
+      colorIdx++;
+      const ball = new Ball(s, color);
+
+      setTimeout(() => {
+        balls.push(ball);
+        updateLegend();
+      }, i * 10);
+    }
+  });
+
+  if(balls.some(b => !incoming.has(b.sub.id))){
+    balls = balls.filter(b => incoming.has(b.sub.id));
+    knownIds = incoming;
+    updateLegend();
+  }
+}
+
+async function syncSubs(force=false){
+  if(isPolling) return;
+  if(!force && state !== 'idle') return;
+  if(!force && document.hidden) return;
+
+  isPolling = true;
+  try{
+    const data = await gasGet({ type: 'subscribers' });
+    applySubData(data);
+    pollIntervalMs = POLL_BASE_MS;
+    if (balls.length) {
+      setStatus('참가자 불러오기 완료');
+    } else {
+      setStatus('등록된 참가자 없음');
+    }
+  } catch(e){
+    console.warn('[poll]', e.message || e);
+    pollIntervalMs = Math.min(pollIntervalMs * POLL_BACKOFF, POLL_MAX_MS);
+    setStatus('명단 확인 중');
+  } finally {
+    isPolling = false;
+  }
+}
+
+function scheduleNextPoll(){
+  if(pollTimer) clearTimeout(pollTimer);
+  pollTimer = setTimeout(async () => {
+    await syncSubs(false);
+    scheduleNextPoll();
+  }, pollIntervalMs);
+}
+
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden) syncSubs(false);
+});
+
+async function initialLoad(){
+  setStatus('명단 불러오는 중');
+
+  for(let attempt = 1; attempt <= INIT_MAX_RETRY; attempt++){
+    try{
+      const data = await gasGet({ type: 'subscribers' });
+      applySubData(data);
+      if (data.length) setStatus('준비 완료');
+      else setStatus('등록된 참가자 없음');
+      return true;
+    } catch(e){
+      if(attempt < INIT_MAX_RETRY){
+        await sleep(INIT_RETRY_MS);
+      }
+    }
+  }
+
+  setStatus('명단 연결 실패');
+  return false;
+}
+
+async function forceSync(){
+  setStatus('새로고침 중');
+  await syncSubs(true);
+}
+
+function startDrop(ball){
+  dropBall = ball;
+  balls = balls.filter(b => b !== ball);
+  dropBall.dropping = true;
+  dropBall.x = sx(NCX_R);
+  dropBall.y = sy(TY + TH) - dropBall.r - sy(2);
+  dropY = dropBall.y;
+  state = 'dropping';
+  updateLegend();
+}
+
+async function doPick(){
+  if(state !== 'idle' || isClosingWinner) return;
+
+  await syncSubs(true);
+
+  const ytPool = balls.filter(b => b.isYT());
+  const igPool = balls.filter(b => isIGch(b.sub.channel));
+
+  if(!ytPool.length || !igPool.length){
+    setStatus('유튜브 1명, 인스타그램 1명 이상 필요');
+    return;
+  }
+
+  pickBtn.disabled = true;
+  refreshBtn.disabled = true;
+
+  const ytWinner = ytPool[Math.floor(Math.random() * ytPool.length)];
+  let igWinner = igPool[Math.floor(Math.random() * igPool.length)];
+
+  if (ytWinner.sub.id === igWinner.sub.id && igPool.length > 1) {
+    const rest = igPool.filter(b => b.sub.id !== ytWinner.sub.id);
+    igWinner = rest[Math.floor(Math.random() * rest.length)];
+  }
+
+  roundWinners = {
+    youtube: ytWinner,
+    instagram: igWinner
+  };
+
+  winnerQueue = [ytWinner, igWinner];
+  winnerIdx = 0;
+
+  setStatus('당첨자 추첨 중');
+  startDrop(winnerQueue[0]);
+}
+
+async function onCardClose(){
+  if(isClosingWinner || !zoomBall) return;
+
+  isClosingWinner = true;
+
+  const currentWinner = zoomBall;
+  zoomBall = null;
+  dropBall = null;
+
+  winnerIdx++;
+
+  if(winnerIdx < winnerQueue.length){
+    state = 'idle';
+    isClosingWinner = false;
+    startDrop(winnerQueue[winnerIdx]);
+    return;
+  }
+
+  setStatus('당첨 확정 중');
+
+  try{
+    const res = await gasGet({
+      type: 'finalizeRound',
+      youtube_winner_id: roundWinners.youtube.sub.id,
+      instagram_winner_id: roundWinners.instagram.sub.id
+    });
+
+    if(!res || res.ok === false){
+      setStatus(res && res.error ? res.error : '당첨 확정 실패');
+      state = 'idle';
+      isClosingWinner = false;
+      pickBtn.disabled = false;
+      refreshBtn.disabled = false;
+      return;
+    }
+
+    balls = [];
+    knownIds = new Set();
+    winnerQueue = [];
+    winnerIdx = 0;
+    roundWinners = { youtube: null, instagram: null };
+
+    updateLegend();
+    setStatus('추첨 완료');
+  } catch(e){
+    console.warn('[finalizeRound]', e.message || e);
+    setStatus('당첨 확정 실패');
+  }
+
+  state = 'idle';
+  isClosingWinner = false;
+  pickBtn.disabled = false;
+  refreshBtn.disabled = false;
+}
+
+cv.addEventListener('click', () => {
+  if(isClosingWinner) return;
+  if(state === 'showing' || state === 'showDone'){
+    onCardClose();
+  }
+});
+
+pickBtn.addEventListener('click', doPick);
+refreshBtn.addEventListener('click', forceSync);
+
+async function init(){
+  setupCanvas();
+  setStatus('기계 준비 중');
+
+  drawNow();
+  loop();
+
+  await initialLoad();
+  scheduleNextPoll();
+}
+
+window.addEventListener('resize', setupCanvas);
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
