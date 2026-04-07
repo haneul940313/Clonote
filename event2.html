@@ -6,197 +6,42 @@
 <title>CLONOTE 구독 이벤트</title>
 <style>
   :root{
-    --ink:#2e2a25;
-    --panel:#fff7df;
-    --shadow:#8a7d69;
-    --yt:#e8453c;
-    --ig:#c2185b;
-    --yellow:#ffe04f;
-    --blue:#98c9e3;
-    --blue2:#6faacf;
-    --glass:#dff2fb;
+    --ink:#2e2a25;--panel:#fff7df;--shadow:#8a7d69;
+    --yt:#e8453c;--ig:#c2185b;--yellow:#ffe04f;--blue:#98c9e3;
   }
-
   *{box-sizing:border-box;margin:0;padding:0}
-
-  html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:transparent;
-    font-family:
-      "Arial Black",
-      "Impact",
-      "DungGeunMo",
-      "Galmuri11",
-      sans-serif;
-  }
-
-  .app{
-    width:100%;
-    height:100%;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:16px;
-    padding:18px;
-  }
-
-  .title{
-    text-align:center;
-    line-height:0.9;
-    color:var(--yellow);
-    font-weight:900;
-    letter-spacing:.02em;
-    text-transform:uppercase;
-    text-shadow:
-      3px 0 0 var(--ink),
-      -3px 0 0 var(--ink),
-      0 3px 0 var(--ink),
-      0 -3px 0 var(--ink),
-      3px 3px 0 var(--ink),
-      6px 6px 0 rgba(0,0,0,.18);
-  }
-
-  .title .t1{
-    display:block;
-    font-size:clamp(20px, 4.2vw, 34px);
-  }
-
-  .title .t2{
-    display:block;
-    margin-top:8px;
-    font-size:clamp(28px, 6.2vw, 52px);
-  }
-
-  .frame{
-    width:min(100%, 600px);
-    background:var(--panel);
-    border:4px solid var(--ink);
-    box-shadow:7px 7px 0 var(--shadow);
-    padding:14px;
-  }
-
-  canvas{
-    display:block;
-    max-width:100%;
-    margin:0 auto;
-    image-rendering:pixelated;
-    image-rendering:crisp-edges;
-  }
-
-  .hud{
-    margin-top:12px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-    flex-wrap:wrap;
-  }
-
-  .legend{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-  }
-
-  .chip{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    padding:9px 10px;
-    background:#fff;
-    border:3px solid var(--ink);
-    box-shadow:3px 3px 0 var(--shadow);
-    color:var(--ink);
-    font-size:11px;
-    font-weight:700;
-  }
-
-  .ldot{
-    width:16px;
-    height:16px;
-    border-radius:50%;
-    border:2px solid var(--ink);
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    color:#fff;
-    font-size:8px;
-    font-weight:bold;
-  }
-
-  .yt{ background:var(--yt); }
-  .ig{ background:var(--ig); }
-
-  .btns{
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
-  }
-
-  button{
-    appearance:none;
-    border:none;
-    cursor:pointer;
-    padding:10px 14px;
-    background:#ffe16a;
-    color:var(--ink);
-    border:3px solid var(--ink);
-    box-shadow:4px 4px 0 var(--shadow);
-    font:inherit;
-    font-size:11px;
-    font-weight:700;
-  }
-
-  button:active{
-    transform:translate(2px,2px);
-    box-shadow:2px 2px 0 var(--shadow);
-  }
-
-  button:disabled{
-    opacity:.55;
-    cursor:default;
-    transform:none;
-  }
-
-  .ghost{
-    background:#dff0fb;
-  }
-
-  .statusbar{
-    width:min(100%, 600px);
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
-    justify-content:space-between;
-  }
-
-  .statusbox{
-    min-height:40px;
-    display:flex;
-    align-items:center;
-    padding:8px 10px;
-    background:#fff;
-    border:3px solid var(--ink);
-    box-shadow:3px 3px 0 var(--shadow);
-    font-size:10px;
-    font-weight:700;
-    color:var(--ink);
-  }
-
-  .blink{
-    animation:blink .8s steps(2,end) infinite;
-  }
-
-  @keyframes blink{
-    50%{opacity:.35}
-  }
-
-  @media (max-width: 480px){
-    .chip, button, .statusbox{font-size:10px}
-  }
+  html,body{width:100%;height:100%;overflow:hidden;background:transparent;
+    font-family:"Arial Black","Impact","DungGeunMo","Galmuri11",sans-serif;}
+  .app{width:100%;height:100%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:16px;padding:18px;}
+  .title{text-align:center;line-height:0.9;color:var(--yellow);font-weight:900;
+    letter-spacing:.02em;text-transform:uppercase;
+    text-shadow:3px 0 0 var(--ink),-3px 0 0 var(--ink),0 3px 0 var(--ink),
+      0 -3px 0 var(--ink),3px 3px 0 var(--ink),6px 6px 0 rgba(0,0,0,.18);}
+  .title .t1{display:block;font-size:clamp(20px,4.2vw,34px);}
+  .title .t2{display:block;margin-top:8px;font-size:clamp(28px,6.2vw,52px);}
+  .frame{width:min(100%,600px);background:var(--panel);
+    border:4px solid var(--ink);box-shadow:7px 7px 0 var(--shadow);padding:14px;}
+  canvas{display:block;max-width:100%;margin:0 auto;
+    image-rendering:pixelated;image-rendering:crisp-edges;}
+  .hud{margin-top:12px;display:flex;justify-content:space-between;
+    align-items:center;gap:10px;flex-wrap:wrap;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:9px 10px;
+    background:#fff;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--shadow);
+    color:var(--ink);font-size:11px;font-weight:700;}
+  .ldot{width:16px;height:16px;border-radius:50%;border:2px solid var(--ink);
+    display:inline-flex;align-items:center;justify-content:center;
+    color:#fff;font-size:8px;font-weight:bold;}
+  .ldot.yt{background:var(--yt);} .ldot.ig{background:var(--ig);}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;}
+  button{appearance:none;border:none;cursor:pointer;padding:10px 14px;
+    background:#ffe16a;color:var(--ink);border:3px solid var(--ink);
+    box-shadow:4px 4px 0 var(--shadow);font:inherit;font-size:11px;font-weight:700;}
+  button:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--shadow);}
+  button:disabled{opacity:.55;cursor:default;transform:none;}
+  .ghost{background:#dff0fb;}
+  @media(max-width:480px){.chip,button{font-size:10px}}
 </style>
 </head>
 <body>
@@ -205,615 +50,559 @@
     <span class="t1">CLONOTE</span>
     <span class="t2">구독 이벤트</span>
   </div>
-
   <div class="frame">
     <canvas id="gc"></canvas>
-
     <div class="hud">
       <div class="legend">
         <span class="chip"><span class="ldot yt">Y</span>YOUTUBE <span id="ytCount">0</span></span>
         <span class="chip"><span class="ldot ig">I</span>INSTAGRAM <span id="igCount">0</span></span>
       </div>
-
       <div class="btns">
-        <button id="btn" onclick="doPick()">1회 뽑기 (2명)</button>
+        <button id="pickBtn" onclick="doPick()">1회 뽑기 (2명)</button>
         <button class="ghost" onclick="forceSync()">새로고침</button>
       </div>
     </div>
   </div>
-
-  <div class="statusbar">
-    <div class="statusbox" id="netStatus">빠르게 불러오는 중</div>
-    <div class="statusbox">후보 <span id="totalCount" style="margin-left:8px">0</span>명</div>
-  </div>
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════════════════════════
+//  설정
+// ═══════════════════════════════════════════════════════════════════════════
 const API = 'https://script.google.com/macros/s/AKfycbz4Cdo2i-5pj5HkelCn-907GxVmF7A5OL6-WmLu4NdyQ6B0y-oWPMMaCg0iSFm6nl81/exec';
 
-const POLL_MS = 700;
-const BURST_MS = 180;
-const BURST_COUNT = 12;
-const REQUEST_TIMEOUT = 5000;
+// 폴링 전략 (GAS 할당량 보호)
+const POLL_BASE_MS   = 12000;  // 기본 12초
+const POLL_MAX_MS    = 60000;  // 실패 시 최대 60초까지 백오프
+const POLL_BACKOFF   = 2;      // 실패마다 2배씩 늘림
+const API_TIMEOUT_MS = 10000;  // 요청 타임아웃
 
+// 초기 로드: 콜드 스타트 대응 재시도
+const INIT_MAX_RETRY = 5;
+const INIT_RETRY_MS  = 1500;
+
+// 뽑기 완료 후 재확인
+const POST_PICK_COUNT    = 3;
+const POST_PICK_DELAY_MS = 1200;
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  캔버스
+// ═══════════════════════════════════════════════════════════════════════════
 const cv = document.getElementById('gc');
 const cx = cv.getContext('2d');
-
 let W, H;
-const BASE_W = 480, BASE_H = 580;
-const R = 30;
+const BASE_W=480, BASE_H=580, BALL_R=30;
 
-const TX = 40, TY = 24, TW = 400, TH = 360;
-const NCX_R = TW/2 + TX;
-const NTOP_R = TY + TH;
-const NW = 72, NH = 90;
-const TRAY_Y_R = NTOP_R + NH;
-const TRAY_W = 150, TRAY_H = 32;
-const SLOT_X_R = TW/2 + TX;
+// 기계 레이아웃 (BASE 좌표)
+const TX=40,TY=24,TW=400,TH=360;
+const NCX_R=TW/2+TX, NTOP_R=TY+TH, NW=72, NH=90;
+const TRAY_Y_R=NTOP_R+NH, TRAY_W=150, TRAY_H=32;
 
-function setupCanvas() {
-  const maxW = Math.min(window.innerWidth - 36, 600);
-  const maxH = window.innerHeight - 210;
-  const scale = Math.min(maxW / BASE_W, maxH / BASE_H, 1.18);
-  W = Math.round(BASE_W * scale);
-  H = Math.round(BASE_H * scale);
-  cv.width = W;
-  cv.height = H;
-  cv.style.width = W + 'px';
-  cv.style.height = H + 'px';
+function setupCanvas(){
+  const maxW=Math.min(window.innerWidth-36,600);
+  const maxH=window.innerHeight-155;
+  const scale=Math.min(maxW/BASE_W, maxH/BASE_H, 1.18);
+  W=Math.round(BASE_W*scale); H=Math.round(BASE_H*scale);
+  cv.width=W; cv.height=H; cv.style.width=W+'px'; cv.style.height=H+'px';
 }
-function sf(){ return W / BASE_W; }
-function sx(v){ return v * sf(); }
-function sy(v){ return v * sf(); }
+const sf = () => W/BASE_W;
+const sx = v  => v*sf();
+const sy = v  => v*sf();
 
-const COLORS = [
-  '#e8453c','#ff6d3b','#d4ac00','#43a047','#1e88e5',
-  '#7b3fa0','#c2185b','#00897b','#e65100','#3949ab'
-];
+// ═══════════════════════════════════════════════════════════════════════════
+//  유틸
+// ═══════════════════════════════════════════════════════════════════════════
+const COLORS=['#e8453c','#ff6d3b','#d4ac00','#43a047','#1e88e5',
+              '#7b3fa0','#c2185b','#00897b','#e65100','#3949ab'];
+const ease = t => t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2;
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
 
-const GRAVITY = 0.42;
-function ease(t){ return t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2; }
-
-function normalizeChannelName(v) {
-  const s = String(v || '').trim().toLowerCase();
-  if (s === 'youtube' || s === '유튜브' || s === 'you tube' || s === 'yt') return 'youtube';
-  if (s === 'instagram' || s === '인스타그램' || s === '인스타' || s === 'ig') return 'instagram';
+function normCh(v){
+  const s=String(v||'').trim().toLowerCase();
+  if(['youtube','유튜브','you tube','yt'].includes(s)) return 'youtube';
+  if(['instagram','인스타그램','인스타','ig'].includes(s)) return 'instagram';
   return s;
 }
-function isYouTubeChannel(v) {
-  return normalizeChannelName(v) === 'youtube';
-}
-function isInstagramChannel(v) {
-  return normalizeChannelName(v) === 'instagram';
+const isYTch = v => normCh(v)==='youtube';
+const isIGch = v => normCh(v)==='instagram';
+
+function fitName(name,maxPx,fs){
+  cx.font=`bold ${fs}px sans-serif`;
+  if(cx.measureText(name).width<=maxPx) return name;
+  let t=name;
+  while(t.length>1 && cx.measureText(t+'…').width>maxPx) t=t.slice(0,-1);
+  return t+'…';
 }
 
-function setStatus(msg, loading=false){
-  const el = document.getElementById('netStatus');
-  el.textContent = msg;
-  el.classList.toggle('blink', loading);
-}
-
-function fitName(name, maxW, fontSize) {
-  cx.font = `bold ${fontSize}px sans-serif`;
-  if (cx.measureText(name).width <= maxW) return name;
-  let t = name;
-  while (t.length > 1 && cx.measureText(t + '…').width > maxW) t = t.slice(0,-1);
-  return t + '…';
-}
-
-function drawPixelCircle(x, y, r, fill, stroke, pixel=3) {
+// ═══════════════════════════════════════════════════════════════════════════
+//  픽셀 원
+// ═══════════════════════════════════════════════════════════════════════════
+function drawPixelCircle(x,y,r,fill,stroke,pixel=3){
+  const s=Math.max(2,Math.round(pixel));
   cx.save();
-  const step = Math.max(2, Math.round(pixel));
-
-  for (let py = -r; py <= r; py += step) {
-    for (let px = -r; px <= r; px += step) {
-      const d = Math.hypot(px, py);
-      if (d <= r) {
-        cx.fillStyle = fill;
-        cx.fillRect(Math.round(x + px), Math.round(y + py), step, step);
-      }
+  for(let py=-r;py<=r;py+=s)
+    for(let px2=-r;px2<=r;px2+=s)
+      if(Math.hypot(px2,py)<=r){cx.fillStyle=fill;cx.fillRect(Math.round(x+px2),Math.round(y+py),s,s);}
+  for(let py=-r;py<=r;py+=s)
+    for(let px2=-r;px2<=r;px2+=s){
+      const d=Math.hypot(px2,py);
+      if(d<=r&&d>=r-s*1.6){cx.fillStyle=stroke;cx.fillRect(Math.round(x+px2),Math.round(y+py),s,s);}
     }
-  }
-
-  for (let py = -r; py <= r; py += step) {
-    for (let px = -r; px <= r; px += step) {
-      const d = Math.hypot(px, py);
-      if (d <= r && d >= r - step * 1.6) {
-        cx.fillStyle = stroke;
-        cx.fillRect(Math.round(x + px), Math.round(y + py), step, step);
-      }
-    }
-  }
   cx.restore();
 }
 
-class Ball {
-  constructor(sub, color) {
-    this.sub = sub;
-    this.color = color;
-    this.r = R * sf();
-    this.x = sx(SLOT_X_R) + (Math.random()-0.5)*sx(28);
-    this.y = sy(TY) + this.r;
-    this.vx = (Math.random()-0.5)*1.8;
-    this.vy = 0;
-    this.done = false;
-    this.dropping = false;
+// ═══════════════════════════════════════════════════════════════════════════
+//  Ball
+// ═══════════════════════════════════════════════════════════════════════════
+class Ball{
+  constructor(sub,color){
+    this.sub=sub; this.color=color;
+    this.r=BALL_R*sf();
+    this.x=sx(NCX_R)+(Math.random()-0.5)*sx(28);
+    this.y=sy(TY)+this.r;
+    this.vx=(Math.random()-0.5)*1.8; this.vy=0;
+    this.dropping=false; this.done=false;
   }
-
-  update(others) {
-    if (this.done || this.dropping) return;
-
-    const txl = sx(TX)+2, txr = sx(TX+TW)-2;
-    const tyb = sy(TY+TH)-4;
-
-    this.vy += GRAVITY;
-    this.vx *= 0.984;
-    this.x += this.vx;
-    this.y += this.vy;
-
-    if (this.x - this.r < txl) { this.x = txl + this.r; this.vx = Math.abs(this.vx)*0.52; }
-    if (this.x + this.r > txr) { this.x = txr - this.r; this.vx = -Math.abs(this.vx)*0.52; }
-    if (this.y + this.r > tyb) { this.y = tyb - this.r; this.vy = -Math.abs(this.vy)*0.26; this.vx *= 0.70; }
-
-    for (const o of others) {
-      if (o === this || o.dropping || o.done) continue;
-      const dx=this.x-o.x, dy=this.y-o.y, d=Math.hypot(dx,dy);
-      if (d < this.r + o.r - 0.5 && d > 0.01) {
-        const nx=dx/d, ny=dy/d, ov=(this.r+o.r-d)/2;
-        this.x+=nx*ov*0.5; this.y+=ny*ov*0.5;
-        o.x-=nx*ov*0.5; o.y-=ny*ov*0.5;
+  update(others){
+    if(this.done||this.dropping) return;
+    const txl=sx(TX)+2,txr=sx(TX+TW)-2,tyb=sy(TY+TH)-4;
+    this.vy+=0.42; this.vx*=0.984; this.x+=this.vx; this.y+=this.vy;
+    if(this.x-this.r<txl){this.x=txl+this.r;this.vx=Math.abs(this.vx)*0.52;}
+    if(this.x+this.r>txr){this.x=txr-this.r;this.vx=-Math.abs(this.vx)*0.52;}
+    if(this.y+this.r>tyb){this.y=tyb-this.r;this.vy=-Math.abs(this.vy)*0.26;this.vx*=0.70;}
+    for(const o of others){
+      if(o===this||o.dropping||o.done) continue;
+      const dx=this.x-o.x,dy=this.y-o.y,d=Math.hypot(dx,dy);
+      if(d<this.r+o.r-0.5&&d>0.01){
+        const nx=dx/d,ny=dy/d,ov=(this.r+o.r-d)/2;
+        this.x+=nx*ov*0.5;this.y+=ny*ov*0.5;
+        o.x-=nx*ov*0.5;o.y-=ny*ov*0.5;
       }
     }
   }
+  draw(bx,by,br){
+    const x=bx??this.x, y=by??this.y, r=br??this.r;
+    const px=Math.max(2,Math.round(sf()*2.2));
 
-  draw(bx, by, br) {
-    const x = bx ?? this.x;
-    const y = by ?? this.y;
-    const r = br ?? this.r;
-    const px = Math.max(2, Math.round(sf()*2.2));
+    // 그림자
+    drawPixelCircle(x+3,y+4,r,'rgba(0,0,0,0.10)','rgba(0,0,0,0.10)',px);
 
-    drawPixelCircle(x + 3, y + 4, r, 'rgba(0,0,0,0.10)', 'rgba(0,0,0,0.10)', px);
+    // ① 아래 절반 (밝은 색)
+    cx.save(); cx.beginPath(); cx.rect(x-r-4,y,r*2+8,r+6); cx.clip();
+    drawPixelCircle(x,y,r,'#f0ece0','#2e2a25',px); cx.restore();
 
-    cx.save();
-    cx.beginPath();
-    cx.rect(x-r-4, y-r-4, r*2+8, r+4);
-    cx.clip();
-    drawPixelCircle(x, y, r, this.color, '#2e2a25', px);
-    cx.restore();
+    // ② 위 절반 (캡슐 색상)
+    cx.save(); cx.beginPath(); cx.rect(x-r-4,y-r-4,r*2+8,r+4); cx.clip();
+    drawPixelCircle(x,y,r,this.color,'#2e2a25',px); cx.restore();
 
-    cx.save();
-    cx.beginPath();
-    cx.rect(x-r-4, y, r*2+8, r+6);
-    cx.clip();
-    drawPixelCircle(x, y, r, '#f6f1e7', '#2e2a25', px);
-    cx.restore();
+    // ③ 구분선
+    cx.strokeStyle='#2e2a25'; cx.lineWidth=2;
+    cx.beginPath(); cx.moveTo(x-r,y); cx.lineTo(x+r,y); cx.stroke();
 
-    cx.strokeStyle = '#2e2a25';
-    cx.lineWidth = 2;
-    cx.beginPath();
-    cx.moveTo(x-r, y);
-    cx.lineTo(x+r, y);
-    cx.stroke();
+    // ④ 닉네임 (위 절반 중앙)
+    const fs=Math.max(8,Math.round(r*0.30));
+    cx.font=`bold ${fs}px sans-serif`;
+    cx.textAlign='center'; cx.textBaseline='middle'; cx.fillStyle='#fff';
+    cx.fillText(fitName(this.sub.nickname||this.sub.name||'',r*1.55,fs), x, y-r*0.30);
 
-    drawPixelCircle(x-r*0.28, y-r*0.28, r*0.16, 'rgba(255,255,255,0.35)', 'rgba(255,255,255,0.35)', px);
+    // ⑤ 채널 아이콘 (아래 절반)
+    cx.font=`bold ${Math.max(8,Math.round(r*0.26))}px sans-serif`;
+    cx.fillStyle='#555';
+    cx.fillText(this.isYT()?'Y':'I', x, y+r*0.30);
 
-    const fs = Math.max(8, Math.round(r * 0.30));
-    const name = fitName(this.sub.nickname || this.sub.name || '', r*1.55, fs);
-    cx.font = `bold ${fs}px sans-serif`;
-    cx.textAlign='center';
-    cx.textBaseline='middle';
-    cx.fillStyle = '#fff';
-    cx.fillText(name, x, y - r*0.24);
-
-    cx.font = `bold ${Math.max(8, Math.round(r * 0.26))}px sans-serif`;
-    cx.fillStyle = '#555';
-    cx.fillText(this.isYT() ? 'Y' : 'I', x, y + r*0.30);
+    // ⑥ 하이라이트: 글씨 위쪽 끝으로 올려서 겹침 방지
+    drawPixelCircle(x-r*0.28,y-r*0.74,r*0.13,'rgba(255,255,255,0.50)','rgba(255,255,255,0.50)',px);
   }
-
-  isYT() {
-    return isYouTubeChannel(this.sub.channel);
-  }
+  isYT(){ return isYTch(this.sub.channel); }
 }
 
-function drawMachine() {
-  const tx=sx(TX), ty=sy(TY), tw=sx(TW), th=sy(TH);
-  const ncx=sx(NCX_R), ntop=sy(NTOP_R);
-  const nw=sx(NW), nh=sy(NH);
-  const tray_y=sy(TRAY_Y_R), tray_w=sx(TRAY_W), tray_h=sy(TRAY_H);
+// ═══════════════════════════════════════════════════════════════════════════
+//  기계 그리기
+// ═══════════════════════════════════════════════════════════════════════════
+function drawMachine(){
+  const tx=sx(TX),ty=sy(TY),tw=sx(TW),th=sy(TH);
+  const ncx=sx(NCX_R),ntop=sy(NTOP_R),nw=sx(NW),nh=sy(NH);
+  const ty2=sy(TRAY_Y_R),tw2=sx(TRAY_W),th2=sy(TRAY_H);
+  const p2=Math.max(2,Math.round(sf()*2));
 
-  cx.fillStyle = '#98c9e3';
-  cx.fillRect(tx, ty, tw, th);
-  cx.strokeStyle = '#2e2a25';
-  cx.lineWidth = 4;
-  cx.strokeRect(tx, ty, tw, th);
+  cx.fillStyle='#98c9e3'; cx.fillRect(tx,ty,tw,th);
+  cx.strokeStyle='#2e2a25'; cx.lineWidth=4; cx.strokeRect(tx,ty,tw,th);
+  cx.fillStyle='#dff2fb'; cx.fillRect(tx+sx(8),ty+sy(8),tw-sx(16),th-sy(16));
+  cx.fillStyle='rgba(255,255,255,.32)'; cx.fillRect(tx+sx(14),ty+sy(12),sx(20),th-sy(24));
 
-  cx.fillStyle = '#dff2fb';
-  cx.fillRect(tx+sx(8), ty+sy(8), tw-sx(16), th-sy(16));
-
-  cx.fillStyle = 'rgba(255,255,255,.32)';
-  cx.fillRect(tx+sx(14), ty+sy(12), sx(20), th-sy(24));
-
-  cx.fillStyle = '#4a82a3';
-  cx.fillRect(ncx-sx(16), ty-sy(4), sx(32), sy(12));
-  cx.strokeRect(ncx-sx(16), ty-sy(4), sx(32), sy(12));
-
-  cx.fillStyle = '#b8d8ea';
-  cx.fillRect(ncx-nw/2, ntop, nw, nh);
-  cx.strokeRect(ncx-nw/2, ntop, nw, nh);
-
-  cx.fillStyle = '#6faacf';
-  cx.fillRect(ncx-tray_w/2, tray_y, tray_w, tray_h);
-  cx.strokeRect(ncx-tray_w/2, tray_y, tray_w, tray_h);
-
-  cx.fillStyle = '#d9eef8';
-  cx.fillRect(ncx-tray_w/2+sx(8), tray_y+sy(5), tray_w-sx(16), tray_h-sy(10));
-  cx.strokeRect(ncx-tray_w/2+sx(8), tray_y+sy(5), tray_w-sx(16), tray_h-sy(10));
-
-  cx.fillStyle = '#d8edf8';
-  cx.fillRect(tx+sx(20), tray_y+tray_h, tw-sx(40), sy(24));
-  cx.strokeRect(tx+sx(20), tray_y+tray_h, tw-sx(40), sy(24));
-
-  cx.fillStyle = '#e8453c';
-  cx.fillRect(tx+tw-sx(16), ntop+sy(10), sx(16), sy(54));
-  cx.strokeRect(tx+tw-sx(16), ntop+sy(10), sx(16), sy(54));
-
-  cx.fillStyle = '#c0392b';
-  drawPixelCircle(tx+tw-sx(8), ntop+sy(10), sx(12), '#c0392b', '#2e2a25', Math.max(2, Math.round(sf()*2)));
+  cx.fillStyle='#4a82a3'; cx.fillRect(ncx-sx(16),ty-sy(4),sx(32),sy(12)); cx.strokeRect(ncx-sx(16),ty-sy(4),sx(32),sy(12));
+  cx.fillStyle='#b8d8ea'; cx.fillRect(ncx-nw/2,ntop,nw,nh); cx.strokeRect(ncx-nw/2,ntop,nw,nh);
+  cx.fillStyle='#6faacf'; cx.fillRect(ncx-tw2/2,ty2,tw2,th2); cx.strokeRect(ncx-tw2/2,ty2,tw2,th2);
+  cx.fillStyle='#d9eef8'; cx.fillRect(ncx-tw2/2+sx(8),ty2+sy(5),tw2-sx(16),th2-sy(10)); cx.strokeRect(ncx-tw2/2+sx(8),ty2+sy(5),tw2-sx(16),th2-sy(10));
+  cx.fillStyle='#d8edf8'; cx.fillRect(tx+sx(20),ty2+th2,tw-sx(40),sy(24)); cx.strokeRect(tx+sx(20),ty2+th2,tw-sx(40),sy(24));
+  cx.fillStyle='#e8453c'; cx.fillRect(tx+tw-sx(16),ntop+sy(10),sx(16),sy(54)); cx.strokeRect(tx+tw-sx(16),ntop+sy(10),sx(16),sy(54));
+  drawPixelCircle(tx+tw-sx(8),ntop+sy(10),sx(12),'#c0392b','#2e2a25',p2);
 }
 
-let balls=[], state='idle', dropBall=null, dropY=0;
-let zoomT=0, openT=0, showT=0, zoomBall=null;
-let winnerQueue=[], winnerIdx=0;
-let isClosingWinner = false;
-let currentRoundWinners = [];
+// ═══════════════════════════════════════════════════════════════════════════
+//  캔버스 로딩 오버레이 (빈 화면 방지)
+// ═══════════════════════════════════════════════════════════════════════════
+let loadingMsg = ''; // 비어있으면 표시 안 함
+let loadingDot = 0;
+let loadingTimer = null;
 
-const ZOOM_DUR=72, OPEN_DUR=72, SHOW_DUR=100;
+function showLoading(msg){
+  loadingMsg = msg;
+  loadingDot = 0;
+  if(!loadingTimer) loadingTimer = setInterval(()=>{ loadingDot=(loadingDot+1)%4; },400);
+}
+function hideLoading(){
+  loadingMsg='';
+  if(loadingTimer){ clearInterval(loadingTimer); loadingTimer=null; }
+}
+function drawLoadingOverlay(){
+  if(!loadingMsg) return;
+  const dots='.'.repeat(loadingDot);
+  const msg=loadingMsg+dots;
+  const padX=sx(20),padY=sy(10);
+  cx.font=`bold ${Math.max(11,sx(13))}px sans-serif`;
+  const tw=cx.measureText(msg).width;
+  const bx=(W-tw)/2-padX, by=H/2-sy(16)-padY;
+  const bw=tw+padX*2, bh=sy(32)+padY*2;
+
+  cx.fillStyle='rgba(46,42,37,0.72)';
+  cx.fillRect(bx-2,by-2,bw+4,bh+4);
+  cx.fillStyle='#fff7df';
+  cx.fillRect(bx,by,bw,bh);
+  cx.strokeStyle='#2e2a25'; cx.lineWidth=2.5;
+  cx.strokeRect(bx,by,bw,bh);
+
+  cx.fillStyle='#2e2a25';
+  cx.textAlign='center'; cx.textBaseline='middle';
+  cx.fillText(msg, W/2, H/2);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  앱 상태
+// ═══════════════════════════════════════════════════════════════════════════
+let balls=[], state='idle';
+let dropBall=null, dropY=0;
+let zoomBall=null, zoomT=0, openT=0, showT=0;
+const ZOOM_DUR=72, OPEN_DUR=72, SHOW_DUR=100, MAX_R=100;
+let winnerQueue=[], winnerIdx=0, isClosingWinner=false;
 let knownIds=new Set(), colorIdx=0;
-let isPolling = false;
-let inflightController = null;
 
-function updateLegend() {
-  const yt = balls.filter(b => isYouTubeChannel(b.sub.channel)).length;
-  const ig = balls.filter(b => isInstagramChannel(b.sub.channel)).length;
-  document.getElementById('ytCount').textContent = yt;
-  document.getElementById('igCount').textContent = ig;
-  document.getElementById('totalCount').textContent = yt + ig;
+function updateLegend(){
+  document.getElementById('ytCount').textContent=balls.filter(b=>b.isYT()).length;
+  document.getElementById('igCount').textContent=balls.filter(b=>isIGch(b.sub.channel)).length;
 }
 
-async function fetchJSON(url, label='처리 중') {
-  setStatus(label, true);
-
-  if (inflightController) {
-    try { inflightController.abort(); } catch (_) {}
-  }
-  inflightController = new AbortController();
-
-  const timeoutId = setTimeout(() => {
-    try { inflightController.abort(); } catch (_) {}
-  }, REQUEST_TIMEOUT);
-
-  try {
-    const res = await fetch(url, {
-      cache: 'no-store',
-      signal: inflightController.signal
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    setStatus('대기 중');
-    return data;
-  } finally {
-    clearTimeout(timeoutId);
-  }
+// ═══════════════════════════════════════════════════════════════════════════
+//  API 호출 (타임아웃 포함)
+// ═══════════════════════════════════════════════════════════════════════════
+async function gasGet(params){
+  const qs=new URLSearchParams({...params,_:Date.now()}).toString();
+  const ctrl=new AbortController();
+  const tid=setTimeout(()=>ctrl.abort(), API_TIMEOUT_MS);
+  try{
+    const res=await fetch(`${API}?${qs}`,{cache:'no-store',signal:ctrl.signal});
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } finally{ clearTimeout(tid); }
 }
 
-async function pollSubs(force=false) {
-  if (isPolling) return;
-  if (!force && state !== 'idle') return;
+// ═══════════════════════════════════════════════════════════════════════════
+//  폴링 (지수 백오프)
+// ═══════════════════════════════════════════════════════════════════════════
+let isPolling     = false;
+let pollTimer     = null;
+let pollIntervalMs = POLL_BASE_MS;
 
-  isPolling = true;
-  try {
-    const data = await fetchJSON(`${API}?type=subscribers&_=${Date.now()}`, '명단 초고속 불러오는 중');
-    if (!Array.isArray(data)) {
-      setStatus('명단 형식 확인 필요');
-      return;
+function applySubData(data){
+  if(!Array.isArray(data)) return;
+  const incoming=new Set(data.map(s=>s.id));
+  data.forEach((s,i)=>{
+    if(!knownIds.has(s.id)){
+      knownIds.add(s.id);
+      const color=COLORS[colorIdx%COLORS.length]; colorIdx++;
+      setTimeout(()=>{ balls.push(new Ball(s,color)); updateLegend(); }, i*30);
     }
-
-    const incomingIds = new Set(data.map(s => s.id));
-
-    data.forEach((s, i) => {
-      if (!knownIds.has(s.id)) {
-        knownIds.add(s.id);
-        const color = COLORS[colorIdx % COLORS.length];
-        colorIdx++;
-        setTimeout(() => {
-          balls.push(new Ball(s, color));
-          updateLegend();
-        }, i * 25);
-      }
-    });
-
-    balls = balls.filter(b => incomingIds.has(b.sub.id));
-    knownIds = incomingIds;
+  });
+  if(balls.some(b=>!incoming.has(b.sub.id))){
+    balls=balls.filter(b=>incoming.has(b.sub.id));
+    knownIds=incoming;
     updateLegend();
-  } catch (e) {
-    console.warn('poll error:', e);
-    setStatus('연결 확인 필요');
-  } finally {
-    isPolling = false;
   }
 }
 
-async function burstPoll() {
-  for (let i = 0; i < BURST_COUNT; i++) {
-    await pollSubs(true);
-    await new Promise(r => setTimeout(r, BURST_MS));
+async function syncSubs(force=false){
+  if(isPolling) return;
+  if(!force && state!=='idle') return;   // 뽑기 중 자동 폴링 스킵
+  if(!force && document.hidden) return;  // 탭 숨김 시 스킵
+  isPolling=true;
+  try{
+    const data=await gasGet({type:'subscribers'});
+    applySubData(data);
+    // 성공 → 백오프 초기화
+    pollIntervalMs=POLL_BASE_MS;
+  } catch(e){
+    console.warn('[poll]',e.message||e);
+    // 실패 → 백오프 (최대 60초)
+    pollIntervalMs=Math.min(pollIntervalMs*POLL_BACKOFF, POLL_MAX_MS);
+    console.info(`[poll] 다음 폴링까지 ${pollIntervalMs/1000}초 대기`);
+  } finally{
+    isPolling=false;
   }
 }
 
-async function forceSync() {
-  await burstPoll();
+// 주기적 폴링 (백오프 반영)
+function scheduleNextPoll(){
+  if(pollTimer) clearTimeout(pollTimer);
+  pollTimer=setTimeout(async()=>{
+    await syncSubs(false);
+    scheduleNextPoll(); // 다음 스케줄 (pollIntervalMs 갱신 후)
+  }, pollIntervalMs);
 }
 
-function doPick() {
-  if (state !== 'idle' || balls.length === 0) return;
-  if (isClosingWinner) return;
+// 탭 복귀 시 즉시 한 번 폴링
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden){ syncSubs(false); }
+});
 
-  const ytPool = balls.filter(b => isYouTubeChannel(b.sub.channel));
-  const igPool = balls.filter(b => isInstagramChannel(b.sub.channel));
+// ── 초기 로드: 콜드 스타트 재시도 ──────────────────────────────────────
+async function initialLoad(){
+  showLoading('명단 불러오는 중');
+  for(let attempt=1; attempt<=INIT_MAX_RETRY; attempt++){
+    try{
+      const data=await gasGet({type:'subscribers'});
+      applySubData(data);
+      hideLoading();
+      return true;
+    } catch(e){
+      console.warn(`[init] 시도 ${attempt}/${INIT_MAX_RETRY} 실패:`, e.message||e);
+      if(attempt<INIT_MAX_RETRY){
+        showLoading(`연결 중 (${attempt}/${INIT_MAX_RETRY})`);
+        await sleep(INIT_RETRY_MS);
+      }
+    }
+  }
+  hideLoading();
+  showLoading('연결 실패 - 새로고침 눌러주세요');
+  setTimeout(hideLoading, 3000);
+  return false;
+}
 
-  if (ytPool.length === 0 || igPool.length === 0) {
-    setStatus('유튜브 1명 + 인스타그램 1명이 모두 있어야 시작 가능');
+// ── 강제 새로고침 ────────────────────────────────────────────────────────
+async function forceSync(){
+  showLoading('새로고침 중');
+  for(let i=0;i<3;i++){
+    await syncSubs(true);
+    if(i<2) await sleep(600);
+  }
+  hideLoading();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  뽑기
+// ═══════════════════════════════════════════════════════════════════════════
+async function doPick(){
+  if(state!=='idle'||isClosingWinner) return;
+
+  // 뽑기 전 최신 상태 확인
+  showLoading('최신 명단 확인 중');
+  await syncSubs(true);
+  hideLoading();
+
+  const ytPool=balls.filter(b=>b.isYT());
+  const igPool=balls.filter(b=>isIGch(b.sub.channel));
+
+  if(!ytPool.length||!igPool.length){
+    alert('유튜브 후보 1명 + 인스타그램 후보 1명이 모두 있어야 뽑기가 가능합니다.');
     return;
   }
 
-  document.getElementById('btn').disabled = true;
-  setStatus('1회 뽑기 진행 중', true);
-
-  const ytWinner = ytPool[Math.floor(Math.random() * ytPool.length)];
-  const igWinner = igPool[Math.floor(Math.random() * igPool.length)];
-
-  winnerQueue = [ytWinner, igWinner];
-  currentRoundWinners = winnerQueue.map(w => w.sub.id);
-  winnerIdx = 0;
-
+  document.getElementById('pickBtn').disabled=true;
+  winnerQueue=[
+    ytPool[Math.floor(Math.random()*ytPool.length)],
+    igPool[Math.floor(Math.random()*igPool.length)]
+  ];
+  winnerIdx=0;
   startDrop(winnerQueue[0]);
 }
 
-function startDrop(ball) {
-  if (!ball) return;
-
-  dropBall = ball;
-  balls = balls.filter(b => b !== ball);
-  dropBall.dropping = true;
-  dropBall.x = sx(NCX_R);
-  dropBall.y = sy(TY+TH) - dropBall.r - sy(2);
-  dropY = dropBall.y;
-
-  state = 'dropping';
+function startDrop(ball){
+  dropBall=ball;
+  balls=balls.filter(b=>b!==ball);
+  dropBall.dropping=true;
+  dropBall.x=sx(NCX_R);
+  dropBall.y=sy(TY+TH)-dropBall.r-sy(2);
+  dropY=dropBall.y;
+  state='dropping';
   updateLegend();
 }
 
-async function onCardClose() {
-  if (isClosingWinner) return;
-  if (!zoomBall) return;
+async function onCardClose(){
+  if(isClosingWinner||!zoomBall) return;
+  isClosingWinner=true;
+  const winner=zoomBall;
+  zoomBall=null; dropBall=null;
 
-  isClosingWinner = true;
+  // 당첨 기록
+  showLoading('당첨 처리 중');
+  try{ await gasGet({type:'catch',winner_id:winner.sub.id}); }
+  catch(e){ console.warn('[catch]',e.message||e); }
+  hideLoading();
 
-  const winner = zoomBall;
-  zoomBall = null;
-  dropBall = null;
+  winnerIdx++;
 
-  try {
-    await fetchJSON(`${API}?type=catch&winner_id=${winner.sub.id}&_=${Date.now()}`, '당첨 반영 중');
-  } catch(e) {
-    console.warn(e);
-  }
-
-  winnerIdx += 1;
-
-  if (winnerIdx < winnerQueue.length) {
-    state = 'idle_between';
-    setStatus(`${winnerIdx + 1}번째 당첨자 추첨 중`, true);
-
-    setTimeout(() => {
-      isClosingWinner = false;
-      startDrop(winnerQueue[winnerIdx]);
-    }, 350);
-
+  // 유튜브 완료 → 인스타 진행
+  if(winnerIdx<winnerQueue.length){
+    state='idle';
+    await sleep(350);
+    isClosingWinner=false;
+    startDrop(winnerQueue[winnerIdx]);
     return;
   }
 
-  try {
-    await fetchJSON(`${API}?type=closeWeek&_=${Date.now()}`, '회차 마감 중');
-  } catch(e) {
-    console.warn(e);
-  }
+  // 두 명 완료 → 회차 마감
+  showLoading('회차 마감 중');
+  try{ await gasGet({type:'closeWeek'}); }
+  catch(e){ console.warn('[closeWeek]',e.message||e); }
+  hideLoading();
 
-  balls = [];
-  knownIds = new Set();
-  winnerQueue = [];
-  currentRoundWinners = [];
-  winnerIdx = 0;
-
+  // 초기화
+  balls=[]; knownIds=new Set(); winnerQueue=[]; winnerIdx=0;
   updateLegend();
 
-  await burstPoll();
+  // 새 회차 재확인
+  showLoading('새 회차 확인 중');
+  for(let i=0;i<POST_PICK_COUNT;i++){
+    await syncSubs(true);
+    if(i<POST_PICK_COUNT-1) await sleep(POST_PICK_DELAY_MS);
+  }
+  hideLoading();
 
-  state = 'idle';
-  isClosingWinner = false;
-  document.getElementById('btn').disabled = false;
-  setStatus('1회 뽑기 완료');
+  state='idle'; isClosingWinner=false;
+  document.getElementById('pickBtn').disabled=false;
+  pollIntervalMs=POLL_BASE_MS; // 백오프 초기화
+  scheduleNextPoll();
 }
 
-function drawZooming() {
-  const t = ease(Math.min(zoomT/ZOOM_DUR,1));
-  const fromX = sx(NCX_R), fromY = sy(TRAY_Y_R)+sy(TRAY_H)/2;
-  const toX = W/2, toY = H/2 - sy(10);
-  const x = fromX+(toX-fromX)*t;
-  const y = fromY+(toY-fromY)*t;
-  const r = zoomBall.r + (sx(MAX_R)-zoomBall.r)*t;
-
-  cx.fillStyle = `rgba(46,42,37,${0.42*t})`;
-  cx.fillRect(0,0,W,H);
+// ═══════════════════════════════════════════════════════════════════════════
+//  애니메이션
+// ═══════════════════════════════════════════════════════════════════════════
+function drawZooming(){
+  const t=ease(Math.min(zoomT/ZOOM_DUR,1));
+  const fx=sx(NCX_R),fy=sy(TRAY_Y_R)+sy(TRAY_H)/2;
+  const x=fx+(W/2-fx)*t, y=fy+(H/2-sy(10)-fy)*t;
+  const r=zoomBall.r+(sx(MAX_R)-zoomBall.r)*t;
+  cx.fillStyle=`rgba(46,42,37,${0.42*t})`; cx.fillRect(0,0,W,H);
   zoomBall.draw(x,y,r);
   zoomT++;
-  if (zoomT >= ZOOM_DUR) { state='opening'; openT=0; }
+  if(zoomT>=ZOOM_DUR){state='opening';openT=0;}
 }
 
-const MAX_R = 100;
-
-function drawOpening() {
-  const t = ease(Math.min(openT/OPEN_DUR,1));
-  const gap = t * sx(MAX_R) * 1.12;
-  const x=W/2, y=H/2-sy(10), r=sx(MAX_R);
-  const px = Math.max(2, Math.round(sf()*2.5));
-
-  cx.fillStyle='rgba(46,42,37,0.42)';
-  cx.fillRect(0,0,W,H);
-
-  cx.save();
-  cx.beginPath();
-  cx.rect(x-r-6, y-gap-r-6, r*2+12, r+8);
-  cx.clip();
-  drawPixelCircle(x, y-gap, r, zoomBall.color, '#2e2a25', px);
-  cx.restore();
-
-  cx.save();
-  cx.beginPath();
-  cx.rect(x-r-6, y+gap, r*2+12, r+8);
-  cx.clip();
-  drawPixelCircle(x, y+gap, r, '#f6f1e7', '#2e2a25', px);
-  cx.restore();
-
+function drawOpening(){
+  const t=ease(Math.min(openT/OPEN_DUR,1));
+  const gap=t*sx(MAX_R)*1.12;
+  const x=W/2,y=H/2-sy(10),r=sx(MAX_R);
+  const px=Math.max(2,Math.round(sf()*2.5));
+  cx.fillStyle='rgba(46,42,37,0.42)'; cx.fillRect(0,0,W,H);
+  cx.save(); cx.beginPath(); cx.rect(x-r-6,y-gap-r-6,r*2+12,r+8); cx.clip();
+  drawPixelCircle(x,y-gap,r,zoomBall.color,'#2e2a25',px); cx.restore();
+  cx.save(); cx.beginPath(); cx.rect(x-r-6,y+gap,r*2+12,r+8); cx.clip();
+  drawPixelCircle(x,y+gap,r,'#f0ece0','#2e2a25',px); cx.restore();
   openT++;
-  if (openT >= OPEN_DUR) { state='showing'; showT=0; }
+  if(openT>=OPEN_DUR){state='showing';showT=0;}
 }
 
-function drawShowing() {
-  const t = ease(Math.min(showT/SHOW_DUR,1));
-  const gap = sx(MAX_R)*1.12;
-  const x=W/2, y=H/2-sy(10), r=sx(MAX_R);
-  const sub = zoomBall.sub;
-  const isYT = zoomBall.isYT();
-  const px = Math.max(2, Math.round(sf()*2.5));
+function drawShowing(){
+  const t=ease(Math.min(showT/SHOW_DUR,1));
+  const gap=sx(MAX_R)*1.12;
+  const x=W/2,y=H/2-sy(10),r=sx(MAX_R);
+  const px=Math.max(2,Math.round(sf()*2.5));
+  const sub=zoomBall.sub,ytW=zoomBall.isYT();
 
-  cx.fillStyle='rgba(46,42,37,0.42)';
-  cx.fillRect(0,0,W,H);
+  cx.fillStyle='rgba(46,42,37,0.42)'; cx.fillRect(0,0,W,H);
+  cx.save(); cx.beginPath(); cx.rect(x-r-6,y-gap-r-6,r*2+12,r+8); cx.clip();
+  drawPixelCircle(x,y-gap,r,zoomBall.color,'#2e2a25',px); cx.restore();
+  cx.save(); cx.beginPath(); cx.rect(x-r-6,y+gap,r*2+12,r+8); cx.clip();
+  drawPixelCircle(x,y+gap,r,'#f0ece0','#2e2a25',px); cx.restore();
 
-  cx.save();
-  cx.beginPath();
-  cx.rect(x-r-6, y-gap-r-6, r*2+12, r+8);
-  cx.clip();
-  drawPixelCircle(x, y-gap, r, zoomBall.color, '#2e2a25', px);
-  cx.restore();
-
-  cx.save();
-  cx.beginPath();
-  cx.rect(x-r-6, y+gap, r*2+12, r+8);
-  cx.clip();
-  drawPixelCircle(x, y+gap, r, '#f6f1e7', '#2e2a25', px);
-  cx.restore();
-
-  cx.save();
-  cx.globalAlpha = t;
-
-  const cw=Math.min(sx(290),W-sx(40)), ch=sy(192);
-  const cardX=x-cw/2, cardY=y-ch/2;
-
-  cx.fillStyle='#fff8e8';
-  cx.fillRect(cardX, cardY, cw, ch);
-  cx.strokeStyle='#2e2a25';
-  cx.lineWidth=3;
-  cx.strokeRect(cardX, cardY, cw, ch);
-
-  cx.fillStyle=zoomBall.color;
-  cx.fillRect(cardX, cardY, cw, sy(42));
-  cx.strokeRect(cardX, cardY, cw, sy(42));
-
-  cx.font=`bold 12px sans-serif`;
-  cx.textAlign='center';
-  cx.textBaseline='middle';
+  cx.save(); cx.globalAlpha=t;
+  const cw=Math.min(sx(290),W-sx(40)),ch=sy(192);
+  const cardX=x-cw/2,cardY=y-ch/2;
+  cx.fillStyle='#fff8e8'; cx.fillRect(cardX,cardY,cw,ch);
+  cx.strokeStyle='#2e2a25'; cx.lineWidth=3; cx.strokeRect(cardX,cardY,cw,ch);
+  cx.fillStyle=zoomBall.color; cx.fillRect(cardX,cardY,cw,sy(42)); cx.strokeRect(cardX,cardY,cw,sy(42));
+  cx.font='bold 12px sans-serif'; cx.textAlign='center'; cx.textBaseline='middle';
   cx.fillStyle='#fff';
-  cx.fillText(isYT ? 'YOUTUBE WINNER' : 'INSTAGRAM WINNER', x, cardY+sy(21));
-
-  cx.font=`bold ${sy(26)}px sans-serif`;
-  cx.fillStyle='#2e2a25';
-  cx.fillText(sub.nickname || sub.name || '', x, cardY+sy(88));
-
-  cx.beginPath();
-  cx.moveTo(cardX+sx(24), cardY+sy(114));
-  cx.lineTo(cardX+cw-sx(24), cardY+sy(114));
-  cx.stroke();
-
-  if (sub.template) {
-    cx.font=`bold 14px sans-serif`;
-    cx.fillStyle='#7b3fa0';
+  cx.fillText(ytW?'YOUTUBE WINNER':'INSTAGRAM WINNER', x, cardY+sy(21));
+  cx.font=`bold ${sy(26)}px sans-serif`; cx.fillStyle='#2e2a25';
+  cx.fillText(sub.nickname||sub.name||'', x, cardY+sy(88));
+  cx.strokeStyle='#2e2a25'; cx.lineWidth=1.5;
+  cx.beginPath(); cx.moveTo(cardX+sx(24),cardY+sy(114)); cx.lineTo(cardX+cw-sx(24),cardY+sy(114)); cx.stroke();
+  if(sub.template){
+    cx.font='bold 14px sans-serif'; cx.fillStyle='#7b3fa0';
     cx.fillText(`[ ${sub.template} ]`, x, cardY+sy(144));
   }
-
-  cx.font=`bold 11px sans-serif`;
-  cx.fillStyle='rgba(46,42,37,.7)';
+  cx.font='bold 11px sans-serif'; cx.fillStyle='rgba(46,42,37,.7)';
   cx.fillText('TAP TO CONTINUE', x, cardY+sy(170));
-
   cx.restore();
-
   showT++;
-  if (showT >= SHOW_DUR) state='showDone';
+  if(showT>=SHOW_DUR) state='showDone';
 }
 
-cv.addEventListener('click', () => {
-  if (isClosingWinner) return;
-  if (state === 'showDone' || state === 'showing') {
-    onCardClose();
-  }
+cv.addEventListener('click',()=>{
+  if(isClosingWinner) return;
+  if(state==='showDone'||state==='showing') onCardClose();
 });
 
-function loop() {
-  balls.forEach(b => b.update(balls));
+// ═══════════════════════════════════════════════════════════════════════════
+//  메인 루프
+// ═══════════════════════════════════════════════════════════════════════════
+function loop(){
+  balls.forEach(b=>b.update(balls));
 
-  if ((state==='dropping' || state==='idle_between') && dropBall) {
-    const targetY = sy(TRAY_Y_R) + sy(TRAY_H)/2;
-    dropY += (targetY - dropY)*0.04 + 1.1;
-    dropBall.x += (sx(NCX_R) - dropBall.x)*0.09;
-    dropBall.y = dropY;
-
-    if (dropY >= targetY-1) {
-      dropBall.y = targetY;
-      dropBall.x = sx(NCX_R);
-      zoomBall = dropBall;
-      dropBall = null;
-      state='zooming';
-      zoomT=0;
+  if(state==='dropping'&&dropBall){
+    const targetY=sy(TRAY_Y_R)+sy(TRAY_H)/2;
+    dropY+=(targetY-dropY)*0.04+1.1;
+    dropBall.x+=(sx(NCX_R)-dropBall.x)*0.09;
+    dropBall.y=dropY;
+    if(dropY>=targetY-1){
+      dropBall.y=targetY; dropBall.x=sx(NCX_R);
+      zoomBall=dropBall; dropBall=null;
+      state='zooming'; zoomT=0;
     }
   }
 
   cx.clearRect(0,0,W,H);
   drawMachine();
 
-  cx.save();
-  cx.beginPath();
-  cx.rect(sx(TX)+2, sy(TY)+2, sx(TW)-4, sy(TH)-4);
-  cx.clip();
-  balls.forEach(b => b.draw());
+  cx.save(); cx.beginPath();
+  cx.rect(sx(TX)+2,sy(TY)+2,sx(TW)-4,sy(TH)-4); cx.clip();
+  balls.forEach(b=>b.draw());
   cx.restore();
 
-  if (state==='dropping' && dropBall) dropBall.draw();
-  if (state==='zooming') drawZooming();
-  if (state==='opening') drawOpening();
-  if (state==='showing' || state==='showDone') drawShowing();
+  if(state==='dropping'&&dropBall) dropBall.draw();
+  if(state==='zooming')                         drawZooming();
+  if(state==='opening')                         drawOpening();
+  if(state==='showing'||state==='showDone')     drawShowing();
+
+  // 로딩 오버레이는 가장 마지막에 (항상 위에 표시)
+  drawLoadingOverlay();
 
   requestAnimationFrame(loop);
 }
 
-async function init() {
+// ═══════════════════════════════════════════════════════════════════════════
+//  초기화
+// ═══════════════════════════════════════════════════════════════════════════
+async function init(){
   setupCanvas();
-  window.addEventListener('resize', setupCanvas);
-  await burstPoll();
-  setInterval(() => pollSubs(false), POLL_MS);
-  loop();
+  window.addEventListener('resize',setupCanvas);
+  loop(); // 로딩 오버레이 바로 렌더링을 위해 루프 먼저 시작
+
+  await initialLoad();    // 콜드 스타트 재시도 포함
+  scheduleNextPoll();     // 12초 주기 백오프 폴링 시작
 }
 
-window.addEventListener('load', init);
+window.addEventListener('load',init);
 </script>
 </body>
 </html>
