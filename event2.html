@@ -14,7 +14,9 @@
     --yellow:#ffe04f;
     --blue:#98c9e3;
   }
+
   *{box-sizing:border-box;margin:0;padding:0}
+
   html,body{
     width:100%;
     height:100%;
@@ -22,11 +24,13 @@
     background:transparent;
     font-family:"Arial Black","Impact","DungGeunMo","Galmuri11",sans-serif;
   }
+
   body{
     display:flex;
     align-items:center;
     justify-content:center;
   }
+
   .app{
     width:100%;
     height:100%;
@@ -37,6 +41,7 @@
     gap:16px;
     padding:18px;
   }
+
   .title{
     text-align:center;
     line-height:0.9;
@@ -49,6 +54,7 @@
       0 3px 0 var(--ink), 0 -3px 0 var(--ink),
       3px 3px 0 var(--ink), 6px 6px 0 rgba(0,0,0,.18);
   }
+
   .title .t1{display:block;font-size:clamp(20px,4.2vw,34px)}
   .title .t2{display:block;margin-top:8px;font-size:clamp(28px,6.2vw,52px)}
 
@@ -78,7 +84,9 @@
     gap:10px;
     flex-wrap:wrap;
   }
+
   .legend{display:flex;flex-wrap:wrap;gap:8px}
+
   .chip{
     display:inline-flex;
     align-items:center;
@@ -91,6 +99,7 @@
     font-size:11px;
     font-weight:700;
   }
+
   .ldot{
     width:16px;
     height:16px;
@@ -103,10 +112,12 @@
     font-size:8px;
     font-weight:bold;
   }
+
   .ldot.yt{background:var(--yt)}
   .ldot.ig{background:var(--ig)}
 
   .btns{display:flex;gap:8px;flex-wrap:wrap}
+
   button{
     appearance:none;
     border:none;
@@ -120,25 +131,19 @@
     font-size:11px;
     font-weight:700;
   }
+
   button:active{
     transform:translate(2px,2px);
     box-shadow:2px 2px 0 var(--shadow);
   }
+
   button:disabled{
     opacity:.55;
     cursor:default;
     transform:none;
   }
-  .ghost{background:#dff0fb}
 
-  .statusbar{
-    margin-top:10px;
-    min-height:18px;
-    font-size:12px;
-    font-weight:700;
-    color:var(--ink);
-    text-align:center;
-  }
+  .ghost{background:#dff0fb}
 
   @media (max-width:480px){
     .chip,button{font-size:10px}
@@ -167,24 +172,16 @@
         <button class="ghost" id="refreshBtn" type="button">새로고침</button>
       </div>
     </div>
-
-    <div class="statusbar" id="statusText">기계 준비 중</div>
   </div>
 </div>
 
 <script>
-// ─────────────────────────────────────────────────────────────
-// 설정
-// ─────────────────────────────────────────────────────────────
 const API = 'https://script.google.com/macros/s/AKfycbzp7D8ETIvOhLUkZ8c3Q-U_JpW63SxlCFCFQYKXBEeLEdb1KNU2plpthPHEQQ3vnxse/exec';
 
-const POLL_BASE_MS = 1500;
-const POLL_MAX_MS = 6000;
-const POLL_BACKOFF = 1.6;
-const API_TIMEOUT_MS = 4000;
-
-const INIT_MAX_RETRY = 1;
-const INIT_RETRY_MS = 250;
+const POLL_BASE_MS = 1200;
+const POLL_MAX_MS = 5000;
+const POLL_BACKOFF = 1.5;
+const API_TIMEOUT_MS = 3500;
 
 const BASE_W = 530;
 const BASE_H = 550;
@@ -199,8 +196,15 @@ const TRAY_W = 176, TRAY_H = 34;
 
 const COLORS = ['#e8453c','#ff6d3b','#d4ac00','#43a047','#1e88e5','#7b3fa0','#c2185b','#00897b','#e65100','#3949ab'];
 
+const ZOOM_DUR = 40;
+const OPEN_DUR = 30;
+const MAX_R = 104;
+
 const cv = document.getElementById('gc');
 const cx = cv.getContext('2d');
+
+const pickBtn = document.getElementById('pickBtn');
+const refreshBtn = document.getElementById('refreshBtn');
 
 let W = 530;
 let H = 550;
@@ -215,7 +219,7 @@ let dropY = 0;
 let zoomBall = null;
 let zoomT = 0;
 let openT = 0;
-let showT = 0;
+
 let winnerQueue = [];
 let winnerIdx = 0;
 let roundWinners = { youtube: null, instagram: null };
@@ -224,19 +228,7 @@ let isClosingWinner = false;
 let isPolling = false;
 let pollTimer = null;
 let pollIntervalMs = POLL_BASE_MS;
-
-const ZOOM_DUR = 42;
-const OPEN_DUR = 34;
-const SHOW_DUR = 999999;
-const MAX_R = 104;
-
-const statusText = document.getElementById('statusText');
-const pickBtn = document.getElementById('pickBtn');
-const refreshBtn = document.getElementById('refreshBtn');
-
-function setStatus(msg=''){
-  statusText.textContent = msg;
-}
+let booted = false;
 
 function sf(){ return W / BASE_W; }
 function sx(v){ return v * sf(); }
@@ -245,6 +237,7 @@ function sy(v){ return v * sf(); }
 function ease(t){
   return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2;
 }
+
 function sleep(ms){
   return new Promise(r => setTimeout(r, ms));
 }
@@ -255,6 +248,7 @@ function normCh(v){
   if (['instagram','인스타그램','인스타','ig'].includes(s)) return 'instagram';
   return s;
 }
+
 function isYTch(v){ return normCh(v) === 'youtube'; }
 function isIGch(v){ return normCh(v) === 'instagram'; }
 
@@ -272,7 +266,6 @@ function setupCanvas(){
   const maxW = Math.max(320, Math.min(frameWidth, 700));
   const vh = window.innerHeight || 800;
   const maxH = Math.max(420, vh - 180);
-
   const scale = Math.min(maxW / BASE_W, maxH / BASE_H, 1.22);
 
   W = Math.max(320, Math.round(BASE_W * scale));
@@ -316,10 +309,10 @@ class Ball{
     this.r = BALL_R * sf();
     this.x = sx(NCX_R) + (Math.random() - 0.5) * sx(42);
     this.y = sy(TY) + this.r + Math.random() * sy(64);
-    this.vx = (Math.random() - 0.5) * 2.2;
-    this.vy = (Math.random() - 0.5) * 0.8;
+    this.vx = (Math.random() - 0.5) * 2.0;
+    this.vy = (Math.random() - 0.5) * 0.7;
     this.angle = Math.random() * Math.PI * 2;
-    this.spin = (Math.random() - 0.5) * 0.03;
+    this.spin = (Math.random() - 0.5) * 0.02;
     this.dropping = false;
     this.done = false;
   }
@@ -335,7 +328,7 @@ class Ball{
 
     this.vy += 0.28;
     this.vx *= 0.992;
-    this.spin *= 0.985;
+    this.spin *= 0.987;
 
     this.x += this.vx;
     this.y += this.vy;
@@ -344,22 +337,25 @@ class Ball{
     if(this.x - this.r < txl){
       this.x = txl + this.r;
       this.vx = Math.abs(this.vx) * 0.72;
-      this.spin += 0.006;
+      this.spin += 0.004;
     }
+
     if(this.x + this.r > txr){
       this.x = txr - this.r;
       this.vx = -Math.abs(this.vx) * 0.72;
-      this.spin -= 0.006;
+      this.spin -= 0.004;
     }
+
     if(this.y + this.r > tyb){
       this.y = tyb - this.r;
       this.vy = -Math.abs(this.vy) * 0.22;
       this.vx *= 0.94;
-      this.spin += this.vx * 0.003;
+      this.spin += this.vx * 0.002;
     }
 
     for(const o of others){
       if(o === this || o.dropping || o.done) continue;
+
       const dx = this.x - o.x;
       const dy = this.y - o.y;
       const d = Math.hypot(dx, dy);
@@ -375,14 +371,14 @@ class Ball{
         o.x -= nx * ov;
         o.y -= ny * ov;
 
-        const impulse = 0.12;
+        const impulse = 0.10;
         this.vx += nx * impulse;
-        this.vy += ny * impulse * 0.25;
+        this.vy += ny * impulse * 0.22;
         o.vx -= nx * impulse;
-        o.vy -= ny * impulse * 0.25;
+        o.vy -= ny * impulse * 0.22;
 
-        this.spin += (Math.random() - 0.5) * 0.008;
-        o.spin += (Math.random() - 0.5) * 0.008;
+        this.spin += (Math.random() - 0.5) * 0.006;
+        o.spin += (Math.random() - 0.5) * 0.006;
       }
     }
   }
@@ -482,7 +478,9 @@ function drawMachine(){
   drawPixelCircle(tx + tw - sx(8), ntop + sy(4), sx(12), '#c0392b', '#2e2a25', p2);
 }
 
-function drawShowing(){
+function drawWinnerCard(){
+  if(!zoomBall) return;
+
   const sub = zoomBall.sub;
   const ytW = zoomBall.isYT();
   const x = W / 2;
@@ -561,7 +559,6 @@ function drawZooming(){
 
   cx.fillStyle = `rgba(46,42,37,${0.42 * t})`;
   cx.fillRect(0,0,W,H);
-
   zoomBall.draw(x, y, r);
 
   zoomT++;
@@ -614,7 +611,7 @@ function drawNow(){
   if(state === 'dropping' && dropBall) dropBall.draw();
   if(state === 'zooming' && zoomBall) drawZooming();
   if(state === 'opening' && zoomBall) drawOpening();
-  if((state === 'showing' || state === 'showDone') && zoomBall) drawShowing();
+  if(state === 'showing' && zoomBall) drawWinnerCard();
 }
 
 function loop(){
@@ -677,7 +674,7 @@ function applySubData(data){
       setTimeout(() => {
         balls.push(ball);
         updateLegend();
-      }, i * 10);
+      }, i * 8);
     }
   });
 
@@ -698,15 +695,8 @@ async function syncSubs(force=false){
     const data = await gasGet({ type: 'subscribers' });
     applySubData(data);
     pollIntervalMs = POLL_BASE_MS;
-    if (balls.length) {
-      setStatus('준비 완료');
-    } else {
-      setStatus('등록된 참가자 없음');
-    }
   } catch(e){
-    console.warn('[poll]', e.message || e);
     pollIntervalMs = Math.min(pollIntervalMs * POLL_BACKOFF, POLL_MAX_MS);
-    setStatus('명단 확인 중');
   } finally {
     isPolling = false;
   }
@@ -725,28 +715,13 @@ document.addEventListener('visibilitychange', () => {
 });
 
 async function initialLoad(){
-  setStatus('명단 불러오는 중');
-
-  for(let attempt = 1; attempt <= INIT_MAX_RETRY; attempt++){
-    try{
-      const data = await gasGet({ type: 'subscribers' });
-      applySubData(data);
-      if (data.length) setStatus('준비 완료');
-      else setStatus('등록된 참가자 없음');
-      return true;
-    } catch(e){
-      if(attempt < INIT_MAX_RETRY){
-        await sleep(INIT_RETRY_MS);
-      }
-    }
-  }
-
-  setStatus('명단 연결 실패');
-  return false;
+  try{
+    const data = await gasGet({ type: 'subscribers' });
+    applySubData(data);
+  } catch(e){}
 }
 
 async function forceSync(){
-  setStatus('새로고침 중');
   await syncSubs(true);
 }
 
@@ -770,7 +745,6 @@ async function doPick(){
   const igPool = balls.filter(b => isIGch(b.sub.channel));
 
   if(!ytPool.length || !igPool.length){
-    setStatus('유튜브 1명, 인스타그램 1명 이상 필요');
     return;
   }
 
@@ -793,7 +767,6 @@ async function doPick(){
   winnerQueue = [ytWinner, igWinner];
   winnerIdx = 0;
 
-  setStatus('당첨자 추첨 중');
   startDrop(winnerQueue[0]);
 }
 
@@ -801,10 +774,8 @@ async function onCardClose(){
   if(isClosingWinner || !zoomBall) return;
 
   isClosingWinner = true;
-
   zoomBall = null;
   dropBall = null;
-
   winnerIdx++;
 
   if(winnerIdx < winnerQueue.length){
@@ -814,8 +785,6 @@ async function onCardClose(){
     return;
   }
 
-  setStatus('당첨 확정 중');
-
   try{
     const res = await gasGet({
       type: 'finalizeRound',
@@ -823,27 +792,15 @@ async function onCardClose(){
       instagram_winner_id: roundWinners.instagram.sub.id
     });
 
-    if(!res || res.ok === false){
-      setStatus(res && res.error ? res.error : '당첨 확정 실패');
-      state = 'idle';
-      isClosingWinner = false;
-      pickBtn.disabled = false;
-      refreshBtn.disabled = false;
-      return;
+    if(res && res.ok !== false){
+      balls = [];
+      knownIds = new Set();
+      winnerQueue = [];
+      winnerIdx = 0;
+      roundWinners = { youtube: null, instagram: null };
+      updateLegend();
     }
-
-    balls = [];
-    knownIds = new Set();
-    winnerQueue = [];
-    winnerIdx = 0;
-    roundWinners = { youtube: null, instagram: null };
-
-    updateLegend();
-    setStatus('추첨 완료');
-  } catch(e){
-    console.warn('[finalizeRound]', e.message || e);
-    setStatus('당첨 확정 실패');
-  }
+  } catch(e){}
 
   state = 'idle';
   isClosingWinner = false;
@@ -853,27 +810,27 @@ async function onCardClose(){
 
 cv.addEventListener('click', () => {
   if(isClosingWinner) return;
-  if(state === 'showing' || state === 'showDone'){
-    onCardClose();
-  }
+  if(state === 'showing') onCardClose();
 });
 
 pickBtn.addEventListener('click', doPick);
 refreshBtn.addEventListener('click', forceSync);
 
-async function init(){
-  setupCanvas();
-  setStatus('기계 준비 중');
+function boot(){
+  if(booted) return;
+  booted = true;
 
+  setupCanvas();
   drawNow();
   loop();
-
-  await initialLoad();
+  initialLoad();
   scheduleNextPoll();
 }
 
 window.addEventListener('resize', setupCanvas);
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', boot);
+window.addEventListener('load', boot);
+setTimeout(boot, 0);
 </script>
 </body>
 </html>
