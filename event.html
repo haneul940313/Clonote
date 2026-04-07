@@ -367,23 +367,26 @@ class Ball {
     this.y += this.vy;
     this.angle += this.spin;
 
-    if (this.x - this.r < txl) {
-      this.x = txl + this.r;
-      this.vx = Math.abs(this.vx)*0.18;
-      this.spin += 0.002;
-    }
-    if (this.x + this.r > txr) {
-      this.x = txr - this.r;
-      this.vx = -Math.abs(this.vx)*0.18;
-      this.spin -= 0.002;
-    }
-    if (this.y + this.r > tyb) {
-      this.y = tyb - this.r;
-      this.vy = -Math.abs(this.vy)*0.03;
-      this.vx *= 0.88;
-      this.spin += this.vx*0.002;
-      if (Math.abs(this.vy) < 0.10) this.vy = 0;
-    }
+if (this.x - this.r < txl) {
+  this.x = txl + this.r;
+  this.vx = Math.abs(this.vx)*0.18;
+  this.spin *= 0.55;
+  if (Math.abs(this.spin) < 0.0012) this.spin = 0;
+}
+if (this.x + this.r > txr) {
+  this.x = txr - this.r;
+  this.vx = -Math.abs(this.vx)*0.18;
+  this.spin *= 0.55;
+  if (Math.abs(this.spin) < 0.0012) this.spin = 0;
+}
+if (this.y + this.r > tyb) {
+  this.y = tyb - this.r;
+  this.vy = -Math.abs(this.vy)*0.03;
+  this.vx *= 0.88;
+  this.spin *= 0.72;
+  if (Math.abs(this.vx) < 0.06 && Math.abs(this.spin) < 0.0012) this.spin = 0;
+  if (Math.abs(this.vy) < 0.10) this.vy = 0;
+}
 
     for (const o of others) {
       if (o === this || o.dropping || o.done) continue;
