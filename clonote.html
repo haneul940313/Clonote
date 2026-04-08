@@ -65,6 +65,19 @@
     .user-block { display: flex; align-items: center; gap: 4px; }
     .user-name  { font-size: 13px; font-weight: 600; color: #3a3630; white-space: nowrap; max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
 
+    /* 동기화 버튼 */
+    .sync-btn {
+      border: none; background: transparent; cursor: pointer; padding: 2px 4px;
+      color: var(--muted); font-size: 14px; line-height: 1;
+      touch-action: manipulation; transition: opacity 0.15s, transform 0.3s;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px;
+    }
+    .sync-btn:hover { color: var(--accent); }
+    .sync-btn:active { opacity: 0.5; }
+    .sync-btn.spinning { animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     .icon-btn, .text-btn, .menu-btn {
       border: none; background: transparent; cursor: pointer; padding: 0;
       color: #3a3630; transition: opacity 0.15s; touch-action: manipulation;
@@ -245,6 +258,8 @@
     <div class="topbar-divider"></div>
     <div class="user-block">
       <div class="user-name" id="userNameText">사용자</div>
+      <!-- 동기화 버튼: 로그인 후에만 표시 -->
+      <button class="sync-btn" id="syncBtn" style="display:none;" title="동기화">↻</button>
       <div class="menu-wrap" id="menuWrap" style="display:none;">
         <button class="menu-btn" id="menuBtn">⋯</button>
         <div class="menu-pop" id="menuPop">
@@ -299,9 +314,8 @@ const API_URL   = 'https://script.google.com/macros/s/AKfycbznw9McR7zgyPjBYh3b-F
 const PAGE_ID   = new URLSearchParams(location.search).get('id') || 'default';
 const TOK_KEY   = 'clonote_token_'  + PAGE_ID;
 const USER_KEY  = 'clonote_user_'   + PAGE_ID;
-const CACHE_PFX = 'clonote_c3_'     + PAGE_ID;  // c3 — 이전 sessionStorage 캐시와 분리
+const CACHE_PFX = 'clonote_c3_'     + PAGE_ID;
 
-/* ── localStorage 래퍼 (try/catch만, sessionStorage fallback 없음) ── */
 function stGet(k){ try{ return localStorage.getItem(k); }catch{ return null; } }
 function stSet(k,v){ try{ localStorage.setItem(k,v); }catch{} }
 function stDel(k){ try{ localStorage.removeItem(k); }catch{} }
@@ -397,7 +411,22 @@ function renderMeta(){
   $('userNameText').textContent = curUser?.userName||'사용자';
   $('loginBox').classList.toggle('show',!curUser);
   $('menuWrap').style.display = curUser?'block':'none';
+  $('syncBtn').style.display  = curUser?'flex':'none';
   if(!curUser) $('menuPop').classList.remove('show');
+}
+
+/* ── 동기화 버튼 ── */
+async function doSync(){
+  if(!curUser) return;
+  const btn=$('syncBtn');
+  btn.classList.add('spinning');
+  btn.disabled=true;
+  // 캐시 무효화 후 서버에서 강제 로드
+  stDel(ck('h')); stDel(ck('c')); stDel(ck('m'));
+  await loadAll();
+  btn.classList.remove('spinning');
+  btn.disabled=false;
+  setStatus('동기화 완료'); setTimeout(()=>setStatus(''),1500);
 }
 
 /* ── LOAD ── */
@@ -423,20 +452,20 @@ async function loadAll(){
 
   /* 서버에서 최신 데이터 로드 */
   try{
+    const ts = Date.now();
     const [hR,cR,mR] = await Promise.all([
-      gj(`${API_URL}?action=getHabits&userId=${encodeURIComponent(curUser.userId)}&yearMonth=${encodeURIComponent(targetYm)}&_=${Date.now()}`),
-      gj(`${API_URL}?action=getChecks&userId=${encodeURIComponent(curUser.userId)}&yearMonth=${encodeURIComponent(targetYm)}&_=${Date.now()}`),
-      gj(`${API_URL}?action=getRecords&userId=${encodeURIComponent(curUser.userId)}&year=${yr()}&month=${mo()}&_=${Date.now()}`)
+      gj(`${API_URL}?action=getHabits&userId=${encodeURIComponent(curUser.userId)}&yearMonth=${encodeURIComponent(targetYm)}&_=${ts}`),
+      gj(`${API_URL}?action=getChecks&userId=${encodeURIComponent(curUser.userId)}&yearMonth=${encodeURIComponent(targetYm)}&_=${ts}`),
+      gj(`${API_URL}?action=getRecords&userId=${encodeURIComponent(curUser.userId)}&year=${yr()}&month=${mo()}&_=${ts}`)
     ]);
 
-    /* 다른 요청이 시작됐으면 무시 */
     if(seq !== loadSeq || targetYm !== ym()) return;
 
     /* 습관 */
     if(hR?.success && Array.isArray(hR.habits)){
       habits = hR.habits.map(v=>String(v??'').trim());
     } else if(hR?.success && hR.habits===null){
-      /* 이번 달 등록 없음 — habits 현재값 유지 */
+      habits = [];
     }
 
     /* 체크 */
@@ -621,22 +650,46 @@ function onCheck(e){
   },800);
 }
 
-/* MEMO SAVE */
+/* ── MEMO SAVE ──
+   핵심 수정: val이 빈 문자열이어도 서버에 saveRecord를 호출해서 실제로 지워야 함.
+   단, 아예 처음부터 내용이 없었던 경우는 API 호출 불필요.
+*/
 function scheduleMemo(d,src){ if(!curUser)return; clearTimeout(memoTimers[d]); showInd(d,src,'저장중',true); memoTimers[d]=setTimeout(()=>flushMemo(d,src),DEBOUNCE); }
 function flushMemo(d,src){ if(!curUser)return; clearTimeout(memoTimers[d]); doMemoSave(d,src); }
+
 async function doMemoSave(d,src){
   const inp=document.getElementById(`mi-${src}-${d}`); if(!inp)return;
-  const val=inp.value.trim(), other=src==='lm'?'lw':'lm';
+  const val=inp.value.trim();
+  const other=src==='lm'?'lw':'lm';
   const twin=document.getElementById(`mi-${other}-${d}`);
   if(twin&&twin.value!==inp.value) twin.value=inp.value;
-  if(!val){ showInd(d,src,'',false); showInd(d,other,'',false); memos[d]=''; saveCache(); return; }
+
+  // 변경 없음 → 저장 불필요
   if(val===(memos[d]||'')){ showInd(d,src,'',false); return; }
+
   const ver=(memoVers[d]||0)+1; memoVers[d]=ver;
+
+  // ── 빈 문자열: 로컬에서 삭제 + 서버에 빈 메모로 저장 ──
+  if(!val){
+    showInd(d,src,'저장중',true);
+    memos[d]=''; saveCache();
+    showInd(d,src,'',false); showInd(d,other,'',false);
+    // 서버에는 빈 문자열 ' '(공백)로 보내서 기존 내용을 덮어씀
+    // (앱스크립트 saveRecord_는 memo가 비면 에러 반환하므로 공백 1자 전송 후 로컬만 빈값 유지)
+    try{
+      await pj({action:'saveRecord',userId:curUser.userId,year:yr(),month:mo(),day:d,memo:' '});
+    }catch{}
+    return;
+  }
+
+  // ── 일반 저장 ──
+  showInd(d,src,'저장중',true);
   try{
     const r=await pj({action:'saveRecord',userId:curUser.userId,year:yr(),month:mo(),day:d,memo:val});
     if(memoVers[d]!==ver)return;
     if(!r.success) throw new Error(r.message);
-    memos[d]=val; saveCache(); showInd(d,src,'',false); showInd(d,other,'',false);
+    memos[d]=val; saveCache();
+    showInd(d,src,'',false); showInd(d,other,'',false);
     setStatus(`${d}일 메모 저장`); setTimeout(()=>setStatus(''),1500);
   }catch(err){ if(memoVers[d]!==ver)return; showInd(d,src,'오류',true); setStatus(err.message||'메모 저장 오류',true); }
 }
@@ -711,6 +764,7 @@ $('prevBtn').addEventListener('click',()=>moveMonth(-1));
 $('nextBtn').addEventListener('click',()=>moveMonth(1));
 $('startBtn').addEventListener('click',doStart);
 $('logoutBtn').addEventListener('click',doLogout);
+$('syncBtn').addEventListener('click',doSync);
 $('loginName').addEventListener('keydown',e=>{if(e.key==='Enter')$('loginPass').focus();});
 $('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doStart();});
 $('menuBtn').addEventListener('click',e=>{e.stopPropagation();$('menuPop').classList.toggle('show');});
