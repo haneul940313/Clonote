@@ -340,7 +340,7 @@ class Ball {
     this.vx    = (Math.random()-0.5)*1.2;
     this.vy    = (Math.random()-0.5)*0.18;
     this.angle = Math.random()*Math.PI*2;
-    this.spin  = (Math.random()-0.5)*0.01;
+    this.spin  = (Math.random()-0.5)*0.02;
     this.dropping = false;
     this.done  = false;
   }
@@ -361,7 +361,7 @@ class Ball {
 
     if (Math.abs(this.vx) < 0.035) this.vx = 0;
     if (Math.abs(this.vy) < 0.05) this.vy = 0;
-    if (Math.abs(this.spin) < 0.0008) this.spin = 0;
+    if (Math.abs(this.spin) < 0.0005) this.spin = 0;
 
     this.x += this.vx;
     this.y += this.vy;
@@ -369,22 +369,25 @@ class Ball {
 
 if (this.x - this.r < txl) {
   this.x = txl + this.r;
-  this.vx = Math.abs(this.vx)*0.18;
-  this.spin *= 0.55;
-  if (Math.abs(this.spin) < 0.0012) this.spin = 0;
+  this.vx = Math.abs(this.vx)*0.22;
+  this.spin += 0.003;
+  this.spin *= 0.75;
+  if (Math.abs(this.spin) < 0.0006) this.spin = 0;
 }
 if (this.x + this.r > txr) {
   this.x = txr - this.r;
-  this.vx = -Math.abs(this.vx)*0.18;
-  this.spin *= 0.55;
-  if (Math.abs(this.spin) < 0.0012) this.spin = 0;
+  this.vx = -Math.abs(this.vx)*0.22;
+  this.spin -= 0.003;
+  this.spin *= 0.75;
+  if (Math.abs(this.spin) < 0.0006) this.spin = 0;
 }
 if (this.y + this.r > tyb) {
   this.y = tyb - this.r;
-  this.vy = -Math.abs(this.vy)*0.03;
-  this.vx *= 0.88;
-  this.spin *= 0.72;
-  if (Math.abs(this.vx) < 0.06 && Math.abs(this.spin) < 0.0012) this.spin = 0;
+  this.vy = -Math.abs(this.vy)*0.04;
+  this.vx *= 0.90;
+  this.spin += this.vx*0.003;
+  this.spin *= 0.82;
+  if (Math.abs(this.vx) < 0.04 && Math.abs(this.spin) < 0.0006) this.spin = 0;
   if (Math.abs(this.vy) < 0.10) this.vy = 0;
 }
 
@@ -414,8 +417,8 @@ if (this.y + this.r > tyb) {
         o.vx *= 0.90;
         o.vy *= 0.95;
 
-        this.spin += (Math.random()-0.5)*0.002;
-        o.spin += (Math.random()-0.5)*0.002;
+        this.spin += (Math.random()-0.5)*0.004;
+        o.spin += (Math.random()-0.5)*0.004;
       }
     }
   }
