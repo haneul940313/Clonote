@@ -67,23 +67,17 @@
     .month-title { font-size: 14px; font-weight: 700; letter-spacing: -0.02em; color: #3a3630; white-space: nowrap; min-width: 82px; text-align: center; }
     .topbar-divider { width: 1px; height: 16px; background: rgba(0,0,0,0.11); margin: 0 10px; flex-shrink: 0; }
     .user-block { display: flex; align-items: center; gap: 6px; margin-left: auto; min-width: 0; }
-    .user-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
     .user-name { font-size: 13px; font-weight: 600; color: #3a3630; white-space: nowrap; max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
 
     .icon-btn, .text-btn, .menu-btn {
-      border: none;
-      background: transparent;
-      cursor: pointer;
-      padding: 0;
-      color: #3a3630;
-      transition: opacity 0.15s;
-      touch-action: manipulation;
+      border: none; background: transparent; cursor: pointer; padding: 0;
+      color: #3a3630; transition: opacity 0.15s; touch-action: manipulation;
     }
     .icon-btn { font-size: 22px; font-weight: 700; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
     .text-btn  { height: 26px; padding: 0 10px; font-size: 11px; font-weight: 600; border-radius: 6px; background: rgba(255,255,255,0.55); border: 1px solid rgba(0,0,0,0.07); white-space: nowrap; }
     .menu-btn  { font-size: 18px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
     .icon-btn:active, .text-btn:active, .menu-btn:active { opacity: 0.45; }
-    .sync-btn { font-size: 17px; }
+    .sync-btn { font-size: 17px; margin-left: 4px; }
     .sync-btn[disabled] { opacity: 0.35; cursor: default; }
 
     .menu-wrap { position: relative; }
@@ -104,7 +98,7 @@
 
     .page-left {
       flex: 1; min-width: 0; overflow: hidden;
-      background: var(--paper); padding: 0 14px;
+      background: var(--paper); padding: 0 14px 0 14px;
       background-image:
         linear-gradient(to right,
           transparent 0, transparent calc(var(--left-margin) - 1px),
@@ -130,7 +124,7 @@
 
     .page-right {
       flex: 1; min-width: 0; overflow: hidden;
-      background: var(--paper-r); padding: 0 14px;
+      background: var(--paper-r); padding: 0 14px 0 14px;
       background-image:
         linear-gradient(to right,
           transparent 0, transparent calc(var(--right-margin) - 1px),
@@ -254,17 +248,15 @@
       <button class="icon-btn" id="prevBtn">‹</button>
       <div class="month-title" id="monthTitle"></div>
       <button class="icon-btn" id="nextBtn">›</button>
+      <button class="menu-btn sync-btn" id="forceSyncBtn" title="데이터 불러오기" aria-label="데이터 불러오기" style="display:none;">📥</button>
     </div>
     <div class="topbar-divider"></div>
     <div class="user-block">
       <div class="user-name" id="userNameText">사용자</div>
-      <div class="user-actions">
-        <button class="menu-btn sync-btn" id="forceSyncBtn" title="데이터 불러오기" aria-label="데이터 불러오기" style="display:none;">📥</button>
-        <div class="menu-wrap" id="menuWrap" style="display:none;">
-          <button class="menu-btn" id="menuBtn">⋯</button>
-          <div class="menu-pop" id="menuPop">
-            <button class="menu-item" id="logoutBtn">로그아웃</button>
-          </div>
+      <div class="menu-wrap" id="menuWrap" style="display:none;">
+        <button class="menu-btn" id="menuBtn">⋯</button>
+        <div class="menu-pop" id="menuPop">
+          <button class="menu-item" id="logoutBtn">로그아웃</button>
         </div>
       </div>
     </div>
@@ -313,7 +305,7 @@
 </div>
 
 <script>
-const API_URL   = 'https://script.google.com/macros/s/AKfycbwOa50ZxwuYRI6Mg_e50NzFU5AHtPyNlxKMwU2r3knbCO2eFu8trsPKMyD0j-kNhrik/exec';
+const API_URL   = 'https://script.google.com/macros/s/AKfycbzdi-MOBZrFOYyTSs_uTCnv16uCAP-wVCfEnh3WHVgzijeiSRK7lkOMJIx6tdOurea0/exec';
 const PAGE_ID   = new URLSearchParams(location.search).get('id') || 'default';
 const TOK_KEY   = 'clonote_token_'  + PAGE_ID;
 const USER_KEY  = 'clonote_user_'   + PAGE_ID;
@@ -343,6 +335,7 @@ let memoVers    = {};
 let checkTimers = {};
 let loadSeq     = 0;
 let isSyncing   = false;
+let autoSyncTimer = null;
 
 const $    = id => document.getElementById(id);
 const esc  = s  => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -395,7 +388,12 @@ async function reqJson(url, options){
   return r.json();
 }
 const gj = url  => reqJson(url, {cache:'no-store'});
-const pj = body => reqJson(API_URL, {method:'POST', cache:'no-store', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(body)});
+const pj = body => reqJson(API_URL, {
+  method:'POST',
+  cache:'no-store',
+  headers:{'Content-Type':'text/plain;charset=utf-8'},
+  body:JSON.stringify(body)
+});
 
 async function tryAutoLogin(){
   if(!curToken){ renderMeta(); return false; }
@@ -418,7 +416,9 @@ async function doStart(){
     curToken=r.token; curUser=r.user;
     stSet(TOK_KEY,curToken); stSet(USER_KEY,JSON.stringify(curUser));
     $('loginName').value=''; $('loginPass').value=''; setLS('');
-    renderMeta(); await loadAll();
+    renderMeta();
+    await loadAll({ force:true });
+    startAutoSync();
   }catch(e){ setLS(e.message||'실패',true); }
   finally{ $('startBtn').disabled=false; }
 }
@@ -426,8 +426,14 @@ async function doStart(){
 async function doLogout(){
   try{ if(curToken) await pj({action:'logout',token:curToken}); }catch{}
   clearUserCache(curUser?.userId);
-  clearAuth(); habits=[]; checks={}; memos={};
-  renderMeta(); renderAll(); setStatus('로그아웃되었습니다.');
+  clearAuth();
+  habits=[];
+  checks={};
+  memos={};
+  stopAutoSync();
+  renderMeta();
+  renderAll();
+  setStatus('로그아웃되었습니다.');
 }
 
 function renderMeta(){
@@ -693,7 +699,7 @@ async function doMemoSave(d,src,options={}){
   try{
     const r=await pj({action:'saveRecord',userId:curUser.userId,year:yr(),month:mo(),day:d,memo:val});
     if(memoVers[d]!==ver)return;
-    if(!r.success) throw new Error(r.message);
+    if(!r.success) throw new Error(r.message||'메모 저장 실패');
     if(val) memos[d]=val; else delete memos[d];
     saveCache(); showInd(d,src,'',false); showInd(d,other,'',false);
     if(!silent){ setStatus(val?`${d}일 메모 저장`:`${d}일 메모 삭제`); setTimeout(()=>setStatus(''),1500); }
@@ -758,7 +764,22 @@ function buildSpines(rowH){
 function moveMonth(off){
   loadSeq++;
   curDate=new Date(yr(),mo()-1+off,1); weekOff=0; habits=[]; checks={}; memos={};
-  renderMeta(); renderAll(); loadAll();
+  renderMeta(); renderAll(); loadAll({ force:true, silent:true });
+}
+
+function startAutoSync(){
+  stopAutoSync();
+  autoSyncTimer = setInterval(()=>{
+    if(curUser && !isSyncing){
+      loadAll({ silent:true });
+    }
+  }, 15000);
+}
+function stopAutoSync(){
+  if(autoSyncTimer){
+    clearInterval(autoSyncTimer);
+    autoSyncTimer = null;
+  }
 }
 
 $('prevBtn').addEventListener('click',()=>moveMonth(-1));
@@ -782,6 +803,17 @@ document.querySelectorAll('[data-rtab]').forEach(b=>b.addEventListener('click',(
   renderAll();
 }));
 
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible' && curUser){
+    loadAll({ force:true, silent:true });
+  }
+});
+window.addEventListener('focus', ()=>{
+  if(curUser){
+    loadAll({ force:true, silent:true });
+  }
+});
+
 let resizeTimer;
 window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(renderAll,80);});
 
@@ -795,11 +827,15 @@ async function init(){
     renderAll();
     const ok=await tryAutoLogin();
     if(!ok){clearAuth();renderMeta();renderAll();setStatus('로그인이 만료되었습니다.',true);return;}
-    await loadAll();
+    await loadAll({ force:true });
+    startAutoSync();
     return;
   }
   const ok=await tryAutoLogin();
-  if(ok) await loadAll();
+  if(ok){
+    await loadAll({ force:true });
+    startAutoSync();
+  }
 }
 init();
 </script>
