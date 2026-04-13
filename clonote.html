@@ -1,5 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Clonote</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --paper: #fbfbf8;
+      --paper-r: #f8f8f5;
+      --line: rgba(132,184,196,0.45);
+      --red-line: rgba(208,112,112,0.42);
+      --spine-mid: #e0dcd4;
+      --spine-edge: #ccc8c0;
+      --text: #2f2f2f;
+      --muted: #8a8a8a;
+      --sat: #5d86c8;
+      --sun: #d06f6f;
+      --accent: #5d86c8;
+      --radius: 10px;
+      --row-h: 26px;
+      --left-date: 52px;
+      --left-margin: 60px;
+      --right-date: 44px;
+      --right-margin: 52px;
+      --total-w: 26px;
+      --topbar-h: 42px;
+      --status-h: 18px;
+      --spine-w: 18px;
+      --hspine-h: 14px;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    .book-outer {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100vh;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+    }
+
+    .book-topbar {
+      flex-shrink: 0;
+      height: var(--topbar-h);
+      background: linear-gradient(to right, var(--paper) 0%, var(--paper) 50%, var(--paper-r) 50%, var(--paper-r) 100%);
+      border-bottom: 1px solid rgba(132,184,196,0.22);
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .book-nav { display: flex; align-items: center; gap: 2px; }
+    .month-title { font-size: 14px; font-weight: 700; letter-spacing: -0.02em; color: #3a3630; white-space: nowrap; min-width: 82px; text-align: center; }
+    .topbar-divider { width: 1px; height: 16px; background: rgba(0,0,0,0.11); margin: 0 10px; flex-shrink: 0; }
+    .user-block { display: flex; align-items: center; gap: 6px; margin-left: auto; min-width: 0; }
+    .user-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .user-name { font-size: 13px; font-weight: 600; color: #3a3630; white-space: nowrap; max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
+
+    .icon-btn, .text-btn, .menu-btn {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      color: #3a3630;
+      transition: opacity 0.15s;
+      touch-action: manipulation;
+    }
+    .icon-btn { font-size: 22px; font-weight: 700; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+    .text-btn  { height: 26px; padding: 0 10px; font-size: 11px; font-weight: 600; border-radius: 6px; background: rgba(255,255,255,0.55); border: 1px solid rgba(0,0,0,0.07); white-space: nowrap; }
+    .menu-btn  { font-size: 18px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+    .icon-btn:active, .text-btn:active, .menu-btn:active { opacity: 0.45; }
+    .sync-btn { font-size: 17px; }
+    .sync-btn[disabled] { opacity: 0.35; cursor: default; }
+
+    .menu-wrap { position: relative; }
+    .menu-pop  { display: none; position: absolute; top: 30px; right: 0; min-width: 80px; background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.12); padding: 5px; z-index: 50; }
+    .menu-pop.show { display: block; }
+    .menu-item { width: 100%; height: 32px; border: none; background: transparent; border-radius: 7px; text-align: left; padding: 0 10px; font-size: 13px; cursor: pointer; touch-action: manipulation; }
+    .menu-item:active { background: #f0f0f0; }
+
+    .login-box { display: none; background: rgba(255,255,255,0.85); border: 1px solid rgba(0,0,0,0.07); border-radius: 10px; padding: 10px 12px; margin: 4px 10px; flex-shrink: 0; }
+    .login-box.show { display: block; }
+    .guide { font-size: 10px; color: var(--muted); margin-bottom: 6px; }
+    .login-row { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+    .inp { height: 30px; border: 1px solid rgba(0,0,0,0.09); border-radius: 7px; padding: 0 8px; font-size: 13px; outline: none; background: #fff; flex: 1; min-width: 80px; -webkit-appearance: none; }
+    .inp:focus { border-color: rgba(93,134,200,0.5); }
+    .status-bar { min-height: 14px; font-size: 11px; color: #666; margin: 3px 2px 0; }
+
+    .book-spread { flex: 1; display: flex; overflow: hidden; min-height: 0; }
+
+    .page-left {
+      flex: 1; min-width: 0; overflow: hidden;
+      background: var(--paper); padding: 0 14px;
+      background-image:
+        linear-gradient(to right,
+          transparent 0, transparent calc(var(--left-margin) - 1px),
+          var(--red-line) calc(var(--left-margin) - 1px), var(--red-line) calc(var(--left-margin) + 1px),
+          transparent calc(var(--left-margin) + 1px)
+        ),
+        repeating-linear-gradient(to bottom,
+          transparent 0, transparent calc(var(--row-h) - 1px),
+          var(--line) calc(var(--row-h) - 1px), var(--line) var(--row-h)
+        );
+    }
+
+    .spine-v {
+      width: var(--spine-w); flex-shrink: 0; overflow: hidden;
+      background: linear-gradient(to right, var(--spine-edge), var(--spine-mid), var(--spine-edge));
+      position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 6px; gap: 0;
+    }
+    .spine-v::before {
+      content: ''; position: absolute; top: 0; bottom: 0; left: 2px; right: 2px;
+      background: repeating-linear-gradient(to bottom, transparent 0, transparent 10px, rgba(0,0,0,0.06) 10px, rgba(0,0,0,0.06) 11px);
+    }
+    .ring { flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #b0aca4; background: #e8e4dc; position: relative; z-index: 1; }
+
+    .page-right {
+      flex: 1; min-width: 0; overflow: hidden;
+      background: var(--paper-r); padding: 0 14px;
+      background-image:
+        linear-gradient(to right,
+          transparent 0, transparent calc(var(--right-margin) - 1px),
+          var(--red-line) calc(var(--right-margin) - 1px), var(--red-line) calc(var(--right-margin) + 1px),
+          transparent calc(var(--right-margin) + 1px)
+        ),
+        repeating-linear-gradient(to bottom,
+          transparent 0, transparent calc(var(--row-h) - 1px),
+          var(--line) calc(var(--row-h) - 1px), var(--line) var(--row-h)
+        );
+    }
+
+    .spine-h {
+      display: none; height: var(--hspine-h); flex-shrink: 0; overflow: hidden;
+      background: linear-gradient(to bottom, var(--spine-edge), var(--spine-mid), var(--spine-edge));
+      position: relative; flex-direction: row; align-items: center; justify-content: space-around; padding: 0 8px;
+    }
+    .spine-h::before {
+      content: ''; position: absolute; top: 2px; bottom: 2px; left: 0; right: 0;
+      background: repeating-linear-gradient(to right, transparent 0, transparent 10px, rgba(0,0,0,0.06) 10px, rgba(0,0,0,0.06) 11px);
+    }
+    .ring-h { flex-shrink: 0; width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid #b0aca4; background: #e8e4dc; position: relative; z-index: 1; }
+
+    .page-header { display: flex; align-items: center; justify-content: space-between; height: var(--row-h); padding: 0 2px; }
+    .page-title  { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; }
+    .tab-pills   { display: flex; gap: 2px; }
+    .tab-pill    { border: none; background: transparent; font-size: 10px; font-weight: 700; color: var(--muted); padding: 3px 7px; border-radius: 5px; cursor: pointer; transition: background 0.12s, color 0.12s; touch-action: manipulation; }
+    .tab-pill.active { background: rgba(93,134,200,0.14); color: var(--accent); }
+
+    .day-cell { height: var(--row-h); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #777; white-space: nowrap; flex-shrink: 0; margin-left: -2px; }
+    .day-cell.sat { color: var(--sat); }
+    .day-cell.sun { color: var(--sun); }
+
+    .memo-row  { display: grid; grid-template-columns: var(--left-date) 1fr; height: var(--row-h); align-items: center; }
+    .memo-cell { display: flex; align-items: center; height: var(--row-h); padding: 0 6px; position: relative; overflow: hidden; min-width: 0; }
+    .memo-input {
+      width: 100%; height: 100%; border: none; outline: none; background: transparent;
+      padding: 0; font-size: 13px; color: var(--text); line-height: 1;
+      overflow-x: auto; overflow-y: hidden; white-space: nowrap; -webkit-appearance: none;
+    }
+    .memo-input:disabled { color: rgba(0,0,0,0.35); cursor: default; }
+    .save-ind { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); font-size: 9px; color: #9a9a9a; opacity: 0; transition: opacity 0.15s; pointer-events: none; background: rgba(251,251,248,0.92); padding-left: 4px; }
+    .save-ind.show { opacity: 1; }
+
+    .habit-hdr { display: grid; align-items: center; height: var(--row-h); }
+    .hdr-cell  { font-size: 9px; font-weight: 700; color: var(--muted); text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding: 0 1px; display: flex; align-items: center; justify-content: center; }
+    .hdr-total { width: var(--total-w); font-size: 9px; font-weight: 700; color: var(--accent); text-align: center; display: flex; align-items: center; justify-content: center; }
+
+    .check-row { display: grid; align-items: center; height: var(--row-h); }
+    .cb-wrap   { display: flex; align-items: center; justify-content: center; }
+    .cb-wrap input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent); flex-shrink: 0; touch-action: manipulation; }
+    .cb-wrap input[type="checkbox"]:disabled { opacity: 0.3; }
+    .total-cell { width: var(--total-w); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--accent); height: var(--row-h); }
+
+    .setup-row      { display: grid; grid-template-columns: var(--right-date) 1fr; height: var(--row-h); align-items: center; }
+    .setup-num      { height: var(--row-h); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--muted); }
+    .setup-inp-wrap { display: flex; align-items: center; height: var(--row-h); padding: 0 6px; }
+    .setup-inp { width: 100%; height: 100%; border: none; outline: none; background: transparent; font-size: 13px; color: var(--text); -webkit-appearance: none; }
+    .setup-inp::placeholder { color: #c5c5c5; }
+    .setup-inp:disabled { color: rgba(0,0,0,0.32); }
+
+    .graph-wrap { overflow: hidden; }
+    canvas.graph { display: block; width: 100%; }
+
+    .week-nav { display: flex; align-items: center; justify-content: space-between; height: var(--row-h); padding-left: var(--right-date); }
+    .week-lbl { font-size: 10px; font-weight: 700; color: var(--muted); }
+    .w-arrow  { border: none; background: transparent; color: #999; font-size: 18px; font-weight: 700; cursor: pointer; padding: 0 4px; line-height: 1; touch-action: manipulation; }
+    .w-arrow:active   { opacity: 0.5; }
+    .w-arrow:disabled { opacity: 0.2; cursor: default; }
+
+    .habit-save-row { height: var(--row-h); display: flex; align-items: center; padding-left: var(--right-date); }
+    .habit-save-btn { border: none; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; padding: 4px 14px; border-radius: 6px; cursor: pointer; touch-action: manipulation; }
+    .habit-save-btn:active   { opacity: 0.75; }
+    .habit-save-btn:disabled { opacity: 0.4; }
+
+    .book-status {
+      flex-shrink: 0; height: var(--status-h);
+      background: linear-gradient(to right, var(--paper) 0%, var(--paper) 50%, var(--paper-r) 50%, var(--paper-r) 100%);
+      border-top: 1px solid rgba(132,184,196,0.22);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: #888;
+    }
+
+    @media (max-width: 640px) {
+      :root {
+        --topbar-h: 44px; --row-h: 30px;
+        --left-date: 42px; --left-margin: 50px;
+        --right-date: 42px; --right-margin: 50px;
+        --total-w: 26px;
+      }
+      html, body { overflow: auto; height: auto; }
+      .book-outer { height: auto; min-height: 100vh; border-radius: 0; box-shadow: none; }
+      .book-spread { flex-direction: column; overflow: visible; height: auto; }
+      .page-left, .page-right { flex: none; overflow: visible; height: auto !important; padding: 0 12px 12px 12px; }
+      .spine-v { display: none !important; }
+      .spine-h { display: flex; }
+      .book-status { background: var(--paper-r); }
+      .tab-pill { font-size: 12px; padding: 5px 10px; }
+      .icon-btn { font-size: 24px; width: 32px; height: 32px; }
+      .cb-wrap input[type="checkbox"] { width: 18px; height: 18px; }
+      .memo-input { font-size: 14px; }
+      .login-row { flex-direction: column; }
+      .login-row .inp { width: 100%; }
+      .login-row .text-btn { width: 100%; height: 34px; font-size: 13px; }
+      .guide { font-size: 12px; }
+    }
+
+    .credit {
+      position: fixed; bottom: 4px; right: 8px;
+      font-size: 9px; font-weight: 600; color: rgba(0,0,0,0.18);
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      letter-spacing: 0.04em; pointer-events: none; z-index: 20;
+    }
+  </style>
+</head>
+<body>
+
+<div class="book-outer">
+  <div class="book-topbar">
+    <div class="book-nav">
+      <button class="icon-btn" id="prevBtn">‹</button>
+      <div class="month-title" id="monthTitle"></div>
+      <button class="icon-btn" id="nextBtn">›</button>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="user-block">
+      <div class="user-name" id="userNameText">사용자</div>
+      <div class="user-actions">
+        <button class="menu-btn sync-btn" id="forceSyncBtn" title="데이터 불러오기" aria-label="데이터 불러오기" style="display:none;">📥</button>
+        <div class="menu-wrap" id="menuWrap" style="display:none;">
+          <button class="menu-btn" id="menuBtn">⋯</button>
+          <div class="menu-pop" id="menuPop">
+            <button class="menu-item" id="logoutBtn">로그아웃</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-box" id="loginBox">
+    <div class="guide">최초 1번만 입력하면 자동 로그인됩니다.</div>
+    <div class="login-row">
+      <input class="inp" id="loginName" type="text" placeholder="사용자 이름" maxlength="30" autocomplete="username" />
+      <input class="inp" id="loginPass" type="password" placeholder="비밀번호" maxlength="30" autocomplete="current-password" />
+      <button class="text-btn" id="startBtn">시작</button>
+    </div>
+    <div class="status-bar" id="loginStatus"></div>
+  </div>
+
+  <div class="book-spread" id="bookSpread">
+    <div class="page-left" id="pageLeft">
+      <div class="page-header">
+        <div class="page-title">메모</div>
+        <div class="tab-pills">
+          <button class="tab-pill active" data-ltab="memo-month">월간</button>
+          <button class="tab-pill" data-ltab="memo-week">주간</button>
+        </div>
+      </div>
+      <div id="memoContent"></div>
+    </div>
+
+    <div class="spine-v" id="spineV"></div>
+    <div class="spine-h" id="spineH"></div>
+
+    <div class="page-right" id="pageRight">
+      <div class="page-header">
+        <div class="page-title">습관</div>
+        <div class="tab-pills">
+          <button class="tab-pill active" data-rtab="habit-home">홈</button>
+          <button class="tab-pill" data-rtab="habit-setup">설정</button>
+          <button class="tab-pill" data-rtab="habit-all">전체</button>
+        </div>
+      </div>
+      <div id="habitContent"></div>
+    </div>
+  </div>
+
+  <div class="book-status" id="statusText"></div>
+  <div class="credit">Clonote</div>
+</div>
+
 <script>
-const API_URL   = 'https://script.google.com/macros/s/AKfycbyK5wx7eK7gqsGRmb-3XzOnOlvy2I2B3S0a70QJG-0cMJ9ZOZYVIB1EEm17iUDQI2k/exec';
+const API_URL   = 'https://script.google.com/macros/s/AKfycbwOa50ZxwuYRI6Mg_e50NzFU5AHtPyNlxKMwU2r3knbCO2eFu8trsPKMyD0j-kNhrik/exec';
 const PAGE_ID   = new URLSearchParams(location.search).get('id') || 'default';
 const TOK_KEY   = 'clonote_token_'  + PAGE_ID;
 const USER_KEY  = 'clonote_user_'   + PAGE_ID;
@@ -489,3 +803,5 @@ async function init(){
 }
 init();
 </script>
+</body>
+</html>
