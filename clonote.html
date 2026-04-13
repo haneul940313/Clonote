@@ -1,310 +1,14 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Clonote</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-    :root {
-      --paper:        #fbfbf8;
-      --paper-r:      #f8f8f5;
-      --line:         rgba(132,184,196,0.45);
-      --red-line:     rgba(208,112,112,0.42);
-      --spine-mid:    #e0dcd4;
-      --spine-edge:   #ccc8c0;
-      --text:         #2f2f2f;
-      --muted:        #8a8a8a;
-      --sat:          #5d86c8;
-      --sun:          #d06f6f;
-      --accent:       #5d86c8;
-      --radius:       10px;
-      --row-h:        26px;
-      --left-date:    52px;
-      --left-margin:  60px;
-      --right-date:   44px;
-      --right-margin: 52px;
-      --total-w:      26px;
-      --topbar-h:     42px;
-      --status-h:     18px;
-      --spine-w:      18px;
-      --hspine-h:     14px;
-    }
-
-    html, body {
-      width: 100%; height: 100%;
-      background: transparent;
-      font-family: 'Helvetica Neue', Arial, sans-serif;
-      color: var(--text);
-      overflow: hidden;
-    }
-
-    .book-outer {
-      display: flex; flex-direction: column;
-      width: 100%; height: 100vh;
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.10);
-    }
-
-    .book-topbar {
-      flex-shrink: 0;
-      height: var(--topbar-h);
-      background: linear-gradient(to right,
-        var(--paper) 0%, var(--paper) 50%,
-        var(--paper-r) 50%, var(--paper-r) 100%
-      );
-      border-bottom: 1px solid rgba(132,184,196,0.22);
-      display: flex; align-items: center; padding: 0 14px;
-      position: relative; z-index: 10;
-    }
-    .book-nav { display: flex; align-items: center; gap: 2px; }
-    .month-title { font-size: 14px; font-weight: 700; letter-spacing: -0.02em; color: #3a3630; white-space: nowrap; min-width: 82px; text-align: center; }
-    .topbar-divider { width: 1px; height: 16px; background: rgba(0,0,0,0.11); margin: 0 10px; flex-shrink: 0; }
-    .user-block { display: flex; align-items: center; gap: 4px; }
-    .user-name  { font-size: 13px; font-weight: 600; color: #3a3630; white-space: nowrap; max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
-
-    .icon-btn, .text-btn, .menu-btn {
-      border: none; background: transparent; cursor: pointer; padding: 0;
-      color: #3a3630; transition: opacity 0.15s; touch-action: manipulation;
-    }
-    .icon-btn { font-size: 22px; font-weight: 700; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
-    .text-btn  { height: 26px; padding: 0 10px; font-size: 11px; font-weight: 600; border-radius: 6px; background: rgba(255,255,255,0.55); border: 1px solid rgba(0,0,0,0.07); white-space: nowrap; }
-    .menu-btn  { font-size: 18px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
-    .icon-btn:active, .text-btn:active, .menu-btn:active { opacity: 0.45; }
-
-    .menu-wrap { position: relative; }
-    .menu-pop  { display: none; position: absolute; top: 30px; right: 0; min-width: 80px; background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.12); padding: 5px; z-index: 50; }
-    .menu-pop.show { display: block; }
-    .menu-item { width: 100%; height: 32px; border: none; background: transparent; border-radius: 7px; text-align: left; padding: 0 10px; font-size: 13px; cursor: pointer; touch-action: manipulation; }
-    .menu-item:active { background: #f0f0f0; }
-
-    .login-box { display: none; background: rgba(255,255,255,0.85); border: 1px solid rgba(0,0,0,0.07); border-radius: 10px; padding: 10px 12px; margin: 4px 10px; flex-shrink: 0; }
-    .login-box.show { display: block; }
-    .guide { font-size: 10px; color: var(--muted); margin-bottom: 6px; }
-    .login-row { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
-    .inp { height: 30px; border: 1px solid rgba(0,0,0,0.09); border-radius: 7px; padding: 0 8px; font-size: 13px; outline: none; background: #fff; flex: 1; min-width: 80px; -webkit-appearance: none; }
-    .inp:focus { border-color: rgba(93,134,200,0.5); }
-    .status-bar { min-height: 14px; font-size: 11px; color: #666; margin: 3px 2px 0; }
-
-    .book-spread { flex: 1; display: flex; overflow: hidden; min-height: 0; }
-
-    .page-left {
-      flex: 1; min-width: 0; overflow: hidden;
-      background: var(--paper); padding: 0 14px 0 14px;
-      background-image:
-        linear-gradient(to right,
-          transparent 0, transparent calc(var(--left-margin) - 1px),
-          var(--red-line) calc(var(--left-margin) - 1px), var(--red-line) calc(var(--left-margin) + 1px),
-          transparent calc(var(--left-margin) + 1px)
-        ),
-        repeating-linear-gradient(to bottom,
-          transparent 0, transparent calc(var(--row-h) - 1px),
-          var(--line) calc(var(--row-h) - 1px), var(--line) var(--row-h)
-        );
-    }
-    .spine-v {
-      width: var(--spine-w); flex-shrink: 0; overflow: hidden;
-      background: linear-gradient(to right, var(--spine-edge), var(--spine-mid), var(--spine-edge));
-      position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 6px; gap: 0;
-    }
-    .spine-v::before {
-      content: ''; position: absolute; top: 0; bottom: 0; left: 2px; right: 2px;
-      background: repeating-linear-gradient(to bottom, transparent 0, transparent 10px, rgba(0,0,0,0.06) 10px, rgba(0,0,0,0.06) 11px);
-    }
-    .ring { flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #b0aca4; background: #e8e4dc; position: relative; z-index: 1; }
-
-    .page-right {
-      flex: 1; min-width: 0; overflow: hidden;
-      background: var(--paper-r); padding: 0 14px 0 14px;
-      background-image:
-        linear-gradient(to right,
-          transparent 0, transparent calc(var(--right-margin) - 1px),
-          var(--red-line) calc(var(--right-margin) - 1px), var(--red-line) calc(var(--right-margin) + 1px),
-          transparent calc(var(--right-margin) + 1px)
-        ),
-        repeating-linear-gradient(to bottom,
-          transparent 0, transparent calc(var(--row-h) - 1px),
-          var(--line) calc(var(--row-h) - 1px), var(--line) var(--row-h)
-        );
-    }
-
-    .spine-h {
-      display: none; height: var(--hspine-h); flex-shrink: 0; overflow: hidden;
-      background: linear-gradient(to bottom, var(--spine-edge), var(--spine-mid), var(--spine-edge));
-      position: relative; flex-direction: row; align-items: center; justify-content: space-around; padding: 0 8px;
-    }
-    .spine-h::before {
-      content: ''; position: absolute; top: 2px; bottom: 2px; left: 0; right: 0;
-      background: repeating-linear-gradient(to right, transparent 0, transparent 10px, rgba(0,0,0,0.06) 10px, rgba(0,0,0,0.06) 11px);
-    }
-    .ring-h { flex-shrink: 0; width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid #b0aca4; background: #e8e4dc; position: relative; z-index: 1; }
-
-    .page-header { display: flex; align-items: center; justify-content: space-between; height: var(--row-h); padding: 0 2px; }
-    .page-title  { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; }
-    .tab-pills   { display: flex; gap: 2px; }
-    .tab-pill    { border: none; background: transparent; font-size: 10px; font-weight: 700; color: var(--muted); padding: 3px 7px; border-radius: 5px; cursor: pointer; transition: background 0.12s, color 0.12s; touch-action: manipulation; }
-    .tab-pill.active { background: rgba(93,134,200,0.14); color: var(--accent); }
-
-    .day-cell { height: var(--row-h); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #777; white-space: nowrap; flex-shrink: 0; margin-left: -2px; }
-    .day-cell.sat { color: var(--sat); }
-    .day-cell.sun { color: var(--sun); }
-
-    .memo-row  { display: grid; grid-template-columns: var(--left-date) 1fr; height: var(--row-h); align-items: center; }
-    .memo-cell { display: flex; align-items: center; height: var(--row-h); padding: 0 6px; position: relative; overflow: hidden; min-width: 0; }
-    .memo-input {
-      width: 100%; height: 100%; border: none; outline: none; background: transparent;
-      padding: 0; font-size: 13px; color: var(--text); line-height: 1;
-      overflow-x: auto; overflow-y: hidden; white-space: nowrap; -webkit-appearance: none;
-    }
-    .memo-input:disabled { color: rgba(0,0,0,0.35); cursor: default; }
-    .save-ind { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); font-size: 9px; color: #9a9a9a; opacity: 0; transition: opacity 0.15s; pointer-events: none; background: rgba(251,251,248,0.92); padding-left: 4px; }
-    .save-ind.show { opacity: 1; }
-
-    .habit-hdr { display: grid; align-items: center; height: var(--row-h); }
-    .hdr-cell  { font-size: 9px; font-weight: 700; color: var(--muted); text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding: 0 1px; display: flex; align-items: center; justify-content: center; }
-    .hdr-total { width: var(--total-w); font-size: 9px; font-weight: 700; color: var(--accent); text-align: center; display: flex; align-items: center; justify-content: center; }
-
-    .check-row { display: grid; align-items: center; height: var(--row-h); }
-    .cb-wrap   { display: flex; align-items: center; justify-content: center; }
-    .cb-wrap input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent); flex-shrink: 0; touch-action: manipulation; }
-    .cb-wrap input[type="checkbox"]:disabled { opacity: 0.3; }
-    .total-cell { width: var(--total-w); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--accent); height: var(--row-h); }
-
-    .setup-row      { display: grid; grid-template-columns: var(--right-date) 1fr; height: var(--row-h); align-items: center; }
-    .setup-num      { height: var(--row-h); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--muted); }
-    .setup-inp-wrap { display: flex; align-items: center; height: var(--row-h); padding: 0 6px; }
-    .setup-inp { width: 100%; height: 100%; border: none; outline: none; background: transparent; font-size: 13px; color: var(--text); -webkit-appearance: none; }
-    .setup-inp::placeholder { color: #c5c5c5; }
-    .setup-inp:disabled { color: rgba(0,0,0,0.32); }
-
-    .graph-wrap { overflow: hidden; }
-    canvas.graph { display: block; width: 100%; }
-
-    .week-nav { display: flex; align-items: center; justify-content: space-between; height: var(--row-h); padding-left: var(--right-date); }
-    .week-lbl { font-size: 10px; font-weight: 700; color: var(--muted); }
-    .w-arrow  { border: none; background: transparent; color: #999; font-size: 18px; font-weight: 700; cursor: pointer; padding: 0 4px; line-height: 1; touch-action: manipulation; }
-    .w-arrow:active   { opacity: 0.5; }
-    .w-arrow:disabled { opacity: 0.2; cursor: default; }
-
-    .habit-save-row { height: var(--row-h); display: flex; align-items: center; padding-left: var(--right-date); }
-    .habit-save-btn { border: none; background: var(--accent); color: #fff; font-size: 12px; font-weight: 700; padding: 4px 14px; border-radius: 6px; cursor: pointer; touch-action: manipulation; }
-    .habit-save-btn:active   { opacity: 0.75; }
-    .habit-save-btn:disabled { opacity: 0.4; }
-
-    .book-status {
-      flex-shrink: 0; height: var(--status-h);
-      background: linear-gradient(to right, var(--paper) 0%, var(--paper) 50%, var(--paper-r) 50%, var(--paper-r) 100%);
-      border-top: 1px solid rgba(132,184,196,0.22);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px; color: #888;
-    }
-
-    @media (max-width: 640px) {
-      :root {
-        --topbar-h: 44px; --row-h: 30px;
-        --left-date: 42px; --left-margin: 50px;
-        --right-date: 42px; --right-margin: 50px;
-        --total-w: 26px;
-      }
-      html, body { overflow: auto; height: auto; }
-      .book-outer { height: auto; min-height: 100vh; border-radius: 0; box-shadow: none; }
-      .book-spread { flex-direction: column; overflow: visible; height: auto; }
-      .page-left, .page-right { flex: none; overflow: visible; height: auto !important; padding: 0 12px 12px 12px; }
-      .spine-v { display: none !important; }
-      .spine-h { display: flex; }
-      .book-status { background: var(--paper-r); }
-      .tab-pill { font-size: 12px; padding: 5px 10px; }
-      .icon-btn { font-size: 24px; width: 32px; height: 32px; }
-      .cb-wrap input[type="checkbox"] { width: 18px; height: 18px; }
-      .memo-input { font-size: 14px; }
-      .login-row { flex-direction: column; }
-      .login-row .inp { width: 100%; }
-      .login-row .text-btn { width: 100%; height: 34px; font-size: 13px; }
-      .guide { font-size: 12px; }
-    }
-
-    .credit {
-      position: fixed; bottom: 4px; right: 8px;
-      font-size: 9px; font-weight: 600; color: rgba(0,0,0,0.18);
-      font-family: 'Helvetica Neue', Arial, sans-serif;
-      letter-spacing: 0.04em; pointer-events: none; z-index: 20;
-    }
-  </style>
-</head>
-<body>
-
-<div class="book-outer">
-  <div class="book-topbar">
-    <div class="book-nav">
-      <button class="icon-btn" id="prevBtn">‹</button>
-      <div class="month-title" id="monthTitle"></div>
-      <button class="icon-btn" id="nextBtn">›</button>
-    </div>
-    <div class="topbar-divider"></div>
-    <div class="user-block">
-      <div class="user-name" id="userNameText">사용자</div>
-      <div class="menu-wrap" id="menuWrap" style="display:none;">
-        <button class="menu-btn" id="menuBtn">⋯</button>
-        <div class="menu-pop" id="menuPop">
-          <button class="menu-item" id="logoutBtn">로그아웃</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="login-box" id="loginBox">
-    <div class="guide">최초 1회만 입력하면 자동 로그인됩니다.</div>
-    <div class="login-row">
-      <input class="inp" id="loginName" type="text" placeholder="사용자 이름" maxlength="30" autocomplete="username" />
-      <input class="inp" id="loginPass" type="password" placeholder="비밀번호" maxlength="30" autocomplete="current-password" />
-      <button class="text-btn" id="startBtn">시작</button>
-    </div>
-    <div class="status-bar" id="loginStatus"></div>
-  </div>
-
-  <div class="book-spread" id="bookSpread">
-    <div class="page-left" id="pageLeft">
-      <div class="page-header">
-        <div class="page-title">메모</div>
-        <div class="tab-pills">
-          <button class="tab-pill active" data-ltab="memo-month">월간</button>
-          <button class="tab-pill" data-ltab="memo-week">주간</button>
-        </div>
-      </div>
-      <div id="memoContent"></div>
-    </div>
-    <div class="spine-v" id="spineV"></div>
-    <div class="spine-h" id="spineH"></div>
-    <div class="page-right" id="pageRight">
-      <div class="page-header">
-        <div class="page-title">습관</div>
-        <div class="tab-pills">
-          <button class="tab-pill active" data-rtab="habit-home">홈</button>
-          <button class="tab-pill" data-rtab="habit-setup">설정</button>
-          <button class="tab-pill" data-rtab="habit-all">전체</button>
-        </div>
-      </div>
-      <div id="habitContent"></div>
-    </div>
-  </div>
-
-  <div class="book-status" id="statusText"></div>
-  <div class="credit">© Clonote</div>
-</div>
-
 <script>
-const API_URL   = 'https://script.google.com/macros/s/AKfycbznw9McR7zgyPjBYh3b-FTTiqwnvgGs9e-LfY2z8j9-u4H8Vs0iVNgJsp7xih0LxzSX/exec';
+const API_URL   = 'https://script.google.com/macros/s/AKfycbyK5wx7eK7gqsGRmb-3XzOnOlvy2I2B3S0a70QJG-0cMJ9ZOZYVIB1EEm17iUDQI2k/exec';
 const PAGE_ID   = new URLSearchParams(location.search).get('id') || 'default';
 const TOK_KEY   = 'clonote_token_'  + PAGE_ID;
 const USER_KEY  = 'clonote_user_'   + PAGE_ID;
-const CACHE_PFX = 'clonote_c3_'     + PAGE_ID;  // c3 — 이전 sessionStorage 캐시와 분리
+const CACHE_PFX = 'clonote_c4_'     + PAGE_ID;
 
-/* ── localStorage 래퍼 (try/catch만, sessionStorage fallback 없음) ── */
 function stGet(k){ try{ return localStorage.getItem(k); }catch{ return null; } }
 function stSet(k,v){ try{ localStorage.setItem(k,v); }catch{} }
 function stDel(k){ try{ localStorage.removeItem(k); }catch{} }
+function stKeys(){ try{ return Object.keys(localStorage); }catch{ return []; } }
 
 const MAX_H    = 10;
 const DEF_H    = 5;
@@ -324,6 +28,7 @@ let memoTimers  = {};
 let memoVers    = {};
 let checkTimers = {};
 let loadSeq     = 0;
+let isSyncing   = false;
 
 const $    = id => document.getElementById(id);
 const esc  = s  => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -338,8 +43,12 @@ const hcnt = () => Math.max(habits.filter(h => String(h||'').trim() !== '').leng
 function setStatus(m, e=false){ $('statusText').textContent=m||''; $('statusText').style.color=e?'#c0392b':'#888'; }
 function setLS(m, e=false){ $('loginStatus').textContent=m||''; $('loginStatus').style.color=e?'#c0392b':'#666'; }
 
-/* ── 캐시 ── */
 function ck(t){ return `${CACHE_PFX}:${curUser?.userId}:${ym()}:${t}`; }
+function clearCachePrefix(prefix){ stKeys().forEach(k=>{ if(k.startsWith(prefix)) stDel(k); }); }
+function clearLegacyCache(){ clearCachePrefix(`clonote_c3_${PAGE_ID}:`); }
+function clearUserCache(userId=curUser?.userId){ if(userId) clearCachePrefix(`${CACHE_PFX}:${userId}:`); }
+function clearMonthCache(userId=curUser?.userId, targetYm=ym()){ if(userId) ['h','c','m'].forEach(t=>stDel(`${CACHE_PFX}:${userId}:${targetYm}:${t}`)); }
+
 function saveCache(){
   if(!curUser) return;
   try{
@@ -354,12 +63,26 @@ function loadCache(){
     return { h:h?JSON.parse(h):null, c:c?JSON.parse(c):null, m:m?JSON.parse(m):null };
   }catch{ return {}; }
 }
+function applyCachedState(cc){
+  if(Array.isArray(cc.h)) habits = cc.h;
+  if(cc.c && typeof cc.c==='object'){
+    checks={};
+    Object.entries(cc.c).forEach(([d,v])=>{ checks[+d]=Array.isArray(v)?v:Array(MAX_H).fill(false); });
+  }
+  if(cc.m && typeof cc.m==='object'){
+    memos={};
+    Object.entries(cc.m).forEach(([d,v])=>{ memos[+d]=String(v??''); });
+  }
+}
 
-/* ── API ── */
-const gj = url  => fetch(url, {cache:'no-store'}).then(r=>r.json());
-const pj = body => fetch(API_URL, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(body)}).then(r=>r.json());
+async function reqJson(url, options){
+  const r = await fetch(url, options);
+  if(!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}
+const gj = url  => reqJson(url, {cache:'no-store'});
+const pj = body => reqJson(API_URL, {method:'POST', cache:'no-store', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(body)});
 
-/* ── AUTH ── */
 async function tryAutoLogin(){
   if(!curToken){ renderMeta(); return false; }
   try{
@@ -388,6 +111,7 @@ async function doStart(){
 
 async function doLogout(){
   try{ if(curToken) await pj({action:'logout',token:curToken}); }catch{}
+  clearUserCache(curUser?.userId);
   clearAuth(); habits=[]; checks={}; memos={};
   renderMeta(); renderAll(); setStatus('로그아웃되었습니다.');
 }
@@ -397,31 +121,37 @@ function renderMeta(){
   $('userNameText').textContent = curUser?.userName||'사용자';
   $('loginBox').classList.toggle('show',!curUser);
   $('menuWrap').style.display = curUser?'block':'none';
+  $('forceSyncBtn').style.display = curUser?'flex':'none';
+  $('forceSyncBtn').disabled = !curUser || isSyncing;
   if(!curUser) $('menuPop').classList.remove('show');
 }
 
-/* ── LOAD ── */
-async function loadAll(){
+async function persistCheck(d,targetYm=ym(),silent=false){
+  try{
+    const r=await pj({action:'saveCheck',userId:curUser.userId,yearMonth:targetYm,day:d,checks:checks[d]||Array(MAX_H).fill(false)});
+    if(!r.success && !silent) setStatus('체크 저장 실패',true);
+  }catch{
+    if(!silent) setStatus('체크 저장 오류',true);
+  }
+}
+
+async function loadAll(options={}){
+  const { force=false, silent=false } = options;
   renderMeta();
   if(!curUser) return;
 
   const seq = ++loadSeq;
   const targetYm = ym();
 
-  /* 캐시로 즉시 표시 */
-  const cc = loadCache();
-  if(Array.isArray(cc.h)) habits = cc.h;
-  if(cc.c && typeof cc.c==='object'){
-    checks={};
-    Object.entries(cc.c).forEach(([d,v])=>{ checks[+d]=Array.isArray(v)?v:Array(MAX_H).fill(false); });
+  if(force){
+    clearMonthCache(curUser.userId, targetYm);
+  }else{
+    applyCachedState(loadCache());
+    renderAll();
   }
-  if(cc.m && typeof cc.m==='object'){
-    memos={};
-    Object.entries(cc.m).forEach(([d,v])=>{ memos[+d]=String(v??''); });
-  }
-  renderAll();
 
-  /* 서버에서 최신 데이터 로드 */
+  if(!silent) setStatus(force ? '최신 데이터를 불러오는 중...' : '동기화 중...');
+
   try{
     const [hR,cR,mR] = await Promise.all([
       gj(`${API_URL}?action=getHabits&userId=${encodeURIComponent(curUser.userId)}&yearMonth=${encodeURIComponent(targetYm)}&_=${Date.now()}`),
@@ -429,17 +159,11 @@ async function loadAll(){
       gj(`${API_URL}?action=getRecords&userId=${encodeURIComponent(curUser.userId)}&year=${yr()}&month=${mo()}&_=${Date.now()}`)
     ]);
 
-    /* 다른 요청이 시작됐으면 무시 */
     if(seq !== loadSeq || targetYm !== ym()) return;
 
-    /* 습관 */
     if(hR?.success && Array.isArray(hR.habits)){
       habits = hR.habits.map(v=>String(v??'').trim());
-    } else if(hR?.success && hR.habits===null){
-      /* 이번 달 등록 없음 — habits 현재값 유지 */
     }
-
-    /* 체크 */
     if(cR?.success && Array.isArray(cR.checks)){
       checks={};
       cR.checks.forEach(item=>{
@@ -447,8 +171,6 @@ async function loadAll(){
         if(d>=1&&d<=31) checks[d]=Array.isArray(item.checks)?item.checks:Array(MAX_H).fill(false);
       });
     }
-
-    /* 메모 */
     if(mR?.success && Array.isArray(mR.records)){
       memos={};
       mR.records.forEach(item=>{
@@ -459,14 +181,29 @@ async function loadAll(){
 
     saveCache();
     renderAll();
-    setStatus('');
+    if(!silent){
+      setStatus(force ? '데이터를 새로 불러왔습니다.' : '');
+      if(force) setTimeout(()=>setStatus(''),1800);
+    }
   }catch(err){
     if(seq!==loadSeq) return;
-    setStatus('로드 실패: '+(err.message||'네트워크 오류'),true);
+    if(!silent) setStatus('로드 실패: '+(err.message||'네트워크 오류'),true);
   }
 }
 
-/* ── RENDER ── */
+async function doForceReload(){
+  if(!curUser || isSyncing) return;
+  isSyncing = true;
+  renderMeta();
+  try{
+    await flushPendingSaves();
+    await loadAll({force:true});
+  }finally{
+    isSyncing = false;
+    renderMeta();
+  }
+}
+
 function calcLayout(){
   isMobile = window.innerWidth<=640;
   $('pageLeft').style.height='';
@@ -481,7 +218,6 @@ function renderAll(){
   buildSpines(rowH);
 }
 
-/* LEFT */
 function renderLeft(){
   const el=$('memoContent');
   el.innerHTML=(leftTab==='memo-month')?buildMemoRows(1,last(),'lm'):buildMemoWeek();
@@ -515,7 +251,6 @@ function bindMemo(el){
   });
 }
 
-/* RIGHT */
 function renderRight(rowH,graphRows){
   const el=$('habitContent');
   if(rightTab==='habit-home') el.innerHTML=buildHabitHome(rowH,graphRows);
@@ -529,7 +264,7 @@ function renderRight(rowH,graphRows){
 function buildHabitHome(rowH,graphRows){
   const days=getWeekDays(), lastDay=last();
   const minD=days[0]||1, maxD=days[days.length-1]||lastDay;
-  const lbl=days.length?`${days[0]}일 — ${days[days.length-1]}일`:'';
+  const lbl=days.length?`${days[0]}일~${days[days.length-1]}일`:'';
   const graphH=rowH*graphRows;
   let h=`<div class="graph-wrap" style="height:${graphH}px;"><canvas class="graph" id="graphCanvas" style="pointer-events:none;"></canvas></div>`;
   h+=`<div class="week-nav">
@@ -547,7 +282,7 @@ function buildHabitAll(){
 }
 function buildCheckHeader(src){
   const cnt=hcnt(), col=`var(--right-date) repeat(${cnt},1fr) var(--total-w)`;
-  let cells=''; habits.slice(0,cnt).forEach(n=>{cells+=`<div class="hdr-cell">${esc(n||'—')}</div>`;});
+  let cells=''; habits.slice(0,cnt).forEach(n=>{cells+=`<div class="hdr-cell">${esc(n||'습관')}</div>`;});
   return `<div class="habit-hdr" style="grid-template-columns:${col};">
     <div style="width:var(--right-date);flex-shrink:0;"></div>${cells}
     <div class="hdr-total">합</div>
@@ -614,35 +349,44 @@ function onCheck(e){
   if(rightTab==='habit-home') renderGraph();
   clearTimeout(checkTimers[d]);
   checkTimers[d]=setTimeout(async()=>{
-    try{
-      const r=await pj({action:'saveCheck',userId:curUser.userId,yearMonth:targetYm,day:d,checks:checks[d]});
-      if(!r.success) setStatus('체크 저장 실패',true);
-    }catch{ setStatus('체크 저장 오류',true); }
+    delete checkTimers[d];
+    await persistCheck(d,targetYm);
   },800);
 }
 
-/* MEMO SAVE */
+async function flushPendingMemo(d,src){ clearTimeout(memoTimers[d]); delete memoTimers[d]; await doMemoSave(d,src,{silent:true}); }
+async function flushPendingCheck(d,targetYm=ym()){ clearTimeout(checkTimers[d]); delete checkTimers[d]; await persistCheck(d,targetYm,true); }
+async function flushPendingSaves(){
+  if(!curUser) return;
+  const memoJobs=Object.keys(memoTimers).map(Number).map(d=>flushPendingMemo(d,document.getElementById(`mi-lm-${d}`)?'lm':'lw'));
+  const checkJobs=Object.keys(checkTimers).map(Number).map(d=>flushPendingCheck(d));
+  await Promise.allSettled([...memoJobs,...checkJobs]);
+}
 function scheduleMemo(d,src){ if(!curUser)return; clearTimeout(memoTimers[d]); showInd(d,src,'저장중',true); memoTimers[d]=setTimeout(()=>flushMemo(d,src),DEBOUNCE); }
-function flushMemo(d,src){ if(!curUser)return; clearTimeout(memoTimers[d]); doMemoSave(d,src); }
-async function doMemoSave(d,src){
+function flushMemo(d,src){ if(!curUser)return; clearTimeout(memoTimers[d]); delete memoTimers[d]; doMemoSave(d,src); }
+async function doMemoSave(d,src,options={}){
+  const { silent=false } = options;
   const inp=document.getElementById(`mi-${src}-${d}`); if(!inp)return;
   const val=inp.value.trim(), other=src==='lm'?'lw':'lm';
   const twin=document.getElementById(`mi-${other}-${d}`);
   if(twin&&twin.value!==inp.value) twin.value=inp.value;
-  if(!val){ showInd(d,src,'',false); showInd(d,other,'',false); memos[d]=''; saveCache(); return; }
-  if(val===(memos[d]||'')){ showInd(d,src,'',false); return; }
+  if(val===(memos[d]||'')){
+    showInd(d,src,'',false);
+    showInd(d,other,'',false);
+    return;
+  }
   const ver=(memoVers[d]||0)+1; memoVers[d]=ver;
   try{
     const r=await pj({action:'saveRecord',userId:curUser.userId,year:yr(),month:mo(),day:d,memo:val});
     if(memoVers[d]!==ver)return;
     if(!r.success) throw new Error(r.message);
-    memos[d]=val; saveCache(); showInd(d,src,'',false); showInd(d,other,'',false);
-    setStatus(`${d}일 메모 저장`); setTimeout(()=>setStatus(''),1500);
-  }catch(err){ if(memoVers[d]!==ver)return; showInd(d,src,'오류',true); setStatus(err.message||'메모 저장 오류',true); }
+    if(val) memos[d]=val; else delete memos[d];
+    saveCache(); showInd(d,src,'',false); showInd(d,other,'',false);
+    if(!silent){ setStatus(val?`${d}일 메모 저장`:`${d}일 메모 삭제`); setTimeout(()=>setStatus(''),1500); }
+  }catch(err){ if(memoVers[d]!==ver)return; showInd(d,src,'오류',true); showInd(d,other,'오류',true); if(!silent) setStatus(err.message||'메모 저장 오류',true); }
 }
 function showInd(d,src,txt,show){ const el=document.getElementById(`si-${src}-${d}`); if(!el)return; el.textContent=txt; el.classList.toggle('show',show&&!!txt); }
 
-/* GRAPH */
 function renderGraph(){
   const cv=document.getElementById('graphCanvas'); if(!cv)return;
   const ctx=cv.getContext('2d');
@@ -675,7 +419,6 @@ function renderGraph(){
   pts.forEach(pt=>{ctx.beginPath();ctx.arc(pt.x,pt.y,2.2,0,Math.PI*2);ctx.fillStyle=pt.v>0?'rgba(93,134,200,0.85)':'rgba(190,190,190,0.5)';ctx.fill();});
 }
 
-/* WEEK DAYS */
 function getWeekDays(){
   const today=new Date(), isCur=(yr()===today.getFullYear()&&mo()===today.getMonth()+1);
   const base=isCur?today.getDate():last();
@@ -686,7 +429,6 @@ function getWeekDays(){
   return days;
 }
 
-/* SPINE */
 function buildSpines(rowH){
   const sv=$('spineV');
   if(sv&&sv.offsetHeight>0){
@@ -699,18 +441,17 @@ function buildSpines(rowH){
   }
 }
 
-/* MONTH NAV */
 function moveMonth(off){
   loadSeq++;
   curDate=new Date(yr(),mo()-1+off,1); weekOff=0; habits=[]; checks={}; memos={};
   renderMeta(); renderAll(); loadAll();
 }
 
-/* EVENTS */
 $('prevBtn').addEventListener('click',()=>moveMonth(-1));
 $('nextBtn').addEventListener('click',()=>moveMonth(1));
 $('startBtn').addEventListener('click',doStart);
 $('logoutBtn').addEventListener('click',doLogout);
+$('forceSyncBtn').addEventListener('click',doForceReload);
 $('loginName').addEventListener('keydown',e=>{if(e.key==='Enter')$('loginPass').focus();});
 $('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')doStart();});
 $('menuBtn').addEventListener('click',e=>{e.stopPropagation();$('menuPop').classList.toggle('show');});
@@ -730,16 +471,13 @@ document.querySelectorAll('[data-rtab]').forEach(b=>b.addEventListener('click',(
 let resizeTimer;
 window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(renderAll,80);});
 
-/* INIT */
 async function init(){
+  clearLegacyCache();
   renderMeta(); renderAll();
   const cachedUser=(()=>{try{const r=stGet(USER_KEY);return r?JSON.parse(r):null;}catch{return null;}})();
   if(curToken&&cachedUser){
     curUser=cachedUser; renderMeta();
-    const cc=loadCache();
-    if(Array.isArray(cc.h)) habits=cc.h;
-    if(cc.c&&typeof cc.c==='object'){checks={};Object.entries(cc.c).forEach(([d,v])=>{checks[+d]=Array.isArray(v)?v:Array(MAX_H).fill(false);});}
-    if(cc.m&&typeof cc.m==='object'){memos={};Object.entries(cc.m).forEach(([d,v])=>{memos[+d]=String(v??'');});}
+    applyCachedState(loadCache());
     renderAll();
     const ok=await tryAutoLogin();
     if(!ok){clearAuth();renderMeta();renderAll();setStatus('로그인이 만료되었습니다.',true);return;}
@@ -751,5 +489,3 @@ async function init(){
 }
 init();
 </script>
-</body>
-</html>
