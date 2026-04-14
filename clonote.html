@@ -54,7 +54,10 @@
     .book-topbar {
       flex-shrink: 0;
       height: var(--topbar-h);
-      background: linear-gradient(to right, var(--paper) 0%, var(--paper) 50%, var(--paper-r) 50%, var(--paper-r) 100%);
+      background: linear-gradient(to right,
+        var(--paper) 0%, var(--paper) 50%,
+        var(--paper-r) 50%, var(--paper-r) 100%
+      );
       border-bottom: 1px solid rgba(132,184,196,0.22);
       display: flex;
       align-items: center;
@@ -63,11 +66,10 @@
       z-index: 10;
     }
 
-    .book-nav { display: flex; align-items: center; gap: 2px; }
+    .book-nav { display: flex; align-items: center; gap: 4px; width: 100%; min-width: 0; }
     .month-title { font-size: 14px; font-weight: 700; letter-spacing: -0.02em; color: #3a3630; white-space: nowrap; min-width: 82px; text-align: center; }
-    .topbar-divider { width: 1px; height: 16px; background: rgba(0,0,0,0.11); margin: 0 10px; flex-shrink: 0; }
-    .user-block { display: flex; align-items: center; gap: 6px; margin-left: auto; min-width: 0; }
-    .user-name { font-size: 13px; font-weight: 600; color: #3a3630; white-space: nowrap; max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
+    .topbar-divider { width: 1px; height: 16px; background: rgba(0,0,0,0.11); margin: 0 8px; flex-shrink: 0; }
+    .user-name  { font-size: 13px; font-weight: 600; color: #3a3630; white-space: nowrap; max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
 
     .icon-btn, .text-btn, .menu-btn {
       border: none; background: transparent; cursor: pointer; padding: 0;
@@ -248,11 +250,13 @@
       <button class="icon-btn" id="prevBtn">‹</button>
       <div class="month-title" id="monthTitle"></div>
       <button class="icon-btn" id="nextBtn">›</button>
+
       <button class="menu-btn sync-btn" id="forceSyncBtn" title="데이터 불러오기" aria-label="데이터 불러오기" style="display:none;">📥</button>
-    </div>
-    <div class="topbar-divider"></div>
-    <div class="user-block">
+
+      <div class="topbar-divider"></div>
+
       <div class="user-name" id="userNameText">사용자</div>
+
       <div class="menu-wrap" id="menuWrap" style="display:none;">
         <button class="menu-btn" id="menuBtn">⋯</button>
         <div class="menu-pop" id="menuPop">
@@ -305,7 +309,7 @@
 </div>
 
 <script>
-const API_URL   = 'https://script.google.com/macros/s/AKfycbzdi-MOBZrFOYyTSs_uTCnv16uCAP-wVCfEnh3WHVgzijeiSRK7lkOMJIx6tdOurea0/exec';
+const API_URL   = 'https://script.google.com/macros/s/AKfycbxlIatoeDhs1h7VgeX3tXfAj_vKGjYJEiPmR7T49LApzhhOTsElvuyJGaqY5EW638Dj/exec';
 const PAGE_ID   = new URLSearchParams(location.search).get('id') || 'default';
 const TOK_KEY   = 'clonote_token_'  + PAGE_ID;
 const USER_KEY  = 'clonote_user_'   + PAGE_ID;
