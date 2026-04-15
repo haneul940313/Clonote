@@ -5,70 +5,526 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Clonote</title>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-    :root{--paper:#fbfbf8;--paper-r:#f8f8f5;--line:rgba(132,184,196,.45);--red-line:rgba(208,112,112,.42);--text:#2f2f2f;--muted:#8a8a8a;--sat:#5d86c8;--sun:#d06f6f;--accent:#5d86c8;--row-h:26px;--left-date:52px;--left-margin:60px;--right-date:44px;--right-margin:52px;--total-w:26px;--topbar-h:42px;--status-h:18px;--spine-w:18px}
-    html,body{width:100%;height:100%;background:transparent;font-family:'Helvetica Neue',Arial,sans-serif;color:var(--text);overflow:hidden}
-    .book{display:flex;flex-direction:column;width:100%;height:100vh;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.1)}
-    .top{height:var(--topbar-h);display:flex;align-items:center;padding:0 14px;background:linear-gradient(to right,var(--paper) 0%,var(--paper) 50%,var(--paper-r) 50%,var(--paper-r) 100%);border-bottom:1px solid rgba(132,184,196,.22)}
-    .nav{display:flex;align-items:center;gap:4px;width:100%}
-    .btn,.menu-btn{border:none;background:transparent;cursor:pointer;color:#3a3630}
-    .btn{font-size:22px;font-weight:700;width:28px;height:28px}
-    .menu-btn{font-size:18px;width:24px;height:24px}
-    .month{font-size:14px;font-weight:700;min-width:82px;text-align:center}
-    .divider{width:1px;height:16px;background:rgba(0,0,0,.11);margin:0 8px}
-    .user{font-size:13px;font-weight:600;white-space:nowrap;max-width:110px;overflow:hidden;text-overflow:ellipsis}
-    .menu-wrap{position:relative}
-    .menu-pop{display:none;position:absolute;top:30px;right:0;min-width:80px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.12);padding:5px;z-index:50}
-    .menu-pop.show{display:block}
-    .menu-item{width:100%;height:32px;border:none;background:transparent;border-radius:7px;text-align:left;padding:0 10px;font-size:13px;cursor:pointer}
-    .login{display:none;background:rgba(255,255,255,.85);border:1px solid rgba(0,0,0,.07);border-radius:10px;padding:10px 12px;margin:4px 10px}
-    .login.show{display:block}
-    .guide{font-size:10px;color:var(--muted);margin-bottom:6px}
-    .login-row{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
-    .inp{height:30px;border:1px solid rgba(0,0,0,.09);border-radius:7px;padding:0 8px;font-size:13px;outline:none;background:#fff;flex:1;min-width:80px}
-    .text-btn{height:30px;padding:0 10px;font-size:12px;font-weight:600;border:1px solid rgba(0,0,0,.07);border-radius:7px;background:rgba(255,255,255,.55);cursor:pointer}
-    .login-status{min-height:14px;font-size:11px;color:#666;margin-top:3px}
-    .spread{flex:1;display:flex;overflow:hidden;min-height:0}
-    .page{flex:1;min-width:0;overflow:hidden;padding:0 14px}
-    .left{background:var(--paper);background-image:linear-gradient(to right,transparent 0,transparent calc(var(--left-margin) - 1px),var(--red-line) calc(var(--left-margin) - 1px),var(--red-line) calc(var(--left-margin) + 1px),transparent calc(var(--left-margin) + 1px)),repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--row-h) - 1px),var(--line) calc(var(--row-h) - 1px),var(--line) var(--row-h))}
-    .right{background:var(--paper-r);background-image:linear-gradient(to right,transparent 0,transparent calc(var(--right-margin) - 1px),var(--red-line) calc(var(--right-margin) - 1px),var(--red-line) calc(var(--right-margin) + 1px),transparent calc(var(--right-margin) + 1px)),repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--row-h) - 1px),var(--line) calc(var(--row-h) - 1px),var(--line) var(--row-h))}
-    .spine{width:var(--spine-w);flex-shrink:0;background:linear-gradient(to right,#ccc8c0,#e0dcd4,#ccc8c0)}
-    .page-head{display:flex;align-items:center;justify-content:space-between;height:var(--row-h);padding:0 2px}
-    .page-title{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
-    .tabs{display:flex;gap:2px}
-    .tab{border:none;background:transparent;font-size:10px;font-weight:700;color:var(--muted);padding:3px 7px;border-radius:5px;cursor:pointer}
-    .tab.active{background:rgba(93,134,200,.14);color:var(--accent)}
-    .memo-row,.setup-row{display:grid;grid-template-columns:var(--left-date) 1fr;height:var(--row-h);align-items:center}
-    .setup-row{grid-template-columns:var(--right-date) 1fr}
-    .day{height:var(--row-h);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#777}
-    .day.sat{color:var(--sat)} .day.sun{color:var(--sun)}
-    .memo-cell,.setup-cell{display:flex;align-items:center;height:var(--row-h);padding:0 6px;position:relative;overflow:hidden}
-    .memo-input,.setup-input{width:100%;height:100%;border:none;outline:none;background:transparent;font-size:13px;color:var(--text)}
-    .save-ind{position:absolute;right:2px;top:50%;transform:translateY(-50%);font-size:9px;color:#9a9a9a;opacity:0}
-    .save-ind.show{opacity:1}
-    .habit-hdr,.check-row{display:grid;align-items:center;height:var(--row-h)}
-    .hdr,.total,.cb{display:flex;align-items:center;justify-content:center}
-    .hdr{font-size:9px;font-weight:700;color:var(--muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-    .total{font-size:10px;font-weight:700;color:var(--accent)}
-    .cb input{width:15px;height:15px;accent-color:var(--accent)}
-    .week-nav{display:flex;align-items:center;justify-content:space-between;height:var(--row-h);padding-left:var(--right-date)}
-    .week-lbl{font-size:10px;font-weight:700;color:var(--muted)}
-    .w-btn{border:none;background:transparent;color:#999;font-size:18px;font-weight:700;cursor:pointer;padding:0 4px}
-    .graph-wrap{overflow:hidden}
-    .save-row{height:var(--row-h);display:flex;align-items:center;padding-left:var(--right-date)}
-    .save-btn{border:none;background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 14px;border-radius:6px;cursor:pointer}
-    .status{height:var(--status-h);display:flex;align-items:center;justify-content:center;font-size:10px;color:#888;background:linear-gradient(to right,var(--paper) 0%,var(--paper) 50%,var(--paper-r) 50%,var(--paper-r) 100%);border-top:1px solid rgba(132,184,196,.22)}
-    @media (max-width:640px){
-      :root{--topbar-h:44px;--row-h:30px;--left-date:42px;--left-margin:50px;--right-date:42px;--right-margin:50px}
-      html,body{overflow:auto;height:auto}
-      .book{height:auto;min-height:100vh;box-shadow:none}
-      .spread{flex-direction:column;overflow:visible}
-      .page{overflow:visible;height:auto!important;padding:0 12px 12px}
-      .spine{display:none}
-      .login-row{flex-direction:column}
-      .inp,.text-btn{width:100%}
-      .memo-save-btn{border:none;background:transparent;cursor:pointer}
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
+    :root {
+      --paper: #fbfbf8;
+      --paper-r: #f8f8f5;
+      --line: rgba(132,184,196,.62);
+      --red-line: rgba(208,112,112,.42);
+      --spine-mid: #e0dcd4;
+      --spine-edge: #ccc8c0;
+      --text: #2f2f2f;
+      --muted: #8a8a8a;
+      --sat: #5d86c8;
+      --sun: #d06f6f;
+      --accent: #5d86c8;
+      --row-h: 26px;
+      --left-date: 52px;
+      --left-margin: 60px;
+      --right-date: 44px;
+      --right-margin: 52px;
+      --total-w: 26px;
+      --topbar-h: 42px;
+      --status-h: 18px;
+      --spine-w: 18px;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    .book {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(0,0,0,.1);
+    }
+
+    .top {
+      height: var(--topbar-h);
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      background: linear-gradient(to right, var(--paper) 0%, var(--paper) 50%, var(--paper-r) 50%, var(--paper-r) 100%);
+      border-bottom: 1px solid rgba(132,184,196,.22);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      width: 100%;
+      min-width: 0;
+      flex-wrap: nowrap;
+    }
+
+    .btn, .menu-btn {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: #3a3630;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      font-size: 22px;
+      font-weight: 700;
+      width: 28px;
+      height: 28px;
+    }
+
+    .menu-btn {
+      font-size: 18px;
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .month {
+      font-size: 14px;
+      font-weight: 700;
+      min-width: 82px;
+      text-align: center;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .divider {
+      width: 1px;
+      height: 16px;
+      background: rgba(0,0,0,.11);
+      margin: 0 8px;
+      flex-shrink: 0;
+    }
+
+    .user {
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      max-width: 110px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-shrink: 1;
+      min-width: 0;
+    }
+
+    .save-guide {
+      font-size: 10px;
+      color: #8d8d8d;
+      font-style: italic;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-left: 2px;
+    }
+
+    .menu-wrap { position: relative; flex-shrink: 0; }
+
+    .menu-pop {
+      display: none;
+      position: absolute;
+      top: 30px;
+      right: 0;
+      min-width: 92px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0,0,0,.12);
+      padding: 5px;
+      z-index: 50;
+    }
+
+    .menu-pop.show { display: block; }
+
+    .menu-item {
+      width: 100%;
+      height: 32px;
+      border: none;
+      background: transparent;
+      border-radius: 7px;
+      text-align: left;
+      padding: 0 10px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .login {
+      display: none;
+      background: rgba(255,255,255,.85);
+      border: 1px solid rgba(0,0,0,.07);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin: 4px 10px;
+    }
+
+    .login.show { display: block; }
+
+    .guide {
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .login-row {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .inp {
+      height: 30px;
+      border: 1px solid rgba(0,0,0,.09);
+      border-radius: 7px;
+      padding: 0 8px;
+      font-size: 13px;
+      outline: none;
+      background: #fff;
+      flex: 1;
+      min-width: 80px;
+    }
+
+    .text-btn {
+      height: 30px;
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid rgba(0,0,0,.07);
+      border-radius: 7px;
+      background: rgba(255,255,255,.55);
+      cursor: pointer;
+    }
+
+    .login-status {
+      min-height: 14px;
+      font-size: 11px;
+      color: #666;
+      margin-top: 3px;
+    }
+
+    .spread {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .page {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      padding: 0 14px;
+    }
+
+    .left {
+      background-color: var(--paper);
+      background-image:
+        linear-gradient(
+          to right,
+          transparent 0,
+          transparent calc(var(--left-margin) - 1px),
+          var(--red-line) calc(var(--left-margin) - 1px),
+          var(--red-line) calc(var(--left-margin) + 1px),
+          transparent calc(var(--left-margin) + 1px)
+        ),
+        linear-gradient(
+          to bottom,
+          transparent calc(var(--row-h) - 1px),
+          var(--line) calc(var(--row-h) - 1px),
+          var(--line) var(--row-h)
+        );
+      background-repeat: no-repeat, repeat-y;
+      background-size: 100% 100%, 100% var(--row-h);
+      background-position: 0 0, 0 0;
+    }
+
+    .right {
+      background-color: var(--paper-r);
+      background-image:
+        linear-gradient(
+          to right,
+          transparent 0,
+          transparent calc(var(--right-margin) - 1px),
+          var(--red-line) calc(var(--right-margin) - 1px),
+          var(--red-line) calc(var(--right-margin) + 1px),
+          transparent calc(var(--right-margin) + 1px)
+        ),
+        linear-gradient(
+          to bottom,
+          transparent calc(var(--row-h) - 1px),
+          var(--line) calc(var(--row-h) - 1px),
+          var(--line) var(--row-h)
+        );
+      background-repeat: no-repeat, repeat-y;
+      background-size: 100% 100%, 100% var(--row-h);
+      background-position: 0 0, 0 0;
+    }
+
+    .spine {
+      width: var(--spine-w);
+      flex-shrink: 0;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(to right, var(--spine-edge), var(--spine-mid), var(--spine-edge));
+    }
+
+    .spine::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 2px;
+      right: 2px;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 10px,
+        rgba(0,0,0,.06) 10px,
+        rgba(0,0,0,.06) 11px
+      );
+    }
+
+    .page-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: var(--row-h);
+      padding: 0 2px;
+    }
+
+    .page-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 2px;
+    }
+
+    .tab {
+      border: none;
+      background: transparent;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      padding: 3px 7px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: rgba(93,134,200,.14);
+      color: var(--accent);
+    }
+
+    .memo-row, .setup-row {
+      display: grid;
+      grid-template-columns: var(--left-date) 1fr;
+      height: var(--row-h);
+      align-items: center;
+    }
+
+    .setup-row {
+      grid-template-columns: var(--right-date) 1fr;
+    }
+
+    .day {
+      height: var(--row-h);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #777;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .day.sat { color: var(--sat); }
+    .day.sun { color: var(--sun); }
+    .day.pending { color: #c67a00; }
+    .day.saved { color: #4b8b55; }
+
+    .memo-cell, .setup-cell {
+      display: flex;
+      align-items: center;
+      height: var(--row-h);
+      padding: 0 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .memo-input, .setup-input {
+      width: 100%;
+      height: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .save-ind {
+      position: absolute;
+      right: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 9px;
+      color: #9a9a9a;
+      opacity: 0;
+    }
+
+    .save-ind.show { opacity: 1; }
+
+    .habit-hdr, .check-row {
+      display: grid;
+      align-items: center;
+      height: var(--row-h);
+    }
+
+    .hdr, .total, .cb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hdr {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--muted);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .total {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .cb input {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--accent);
+    }
+
+    .week-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: var(--row-h);
+      padding-left: var(--right-date);
+    }
+
+    .week-lbl {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .w-btn {
+      border: none;
+      background: transparent;
+      color: #999;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0 4px;
+    }
+
+    .graph-wrap { overflow: hidden; }
+
+    .save-row {
+      height: var(--row-h);
+      display: flex;
+      align-items: center;
+      padding-left: var(--right-date);
+    }
+
+    .save-btn {
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .status {
+      height: var(--status-h);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #888;
+      background: linear-gradient(to right, var(--paper) 0%, var(--paper) 50%, var(--paper-r) 50%, var(--paper-r) 100%);
+      border-top: 1px solid rgba(132,184,196,.22);
+    }
+
+    @media (max-width:640px) {
+      :root {
+        --topbar-h: 44px;
+        --row-h: 30px;
+        --left-date: 42px;
+        --left-margin: 50px;
+        --right-date: 42px;
+        --right-margin: 50px;
+      }
+
+      html, body {
+        overflow: auto;
+        height: auto;
+      }
+
+      .book {
+        height: auto;
+        min-height: 100vh;
+        box-shadow: none;
+      }
+
+      .spread {
+        flex-direction: column;
+        overflow: visible;
+      }
+
+      .page {
+        overflow: visible;
+        height: auto !important;
+        padding: 0 12px 12px;
+      }
+
+      .spine {
+        display: none;
+      }
+
+      .login-row {
+        flex-direction: column;
+      }
+
+      .inp, .text-btn {
+        width: 100%;
+      }
+
+      .save-guide {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -88,6 +544,7 @@
           <button class="menu-item" id="logoutBtn">로그아웃</button>
         </div>
       </div>
+      <div class="save-guide">일자를 누르면 저장됩니다.</div>
     </div>
   </div>
 
@@ -136,17 +593,14 @@ const API_URL='https://script.google.com/macros/s/AKfycbxlIatoeDhs1h7VgeX3tXfAj_
 const PAGE_ID=new URLSearchParams(location.search).get('id')||'default';
 const TOK_KEY='clonote_token_'+PAGE_ID;
 const USER_KEY='clonote_user_'+PAGE_ID;
-const CACHE_PFX='clonote_c5_'+PAGE_ID;
-const MAX_H=10, DEF_H=5, DEBOUNCE=650;
+const CACHE_PFX='clonote_c6_'+PAGE_ID;
+const MAX_H=10, DEF_H=5;
 
 let curDate=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 let curUser=null, curToken=localStorage.getItem(TOK_KEY)||'';
 let habits=[], checks={}, memos={}, memoDrafts={};
-  function memoDraftKey(d,targetYm=ym()){
-  return `${targetYm}:${d}`;
-}
 let leftTab='memo-month', rightTab='habit-home', weekOff=0;
-let memoTimers={}, memoVers={}, checkTimers={}, loadSeq=0, isSyncing=false, autoSyncTimer=null, refreshJobs={};
+let loadSeq=0, isSyncing=false, autoSyncTimer=null, refreshJobs={};
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
@@ -157,6 +611,7 @@ const last=()=>new Date(yr(),mo(),0).getDate();
 const dow=d=>new Date(yr(),mo()-1,d).getDay();
 const dcls=d=>dow(d)===6?'sat':dow(d)===0?'sun':'';
 const hcnt=()=>Math.max(habits.filter(h=>String(h||'').trim()!=='').length,DEF_H);
+const memoDraftKey=(d,targetYm=ym())=>`${targetYm}:${d}`;
 
 function setStatus(m,e=false){$('statusText').textContent=m||'';$('statusText').style.color=e?'#c0392b':'#888';}
 function setLS(m,e=false){$('loginStatus').textContent=m||'';$('loginStatus').style.color=e?'#c0392b':'#666';}
@@ -165,15 +620,20 @@ function stSet(k,v){try{localStorage.setItem(k,v)}catch{}}
 function stDel(k){try{localStorage.removeItem(k)}catch{}}
 function stKeys(){try{return Object.keys(localStorage)}catch{return[]}}
 function clearCachePrefix(prefix){stKeys().forEach(k=>{if(k.startsWith(prefix))stDel(k)})}
-function clearLegacyCache(){clearCachePrefix(`clonote_c3_${PAGE_ID}:`);clearCachePrefix(`clonote_c4_${PAGE_ID}:`)}
+function clearLegacyCache(){clearCachePrefix(`clonote_c3_${PAGE_ID}:`);clearCachePrefix(`clonote_c4_${PAGE_ID}:`);clearCachePrefix(`clonote_c5_${PAGE_ID}:`)}
 function cacheKey(type,targetYm=ym(),userId=curUser?.userId){return `${CACHE_PFX}:${userId}:${targetYm}:${type}`}
 function clearUserCache(userId=curUser?.userId){if(userId)clearCachePrefix(`${CACHE_PFX}:${userId}:`)}
-function clearMonthCache(userId=curUser?.userId,targetYm=ym()){if(userId)['h','c','m'].forEach(t=>stDel(cacheKey(t,targetYm,userId)))}
-function saveCache(targetYm=ym()){if(!curUser)return;stSet(cacheKey('h',targetYm),JSON.stringify(habits));stSet(cacheKey('c',targetYm),JSON.stringify(checks));stSet(cacheKey('m',targetYm),JSON.stringify(memos))}
-function loadCache(targetYm=ym()){if(!curUser)return{};try{return{h:JSON.parse(stGet(cacheKey('h',targetYm))||'null'),c:JSON.parse(stGet(cacheKey('c',targetYm))||'null'),m:JSON.parse(stGet(cacheKey('m',targetYm))||'null')}}catch{return{}}}
+function clearMonthCache(userId=curUser?.userId,targetYm=ym()){if(userId)['h','c','m','d'].forEach(t=>stDel(cacheKey(t,targetYm,userId)))}
+function saveCache(targetYm=ym()){if(!curUser)return;stSet(cacheKey('h',targetYm),JSON.stringify(habits));stSet(cacheKey('c',targetYm),JSON.stringify(checks));stSet(cacheKey('m',targetYm),JSON.stringify(memos));stSet(cacheKey('d',targetYm),JSON.stringify(memoDrafts))}
+function loadCache(targetYm=ym()){if(!curUser)return{};try{return{h:JSON.parse(stGet(cacheKey('h',targetYm))||'null'),c:JSON.parse(stGet(cacheKey('c',targetYm))||'null'),m:JSON.parse(stGet(cacheKey('m',targetYm))||'null'),d:JSON.parse(stGet(cacheKey('d',targetYm))||'null')}}catch{return{}}}
 function hasMonthCache(targetYm=ym()){return !!(curUser&&(stGet(cacheKey('h',targetYm))||stGet(cacheKey('c',targetYm))||stGet(cacheKey('m',targetYm))))}
-function applyCachedState(cc){if(Array.isArray(cc.h))habits=cc.h;if(cc.c&&typeof cc.c==='object'){checks={};Object.entries(cc.c).forEach(([d,v])=>checks[+d]=Array.isArray(v)?v:Array(MAX_H).fill(false))}if(cc.m&&typeof cc.m==='object'){memos={};Object.entries(cc.m).forEach(([d,v])=>memos[+d]=String(v??''))}}
-function resetMonthState(){habits=[];checks={};memos={}}
+function applyCachedState(cc){
+  if(Array.isArray(cc.h))habits=cc.h;
+  if(cc.c&&typeof cc.c==='object'){checks={};Object.entries(cc.c).forEach(([d,v])=>checks[+d]=Array.isArray(v)?v:Array(MAX_H).fill(false))}
+  if(cc.m&&typeof cc.m==='object'){memos={};Object.entries(cc.m).forEach(([d,v])=>memos[+d]=String(v??''))}
+  if(cc.d&&typeof cc.d==='object'){memoDrafts=cc.d}
+}
+function resetMonthState(){habits=[];checks={};memos={};memoDrafts={}}
 
 async function reqJson(url,options){const r=await fetch(url,options);if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json()}
 const gj=url=>reqJson(url,{cache:'no-store'});
@@ -227,15 +687,20 @@ async function loadAll(options={}){
     if(mR?.success&&Array.isArray(mR.records))mR.records.forEach(item=>{const d=Number(item.day);if(d>=1&&d<=31)nextMemos[d]=String(item.memo??'')});
 
     if(activeMonth){
-      habits=nextHabits;checks=nextChecks;memos=nextMemos;
+      habits=nextHabits;
+      checks=nextChecks;
+      const existingDrafts={...memoDrafts};
+      memos=nextMemos;
+      memoDrafts=existingDrafts;
       saveCache(targetYm);
       renderAll();
     }else{
-      const ph=habits,pc=checks,pm=memos;
+      const ph=habits,pc=checks,pm=memos,pd=memoDrafts;
       habits=nextHabits;checks=nextChecks;memos=nextMemos;
       saveCache(targetYm);
-      habits=ph;checks=pc;memos=pm;
+      habits=ph;checks=pc;memos=pm;memoDrafts=pd;
     }
+
     if(!silent)setStatus('');
   }catch(err){
     if(activeMonth&&seq!==loadSeq)return;
@@ -255,17 +720,28 @@ function queueBackgroundRefresh(targetYm,force=false){
 async function doStart(){
   const n=$('loginName').value.trim(),p=$('loginPass').value.trim();
   if(!n||!p){setLS('이름과 비밀번호를 입력해 주세요.',true);return}
-  $('startBtn').disabled=true;setLS('확인 중...');
+  $('startBtn').disabled=true;
+  setLS('확인 중...');
   try{
     await pj({action:'registerUser',userName:n,password:p});
     const r=await pj({action:'login',userName:n,password:p});
     if(!r.success||!r.token||!r.user)throw new Error(r.message||'로그인 실패');
-    curToken=r.token;curUser=r.user;stSet(TOK_KEY,curToken);stSet(USER_KEY,JSON.stringify(curUser));
-    $('loginName').value='';$('loginPass').value='';setLS('');
-    renderMeta();renderAll();
+    curToken=r.token;
+    curUser=r.user;
+    stSet(TOK_KEY,curToken);
+    stSet(USER_KEY,JSON.stringify(curUser));
+    $('loginName').value='';
+    $('loginPass').value='';
+    setLS('');
+    renderMeta();
+    renderAll();
     await loadAll({force:!hasMonthCache(ym())});
     startAutoSync();
-  }catch(e){setLS(e.message||'실패',true)}finally{$('startBtn').disabled=false}
+  }catch(e){
+    setLS(e.message||'실패',true);
+  }finally{
+    $('startBtn').disabled=false;
+  }
 }
 
 async function doLogout(){
@@ -290,66 +766,35 @@ async function persistCheck(d,targetYm=ym(),silent=false){
 
 async function doForceReload(){
   if(!curUser||isSyncing)return;
-  isSyncing=true;renderMeta();
+  isSyncing=true;
+  renderMeta();
   try{
-    await flushPendingSaves();
     await loadAll({force:true});
   }finally{
-    isSyncing=false;renderMeta();
+    isSyncing=false;
+    renderMeta();
   }
 }
 
 function calcLayout(){return{rowH:window.innerWidth<=640?30:26,graphRows:window.innerWidth<=640?4:6}}
 function renderAll(){const {rowH,graphRows}=calcLayout();renderLeft();renderRight(rowH,graphRows)}
-function renderLeft(){const el=$('memoContent');el.innerHTML=leftTab==='memo-month'?buildMemoRows(1,last(),'lm'):buildMemoWeek();bindMemo(el)}
 
-function buildMemoWeek(){const days=getWeekDays();return days.length?buildMemoRows(days[0],days[days.length-1],'lw'):'<div style="padding:8px 4px;font-size:11px;color:var(--muted);">해당 없음</div>'}
-function bindMemo(el){
-  el.querySelectorAll('.memo-input').forEach(inp=>{
-    inp.addEventListener('input',()=>{
-      if(!curUser) return;
-
-      const d = +inp.dataset.day;
-      const src = inp.dataset.src;
-      const other = src==='lm' ? 'lw' : 'lm';
-      const twin = document.getElementById(`mi-${other}-${d}`);
-      const key = memoDraftKey(d);
-
-      memoDrafts[key] = inp.value.trim();
-
-      if(twin && twin.value !== inp.value){
-        twin.value = inp.value;
-      }
-
-      showInd(d,src,'저장대기',true);
-      showInd(d,other,'저장대기',true);
-    });
-
-    inp.addEventListener('keydown',e=>{
-      if(e.key==='Enter'){
-        e.preventDefault();
-      }
-    });
-  });
-
-  el.querySelectorAll('.memo-save-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>saveMemoByDay(+btn.dataset.day, btn.dataset.src));
-  });
+function renderLeft(){
+  const el=$('memoContent');
+  el.innerHTML=leftTab==='memo-month'?buildMemoRows(1,last(),'lm'):buildMemoWeek();
+  bindMemo(el);
 }
 
 function buildMemoRows(from,to,src){
   let h='';
   for(let d=from;d<=to;d++){
-    const draftKey = memoDraftKey(d);
-    const value = Object.prototype.hasOwnProperty.call(memoDrafts,draftKey)
-      ? memoDrafts[draftKey]
-      : (memos[d]||'');
-
+    const key=memoDraftKey(d);
+    const value=Object.prototype.hasOwnProperty.call(memoDrafts,key)?memoDrafts[key]:(memos[d]||'');
+    const isPending=Object.prototype.hasOwnProperty.call(memoDrafts,key);
     h+=`<div class="memo-row">
-      <button class="day ${dcls(d)} memo-save-btn" type="button" data-day="${d}" data-src="${src}">${d}일</button>
+      <div class="day ${dcls(d)} ${isPending?'pending':''}" data-day-save="${d}" data-src="${src}" id="day-save-${src}-${d}">${d}일</div>
       <div class="memo-cell">
-        <input class="memo-input" id="mi-${src}-${d}" type="text" data-day="${d}" data-src="${src}"
-          value="${esc(value)}" ${curUser?'':'disabled'} autocomplete="off"/>
+        <input class="memo-input" id="mi-${src}-${d}" type="text" data-day="${d}" data-src="${src}" value="${esc(value)}" ${curUser?'':'disabled'} autocomplete="off"/>
         <span class="save-ind" id="si-${src}-${d}"></span>
       </div>
     </div>`;
@@ -357,132 +802,226 @@ function buildMemoRows(from,to,src){
   return h;
 }
 
-function renderRight(rowH,graphRows){const el=$('habitContent');if(rightTab==='habit-home')el.innerHTML=buildHabitHome(rowH,graphRows);else if(rightTab==='habit-setup')el.innerHTML=buildHabitSetup();else el.innerHTML=buildHabitAll();bindChecks(el);if(rightTab==='habit-setup')bindSetup(el);if(rightTab==='habit-home')renderGraph()}
+function buildMemoWeek(){
+  const days=getWeekDays();
+  return days.length?buildMemoRows(days[0],days[days.length-1],'lw'):'<div style="padding:8px 4px;font-size:11px;color:var(--muted);">해당 없음</div>';
+}
+
+function bindMemo(el){
+  el.querySelectorAll('.memo-input').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      if(!curUser)return;
+      const d=+inp.dataset.day;
+      const src=inp.dataset.src;
+      const other=src==='lm'?'lw':'lm';
+      const key=memoDraftKey(d);
+      memoDrafts[key]=inp.value.trim();
+      const twin=document.getElementById(`mi-${other}-${d}`);
+      if(twin&&twin.value!==inp.value)twin.value=inp.value;
+      markDayPending(d);
+      saveCache(ym());
+      showInd(d,src,'저장대기',true);
+      showInd(d,other,'저장대기',true);
+    });
+
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Enter') e.preventDefault();
+    });
+  });
+
+  el.querySelectorAll('[data-day-save]').forEach(dayEl=>{
+    dayEl.addEventListener('click',()=>saveMemoByDay(+dayEl.dataset.daySave,dayEl.dataset.src));
+  });
+}
+
+function markDayPending(d){
+  document.querySelectorAll(`[id^="day-save-"][id$="-${d}"]`).forEach(el=>{
+    el.classList.remove('saved');
+    el.classList.add('pending');
+  });
+}
+
+function markDaySaved(d){
+  document.querySelectorAll(`[id^="day-save-"][id$="-${d}"]`).forEach(el=>{
+    el.classList.remove('pending');
+    el.classList.add('saved');
+  });
+  setTimeout(()=>{
+    document.querySelectorAll(`[id^="day-save-"][id$="-${d}"]`).forEach(el=>el.classList.remove('saved'));
+  },900);
+}
+
+async function saveMemoByDay(d,src){
+  if(!curUser)return;
+  const inp=document.getElementById(`mi-${src}-${d}`);
+  if(!inp)return;
+  await doMemoSave(d,src,{silent:false});
+}
+
+async function doMemoSave(d,src,options={}){
+  const {silent=false}=options;
+  const inp=document.getElementById(`mi-${src}-${d}`);
+  if(!inp)return;
+
+  const val=inp.value.trim();
+  const other=src==='lm'?'lw':'lm';
+  const twin=document.getElementById(`mi-${other}-${d}`);
+  const key=memoDraftKey(d);
+
+  if(twin&&twin.value!==inp.value) twin.value=inp.value;
+  memoDrafts[key]=val;
+
+  try{
+    const r=await pj({action:'saveRecord',userId:curUser.userId,year:yr(),month:mo(),day:d,memo:val});
+    if(!r.success) throw new Error(r.message||'메모 저장 실패');
+
+    if(val) memos[d]=val;
+    else delete memos[d];
+
+    delete memoDrafts[key];
+    saveCache(ym());
+    markDaySaved(d);
+    showInd(d,src,'저장완료',true);
+    showInd(d,other,'저장완료',true);
+
+    setTimeout(()=>{
+      showInd(d,src,'',false);
+      showInd(d,other,'',false);
+    },900);
+
+    if(!silent){
+      setStatus(val?`${d}일 메모 저장`:`${d}일 메모 삭제`);
+      setTimeout(()=>setStatus(''),1200);
+    }
+  }catch(err){
+    markDayPending(d);
+    showInd(d,src,'오류',true);
+    showInd(d,other,'오류',true);
+    if(!silent)setStatus(err.message||'메모 저장 오류',true);
+  }
+}
+
+function showInd(d,src,txt,show){
+  const el=document.getElementById(`si-${src}-${d}`);
+  if(!el)return;
+  el.textContent=txt;
+  el.classList.toggle('show',show&&!!txt);
+}
+
+function renderRight(rowH,graphRows){
+  const el=$('habitContent');
+  if(rightTab==='habit-home')el.innerHTML=buildHabitHome(rowH,graphRows);
+  else if(rightTab==='habit-setup')el.innerHTML=buildHabitSetup();
+  else el.innerHTML=buildHabitAll();
+  bindChecks(el);
+  if(rightTab==='habit-setup')bindSetup(el);
+  if(rightTab==='habit-home')renderGraph();
+}
+
 function buildHabitHome(rowH,graphRows){
   const days=getWeekDays(),lastDay=last(),minD=days[0]||1,maxD=days[days.length-1]||lastDay,lbl=days.length?`${days[0]}일~${days[days.length-1]}일`:'';
   let h=`<div class="graph-wrap" style="height:${rowH*graphRows}px;"><canvas id="graphCanvas"></canvas></div><div class="week-nav"><button class="w-btn" id="wPrev" ${minD<=1?'disabled':''}>‹</button><div class="week-lbl">${lbl}</div><button class="w-btn" id="wNext" ${maxD>=lastDay?'disabled':''}>›</button></div>`;
   if(days.length){h+=buildCheckHeader();days.forEach(d=>h+=buildCheckRow(d,'rh'))}
   return h;
 }
-function buildHabitAll(){let h=buildCheckHeader();for(let d=1;d<=last();d++)h+=buildCheckRow(d,'ra');return h}
-function buildCheckHeader(){const cnt=hcnt(),col=`var(--right-date) repeat(${cnt},1fr) var(--total-w)`;let cells='';habits.slice(0,cnt).forEach(n=>cells+=`<div class="hdr">${esc(n||'습관')}</div>`);return `<div class="habit-hdr" style="grid-template-columns:${col};"><div></div>${cells}<div class="hdr">합</div></div>`}
-function buildCheckRow(d,src){const cnt=hcnt(),col=`var(--right-date) repeat(${cnt},1fr) var(--total-w)`,ch=Array.isArray(checks[d])?checks[d]:Array(MAX_H).fill(false),tot=ch.slice(0,cnt).filter(Boolean).length;let cbs='';for(let i=0;i<cnt;i++)cbs+=`<div class="cb"><input type="checkbox" data-day="${d}" data-idx="${i}" data-src="${src}" ${ch[i]?'checked':''} ${curUser?'':'disabled'}></div>`;return `<div class="check-row" style="grid-template-columns:${col};"><div class="day ${dcls(d)}">${d}일</div>${cbs}<div class="total" id="tc-${src}-${d}">${tot>0?tot:''}</div></div>`}
-function buildHabitSetup(){let h='';for(let i=0;i<MAX_H;i++)h+=`<div class="setup-row"><div class="day">${i+1}</div><div class="setup-cell"><input class="setup-input" type="text" data-hi="${i}" value="${esc(habits[i]||'')}" placeholder="습관 ${i+1}" maxlength="20" ${curUser?'':'disabled'} autocomplete="off"></div></div>`;return h+'<div class="save-row"><button class="save-btn" id="habitSaveBtn">저장</button></div>'}
-function bindSetup(el){const b=el.querySelector('#habitSaveBtn');if(b)b.addEventListener('click',doSaveHabits)}
-async function doSaveHabits(){if(!curUser)return;const targetYm=ym(),h=Array.from(document.querySelectorAll('.setup-input')).map(i=>i.value.trim()),btn=document.getElementById('habitSaveBtn');if(btn)btn.disabled=true;setStatus('저장 중...');try{const r=await pj({action:'saveHabits',userId:curUser.userId,yearMonth:targetYm,habits:h});if(!r.success)throw new Error(r.message||'저장 실패');habits=Array.isArray(r.habits)?r.habits.map(v=>String(v??'').trim()):h;saveCache(targetYm);rightTab='habit-home';document.querySelectorAll('[data-rtab]').forEach(x=>x.classList.toggle('active',x.dataset.rtab==='habit-home'));renderAll();setStatus('습관이 저장되었습니다.');setTimeout(()=>setStatus(''),1600)}catch(e){setStatus(e.message||'저장 실패',true)}finally{if(btn)btn.disabled=false}}
-function bindChecks(el){el.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.addEventListener('change',onCheck));const wp=el.querySelector('#wPrev'),wn=el.querySelector('#wNext');if(wp)wp.addEventListener('click',()=>{weekOff--;renderAll()});if(wn)wn.addEventListener('click',()=>{weekOff++;renderAll()})}
-function onCheck(e){if(!curUser)return;const targetYm=ym(),d=+e.target.dataset.day,idx=+e.target.dataset.idx,cnt=hcnt(),prev=Array.isArray(checks[d])?[...checks[d]]:Array(MAX_H).fill(false);prev[idx]=e.target.checked;checks[d]=prev;const tot=prev.slice(0,cnt).filter(Boolean).length;document.querySelectorAll(`input[type="checkbox"][data-day="${d}"][data-idx="${idx}"]`).forEach(cb=>{if(cb!==e.target)cb.checked=e.target.checked});document.querySelectorAll(`[id^="tc-"][id$="-${d}"]`).forEach(el=>el.textContent=tot>0?tot:'');saveCache(targetYm);if(rightTab==='habit-home')renderGraph();clearTimeout(checkTimers[d]);checkTimers[d]=setTimeout(async()=>{delete checkTimers[d];await persistCheck(d,targetYm)},800)}
 
-async function flushPendingMemo(d,src){clearTimeout(memoTimers[d]);delete memoTimers[d];await doMemoSave(d,src,{silent:true})}
-async function flushPendingCheck(d,targetYm=ym()){clearTimeout(checkTimers[d]);delete checkTimers[d];await persistCheck(d,targetYm,true)}
-async function flushPendingSaves(){if(!curUser)return;const memoJobs=Object.keys(memoTimers).map(Number).map(d=>flushPendingMemo(d,document.getElementById(`mi-lm-${d}`)?'lm':'lw'));const checkJobs=Object.keys(checkTimers).map(Number).map(d=>flushPendingCheck(d));await Promise.allSettled([...memoJobs,...checkJobs])}
-async function saveMemoByDay(d,src){
-  if(!curUser) return;
-
-  const inp = document.getElementById(`mi-${src}-${d}`);
-  if(!inp) return;
-
-  await doMemoSave(d,src,{ silent:false });
+function buildHabitAll(){
+  let h=buildCheckHeader();
+  for(let d=1;d<=last();d++)h+=buildCheckRow(d,'ra');
+  return h;
 }
 
-async function doMemoSave(d,src,options={}){
-  const { silent=false } = options;
-  const inp = document.getElementById(`mi-${src}-${d}`);
-  if(!inp) return;
+function buildCheckHeader(){
+  const cnt=hcnt(),col=`var(--right-date) repeat(${cnt},1fr) var(--total-w)`;
+  let cells='';
+  habits.slice(0,cnt).forEach(n=>cells+=`<div class="hdr">${esc(n||'습관')}</div>`);
+  return `<div class="habit-hdr" style="grid-template-columns:${col};"><div></div>${cells}<div class="hdr">합</div></div>`;
+}
 
-  const val = inp.value.trim();
-  const other = src==='lm' ? 'lw' : 'lm';
-  const twin = document.getElementById(`mi-${other}-${d}`);
-  const draftKey = memoDraftKey(d);
+function buildCheckRow(d,src){
+  const cnt=hcnt(),col=`var(--right-date) repeat(${cnt},1fr) var(--total-w)`,ch=Array.isArray(checks[d])?checks[d]:Array(MAX_H).fill(false),tot=ch.slice(0,cnt).filter(Boolean).length;
+  let cbs='';
+  for(let i=0;i<cnt;i++)cbs+=`<div class="cb"><input type="checkbox" data-day="${d}" data-idx="${i}" data-src="${src}" ${ch[i]?'checked':''} ${curUser?'':'disabled'}></div>`;
+  return `<div class="check-row" style="grid-template-columns:${col};"><div class="day ${dcls(d)}" style="cursor:default;">${d}일</div>${cbs}<div class="total" id="tc-${src}-${d}">${tot>0?tot:''}</div></div>`;
+}
 
-  if(twin && twin.value !== inp.value){
-    twin.value = inp.value;
-  }
+function buildHabitSetup(){
+  let h='';
+  for(let i=0;i<MAX_H;i++)h+=`<div class="setup-row"><div class="day" style="cursor:default;">${i+1}</div><div class="setup-cell"><input class="setup-input" type="text" data-hi="${i}" value="${esc(habits[i]||'')}" placeholder="습관 ${i+1}" maxlength="20" ${curUser?'':'disabled'} autocomplete="off"></div></div>`;
+  return h+'<div class="save-row"><button class="save-btn" id="habitSaveBtn">저장</button></div>';
+}
 
-  memoDrafts[draftKey] = val;
+function bindSetup(el){
+  const b=el.querySelector('#habitSaveBtn');
+  if(b)b.addEventListener('click',doSaveHabits);
+}
 
-  const ver = (memoVers[d]||0)+1;
-  memoVers[d] = ver;
-
+async function doSaveHabits(){
+  if(!curUser)return;
+  const targetYm=ym(),h=Array.from(document.querySelectorAll('.setup-input')).map(i=>i.value.trim()),btn=document.getElementById('habitSaveBtn');
+  if(btn)btn.disabled=true;
+  setStatus('저장 중...');
   try{
-    const r = await pj({
-      action:'saveRecord',
-      userId:curUser.userId,
-      year:yr(),
-      month:mo(),
-      day:d,
-      memo:val
-    });
-
-    if(memoVers[d]!==ver) return;
-    if(!r.success) throw new Error(r.message||'메모 저장 실패');
-
-    if(val){
-      memos[d] = val;
-    }else{
-      delete memos[d];
-    }
-
-    delete memoDrafts[draftKey];
-    saveCache(ym());
-
-    showInd(d,src,'저장완료',true);
-    showInd(d,other,'저장완료',true);
-    setTimeout(()=>{
-      showInd(d,src,'',false);
-      showInd(d,other,'',false);
-    }, 900);
-
-    if(!silent){
-      setStatus(val ? `${d}일 메모 저장` : `${d}일 메모 삭제`);
-      setTimeout(()=>setStatus(''),1200);
-    }
-  }catch(err){
-    if(memoVers[d]!==ver) return;
-    showInd(d,src,'오류',true);
-    showInd(d,other,'오류',true);
-    if(!silent) setStatus(err.message||'메모 저장 오류',true);
+    const r=await pj({action:'saveHabits',userId:curUser.userId,yearMonth:targetYm,habits:h});
+    if(!r.success)throw new Error(r.message||'저장 실패');
+    habits=Array.isArray(r.habits)?r.habits.map(v=>String(v??'').trim()):h;
+    saveCache(targetYm);
+    rightTab='habit-home';
+    document.querySelectorAll('[data-rtab]').forEach(x=>x.classList.toggle('active',x.dataset.rtab==='habit-home'));
+    renderAll();
+    setStatus('습관이 저장되었습니다.');
+    setTimeout(()=>setStatus(''),1600);
+  }catch(e){
+    setStatus(e.message||'저장 실패',true);
+  }finally{
+    if(btn)btn.disabled=false;
   }
 }
 
-async function doMemoSave(d,src,options={}){
-  const {silent=false}=options,inp=document.getElementById(`mi-${src}-${d}`);
-  if(!inp)return;
-  const val=inp.value.trim(),other=src==='lm'?'lw':'lm',twin=document.getElementById(`mi-${other}-${d}`);
-  if(twin&&twin.value!==inp.value)twin.value=inp.value;
-  if(val===(memos[d]||'')){showInd(d,src,'',false);showInd(d,other,'',false);return}
-  const ver=(memoVers[d]||0)+1;memoVers[d]=ver;
-  try{
-    const r=await pj({action:'saveRecord',userId:curUser.userId,year:yr(),month:mo(),day:d,memo:val});
-    if(memoVers[d]!==ver)return;
-    if(!r.success)throw new Error(r.message||'메모 저장 실패');
-    if(val)memos[d]=val;else delete memos[d];
-    saveCache(ym());
-    showInd(d,src,'',false);showInd(d,other,'',false);
-    if(!silent){setStatus(val?`${d}일 메모 저장`:`${d}일 메모 삭제`);setTimeout(()=>setStatus(''),1200)}
-  }catch(err){
-    if(memoVers[d]!==ver)return;
-    showInd(d,src,'오류',true);showInd(d,other,'오류',true);
-    if(!silent)setStatus(err.message||'메모 저장 오류',true);
-  }
+function bindChecks(el){
+  el.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.addEventListener('change',onCheck));
+  const wp=el.querySelector('#wPrev'),wn=el.querySelector('#wNext');
+  if(wp)wp.addEventListener('click',()=>{weekOff--;renderAll()});
+  if(wn)wn.addEventListener('click',()=>{weekOff++;renderAll()});
 }
-function showInd(d,src,txt,show){const el=document.getElementById(`si-${src}-${d}`);if(!el)return;el.textContent=txt;el.classList.toggle('show',show&&!!txt)}
+
+function onCheck(e){
+  if(!curUser)return;
+  const targetYm=ym(),d=+e.target.dataset.day,idx=+e.target.dataset.idx,cnt=hcnt(),prev=Array.isArray(checks[d])?[...checks[d]]:Array(MAX_H).fill(false);
+  prev[idx]=e.target.checked;
+  checks[d]=prev;
+  const tot=prev.slice(0,cnt).filter(Boolean).length;
+  document.querySelectorAll(`input[type="checkbox"][data-day="${d}"][data-idx="${idx}"]`).forEach(cb=>{if(cb!==e.target)cb.checked=e.target.checked});
+  document.querySelectorAll(`[id^="tc-"][id$="-${d}"]`).forEach(el=>el.textContent=tot>0?tot:'');
+  saveCache(targetYm);
+  if(rightTab==='habit-home')renderGraph();
+  setTimeout(async()=>{await persistCheck(d,targetYm)},300);
+}
 
 function renderGraph(){
-  const cv=document.getElementById('graphCanvas');if(!cv)return;
+  const cv=document.getElementById('graphCanvas');
+  if(!cv)return;
   const ctx=cv.getContext('2d'),ld=last(),cnt=hcnt(),now=new Date(),isCur=yr()===now.getFullYear()&&mo()===now.getMonth()+1,today=isCur?now.getDate():ld,data=[];
   for(let d=1;d<=ld;d++){const c=Array.isArray(checks[d])?checks[d]:[];data.push(c.slice(0,cnt).filter(Boolean).length)}
   const hasAny=data.some(v=>v>0),dpr=window.devicePixelRatio||1,W=cv.parentElement.clientWidth||300,H=cv.parentElement.clientHeight||100;
   cv.style.width=W+'px';cv.style.height=H+'px';cv.width=W*dpr;cv.height=H*dpr;ctx.scale(dpr,dpr);ctx.clearRect(0,0,W,H);
   const p={t:12,r:12,b:22,l:50},gW=W-p.l-p.r,gH=H-p.t-p.b;
-  ctx.strokeStyle='rgba(132,184,196,.28)';ctx.lineWidth=.5;
+  ctx.strokeStyle='rgba(132,184,196,.28)';
+  ctx.lineWidth=.5;
   for(let v=0;v<=cnt;v++){const y=p.t+gH-(v/cnt)*gH;ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(p.l+gW,y);ctx.stroke()}
   if(!hasAny)return;
   const pts=[];for(let d=1;d<=today;d++)pts.push({x:p.l+((d-1)/(ld-1||1))*gW,y:p.t+gH-(data[d-1]/cnt)*gH,v:data[d-1]});
   ctx.beginPath();ctx.moveTo(pts[0].x,p.t+gH);pts.forEach(pt=>ctx.lineTo(pt.x,pt.y));ctx.lineTo(pts[pts.length-1].x,p.t+gH);ctx.closePath();ctx.fillStyle='rgba(93,134,200,.09)';ctx.fill();
   ctx.beginPath();ctx.strokeStyle='rgba(93,134,200,.82)';ctx.lineWidth=1.8;pts.forEach((pt,i)=>i===0?ctx.moveTo(pt.x,pt.y):ctx.lineTo(pt.x,pt.y));ctx.stroke();
 }
-function getWeekDays(){const today=new Date(),isCur=yr()===today.getFullYear()&&mo()===today.getMonth()+1,base=isCur?today.getDate():last(),bd=new Date(yr(),mo()-1,base),dw=bd.getDay(),monday=new Date(bd);monday.setDate(bd.getDate()-(dw===0?6:dw-1)+weekOff*7);const days=[];for(let i=0;i<7;i++){const d=new Date(monday);d.setDate(monday.getDate()+i);if(d.getFullYear()===yr()&&d.getMonth()+1===mo())days.push(d.getDate())}return days}
+
+function getWeekDays(){
+  const today=new Date(),isCur=yr()===today.getFullYear()&&mo()===today.getMonth()+1,base=isCur?today.getDate():last(),bd=new Date(yr(),mo()-1,base),dw=bd.getDay(),monday=new Date(bd);
+  monday.setDate(bd.getDate()-(dw===0?6:dw-1)+weekOff*7);
+  const days=[];
+  for(let i=0;i<7;i++){const d=new Date(monday);d.setDate(monday.getDate()+i);if(d.getFullYear()===yr()&&d.getMonth()+1===mo())days.push(d.getDate())}
+  return days;
+}
 
 function moveMonth(off){
   loadSeq++;
@@ -501,8 +1040,14 @@ function moveMonth(off){
   }
 }
 
-function startAutoSync(){stopAutoSync();autoSyncTimer=setInterval(()=>{if(curUser&&!isSyncing)queueBackgroundRefresh(ym(),false)},20000)}
-function stopAutoSync(){if(autoSyncTimer){clearInterval(autoSyncTimer);autoSyncTimer=null}}
+function startAutoSync(){
+  stopAutoSync();
+  autoSyncTimer=setInterval(()=>{if(curUser&&!isSyncing)queueBackgroundRefresh(ym(),false)},20000);
+}
+
+function stopAutoSync(){
+  if(autoSyncTimer){clearInterval(autoSyncTimer);autoSyncTimer=null}
+}
 
 $('prevBtn').addEventListener('click',()=>moveMonth(-1));
 $('nextBtn').addEventListener('click',()=>moveMonth(1));
