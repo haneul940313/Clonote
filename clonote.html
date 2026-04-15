@@ -67,6 +67,8 @@
       .spine{display:none}
       .login-row{flex-direction:column}
       .inp,.text-btn{width:100%}
+      .memo-save-btn{border:none;background:transparent;cursor:pointer}
+
     }
   </style>
 </head>
@@ -139,7 +141,10 @@ const MAX_H=10, DEF_H=5, DEBOUNCE=650;
 
 let curDate=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 let curUser=null, curToken=localStorage.getItem(TOK_KEY)||'';
-let habits=[], checks={}, memos={};
+let habits=[], checks={}, memos={}, memoDrafts={};
+  function memoDraftKey(d,targetYm=ym()){
+  return `${targetYm}:${d}`;
+}
 let leftTab='memo-month', rightTab='habit-home', weekOff=0;
 let memoTimers={}, memoVers={}, checkTimers={}, loadSeq=0, isSyncing=false, autoSyncTimer=null, refreshJobs={};
 
@@ -297,9 +302,60 @@ async function doForceReload(){
 function calcLayout(){return{rowH:window.innerWidth<=640?30:26,graphRows:window.innerWidth<=640?4:6}}
 function renderAll(){const {rowH,graphRows}=calcLayout();renderLeft();renderRight(rowH,graphRows)}
 function renderLeft(){const el=$('memoContent');el.innerHTML=leftTab==='memo-month'?buildMemoRows(1,last(),'lm'):buildMemoWeek();bindMemo(el)}
-function buildMemoRows(from,to,src){let h='';for(let d=from;d<=to;d++)h+=`<div class="memo-row"><div class="day ${dcls(d)}">${d}일</div><div class="memo-cell"><input class="memo-input" id="mi-${src}-${d}" type="text" data-day="${d}" data-src="${src}" value="${esc(memos[d]||'')}" ${curUser?'':'disabled'} autocomplete="off"/><span class="save-ind" id="si-${src}-${d}"></span></div></div>`;return h}
+
 function buildMemoWeek(){const days=getWeekDays();return days.length?buildMemoRows(days[0],days[days.length-1],'lw'):'<div style="padding:8px 4px;font-size:11px;color:var(--muted);">해당 없음</div>'}
-function bindMemo(el){el.querySelectorAll('.memo-input').forEach(inp=>{inp.addEventListener('input',()=>scheduleMemo(+inp.dataset.day,inp.dataset.src));inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();inp.blur()}});inp.addEventListener('blur',()=>flushMemo(+inp.dataset.day,inp.dataset.src));inp.addEventListener('change',()=>flushMemo(+inp.dataset.day,inp.dataset.src))})}
+function bindMemo(el){
+  el.querySelectorAll('.memo-input').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      if(!curUser) return;
+
+      const d = +inp.dataset.day;
+      const src = inp.dataset.src;
+      const other = src==='lm' ? 'lw' : 'lm';
+      const twin = document.getElementById(`mi-${other}-${d}`);
+      const key = memoDraftKey(d);
+
+      memoDrafts[key] = inp.value.trim();
+
+      if(twin && twin.value !== inp.value){
+        twin.value = inp.value;
+      }
+
+      showInd(d,src,'저장대기',true);
+      showInd(d,other,'저장대기',true);
+    });
+
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){
+        e.preventDefault();
+      }
+    });
+  });
+
+  el.querySelectorAll('.memo-save-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>saveMemoByDay(+btn.dataset.day, btn.dataset.src));
+  });
+}
+
+function buildMemoRows(from,to,src){
+  let h='';
+  for(let d=from;d<=to;d++){
+    const draftKey = memoDraftKey(d);
+    const value = Object.prototype.hasOwnProperty.call(memoDrafts,draftKey)
+      ? memoDrafts[draftKey]
+      : (memos[d]||'');
+
+    h+=`<div class="memo-row">
+      <button class="day ${dcls(d)} memo-save-btn" type="button" data-day="${d}" data-src="${src}">${d}일</button>
+      <div class="memo-cell">
+        <input class="memo-input" id="mi-${src}-${d}" type="text" data-day="${d}" data-src="${src}"
+          value="${esc(value)}" ${curUser?'':'disabled'} autocomplete="off"/>
+        <span class="save-ind" id="si-${src}-${d}"></span>
+      </div>
+    </div>`;
+  }
+  return h;
+}
 
 function renderRight(rowH,graphRows){const el=$('habitContent');if(rightTab==='habit-home')el.innerHTML=buildHabitHome(rowH,graphRows);else if(rightTab==='habit-setup')el.innerHTML=buildHabitSetup();else el.innerHTML=buildHabitAll();bindChecks(el);if(rightTab==='habit-setup')bindSetup(el);if(rightTab==='habit-home')renderGraph()}
 function buildHabitHome(rowH,graphRows){
@@ -320,8 +376,75 @@ function onCheck(e){if(!curUser)return;const targetYm=ym(),d=+e.target.dataset.d
 async function flushPendingMemo(d,src){clearTimeout(memoTimers[d]);delete memoTimers[d];await doMemoSave(d,src,{silent:true})}
 async function flushPendingCheck(d,targetYm=ym()){clearTimeout(checkTimers[d]);delete checkTimers[d];await persistCheck(d,targetYm,true)}
 async function flushPendingSaves(){if(!curUser)return;const memoJobs=Object.keys(memoTimers).map(Number).map(d=>flushPendingMemo(d,document.getElementById(`mi-lm-${d}`)?'lm':'lw'));const checkJobs=Object.keys(checkTimers).map(Number).map(d=>flushPendingCheck(d));await Promise.allSettled([...memoJobs,...checkJobs])}
-function scheduleMemo(d,src){if(!curUser)return;clearTimeout(memoTimers[d]);showInd(d,src,'저장중',true);memoTimers[d]=setTimeout(()=>flushMemo(d,src),DEBOUNCE)}
-function flushMemo(d,src){if(!curUser)return;clearTimeout(memoTimers[d]);delete memoTimers[d];doMemoSave(d,src)}
+async function saveMemoByDay(d,src){
+  if(!curUser) return;
+
+  const inp = document.getElementById(`mi-${src}-${d}`);
+  if(!inp) return;
+
+  await doMemoSave(d,src,{ silent:false });
+}
+
+async function doMemoSave(d,src,options={}){
+  const { silent=false } = options;
+  const inp = document.getElementById(`mi-${src}-${d}`);
+  if(!inp) return;
+
+  const val = inp.value.trim();
+  const other = src==='lm' ? 'lw' : 'lm';
+  const twin = document.getElementById(`mi-${other}-${d}`);
+  const draftKey = memoDraftKey(d);
+
+  if(twin && twin.value !== inp.value){
+    twin.value = inp.value;
+  }
+
+  memoDrafts[draftKey] = val;
+
+  const ver = (memoVers[d]||0)+1;
+  memoVers[d] = ver;
+
+  try{
+    const r = await pj({
+      action:'saveRecord',
+      userId:curUser.userId,
+      year:yr(),
+      month:mo(),
+      day:d,
+      memo:val
+    });
+
+    if(memoVers[d]!==ver) return;
+    if(!r.success) throw new Error(r.message||'메모 저장 실패');
+
+    if(val){
+      memos[d] = val;
+    }else{
+      delete memos[d];
+    }
+
+    delete memoDrafts[draftKey];
+    saveCache(ym());
+
+    showInd(d,src,'저장완료',true);
+    showInd(d,other,'저장완료',true);
+    setTimeout(()=>{
+      showInd(d,src,'',false);
+      showInd(d,other,'',false);
+    }, 900);
+
+    if(!silent){
+      setStatus(val ? `${d}일 메모 저장` : `${d}일 메모 삭제`);
+      setTimeout(()=>setStatus(''),1200);
+    }
+  }catch(err){
+    if(memoVers[d]!==ver) return;
+    showInd(d,src,'오류',true);
+    showInd(d,other,'오류',true);
+    if(!silent) setStatus(err.message||'메모 저장 오류',true);
+  }
+}
+
 async function doMemoSave(d,src,options={}){
   const {silent=false}=options,inp=document.getElementById(`mi-${src}-${d}`);
   if(!inp)return;
