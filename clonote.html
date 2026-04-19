@@ -598,7 +598,11 @@ const MAX_H=10, DEF_H=5;
 
 let curDate=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 let curUser=null, curToken=localStorage.getItem(TOK_KEY)||'';
-let habits=[], checks={}, memos={}, memoDrafts={};
+let habits=[], checks={}, checkDrafts={}, memos={}, memoDrafts={};
+  function checkDraftKey(d,targetYm=ym()){
+  return `${targetYm}:${d}`;
+}
+
 let leftTab='memo-month', rightTab='habit-home', weekOff=0;
 let loadSeq=0, isSyncing=false, autoSyncTimer=null, refreshJobs={};
 
@@ -624,16 +628,49 @@ function clearLegacyCache(){clearCachePrefix(`clonote_c3_${PAGE_ID}:`);clearCach
 function cacheKey(type,targetYm=ym(),userId=curUser?.userId){return `${CACHE_PFX}:${userId}:${targetYm}:${type}`}
 function clearUserCache(userId=curUser?.userId){if(userId)clearCachePrefix(`${CACHE_PFX}:${userId}:`)}
 function clearMonthCache(userId=curUser?.userId,targetYm=ym()){if(userId)['h','c','m','d'].forEach(t=>stDel(cacheKey(t,targetYm,userId)))}
-function saveCache(targetYm=ym()){if(!curUser)return;stSet(cacheKey('h',targetYm),JSON.stringify(habits));stSet(cacheKey('c',targetYm),JSON.stringify(checks));stSet(cacheKey('m',targetYm),JSON.stringify(memos));stSet(cacheKey('d',targetYm),JSON.stringify(memoDrafts))}
-function loadCache(targetYm=ym()){if(!curUser)return{};try{return{h:JSON.parse(stGet(cacheKey('h',targetYm))||'null'),c:JSON.parse(stGet(cacheKey('c',targetYm))||'null'),m:JSON.parse(stGet(cacheKey('m',targetYm))||'null'),d:JSON.parse(stGet(cacheKey('d',targetYm))||'null')}}catch{return{}}}
-function hasMonthCache(targetYm=ym()){return !!(curUser&&(stGet(cacheKey('h',targetYm))||stGet(cacheKey('c',targetYm))||stGet(cacheKey('m',targetYm))))}
+function saveCache(targetYm=ym()){
+  if(!curUser)return;
+  stSet(cacheKey('h',targetYm),JSON.stringify(habits));
+  stSet(cacheKey('c',targetYm),JSON.stringify(checks));
+  stSet(cacheKey('cd',targetYm),JSON.stringify(checkDrafts));
+  stSet(cacheKey('m',targetYm),JSON.stringify(memos));
+  stSet(cacheKey('d',targetYm),JSON.stringify(memoDrafts));
+}
+function loadCache(targetYm=ym()){
+  if(!curUser)return{};
+  try{
+    return{
+      h:JSON.parse(stGet(cacheKey('h',targetYm))||'null'),
+      c:JSON.parse(stGet(cacheKey('c',targetYm))||'null'),
+      cd:JSON.parse(stGet(cacheKey('cd',targetYm))||'null'),
+      m:JSON.parse(stGet(cacheKey('m',targetYm))||'null'),
+      d:JSON.parse(stGet(cacheKey('d',targetYm))||'null')
+    };
+  }catch{
+    return{};
+  }
+}
+
+  function hasMonthCache(targetYm=ym()){return !!(curUser&&(stGet(cacheKey('h',targetYm))||stGet(cacheKey('c',targetYm))||stGet(cacheKey('m',targetYm))))}
 function applyCachedState(cc){
   if(Array.isArray(cc.h))habits=cc.h;
-  if(cc.c&&typeof cc.c==='object'){checks={};Object.entries(cc.c).forEach(([d,v])=>checks[+d]=Array.isArray(v)?v:Array(MAX_H).fill(false))}
-  if(cc.m&&typeof cc.m==='object'){memos={};Object.entries(cc.m).forEach(([d,v])=>memos[+d]=String(v??''))}
-  if(cc.d&&typeof cc.d==='object'){memoDrafts=cc.d}
+
+  if(cc.c&&typeof cc.c==='object'){
+    checks={};
+    Object.entries(cc.c).forEach(([d,v])=>checks[+d]=Array.isArray(v)?v:Array(MAX_H).fill(false));
+  }
+
+  if(cc.cd&&typeof cc.cd==='object') checkDrafts=cc.cd;
+
+  if(cc.m&&typeof cc.m==='object'){
+    memos={};
+    Object.entries(cc.m).forEach(([d,v])=>memos[+d]=String(v??''));
+  }
+
+  if(cc.d&&typeof cc.d==='object') memoDrafts=cc.d;
 }
-function resetMonthState(){habits=[];checks={};memos={};memoDrafts={}}
+
+function resetMonthState(){habits=[];checks={};checkDrafts={};memos={};memoDrafts={}}
 
 async function reqJson(url,options){const r=await fetch(url,options);if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json()}
 const gj=url=>reqJson(url,{cache:'no-store'});
@@ -683,6 +720,13 @@ async function loadAll(options={}){
     const nextHabits=hR?.success&&Array.isArray(hR.habits)?hR.habits.map(v=>String(v??'').trim()):[];
     const nextChecks={};
     if(cR?.success&&Array.isArray(cR.checks))cR.checks.forEach(item=>{const d=Number(item.day);if(d>=1&&d<=31)nextChecks[d]=Array.isArray(item.checks)?item.checks:Array(MAX_H).fill(false)});
+    Object.entries(checkDrafts).forEach(([key,value])=>{
+  const [draftYm,draftDay]=key.split(':');
+  if(draftYm===targetYm && Array.isArray(value)){
+    nextChecks[Number(draftDay)]=value;
+  }
+});
+
     const nextMemos={};
     if(mR?.success&&Array.isArray(mR.records))mR.records.forEach(item=>{const d=Number(item.day);if(d>=1&&d<=31)nextMemos[d]=String(item.memo??'')});
 
@@ -756,13 +800,33 @@ async function doLogout(){
 }
 
 async function persistCheck(d,targetYm=ym(),silent=false){
+  const key=checkDraftKey(d,targetYm);
+
   try{
-    const r=await pj({action:'saveCheck',userId:curUser.userId,yearMonth:targetYm,day:d,checks:checks[d]||Array(MAX_H).fill(false)});
-    if(!r.success&&!silent)setStatus('체크 저장 실패',true);
+    const r=await pj({
+      action:'saveCheck',
+      userId:curUser.userId,
+      yearMonth:targetYm,
+      day:d,
+      checks:checkDrafts[key]||checks[d]||Array(MAX_H).fill(false)
+    });
+
+    if(!r.success){
+      if(!silent)setStatus('체크 저장 실패',true);
+      return;
+    }
+
+    if(targetYm===ym() && Array.isArray(checkDrafts[key])){
+      checks[d]=[...checkDrafts[key]];
+    }
+
+    delete checkDrafts[key];
+    saveCache(targetYm);
   }catch{
     if(!silent)setStatus('체크 저장 오류',true);
   }
 }
+
 
 async function doForceReload(){
   if(!curUser||isSyncing)return;
@@ -987,16 +1051,39 @@ function bindChecks(el){
 
 function onCheck(e){
   if(!curUser)return;
-  const targetYm=ym(),d=+e.target.dataset.day,idx=+e.target.dataset.idx,cnt=hcnt(),prev=Array.isArray(checks[d])?[...checks[d]]:Array(MAX_H).fill(false);
+
+  const targetYm=ym();
+  const d=+e.target.dataset.day;
+  const idx=+e.target.dataset.idx;
+  const cnt=hcnt();
+  const key=checkDraftKey(d,targetYm);
+
+  const prev=Array.isArray(checks[d])?[...checks[d]]:Array(MAX_H).fill(false);
   prev[idx]=e.target.checked;
+
   checks[d]=prev;
+  checkDrafts[key]=[...prev];
+
   const tot=prev.slice(0,cnt).filter(Boolean).length;
-  document.querySelectorAll(`input[type="checkbox"][data-day="${d}"][data-idx="${idx}"]`).forEach(cb=>{if(cb!==e.target)cb.checked=e.target.checked});
-  document.querySelectorAll(`[id^="tc-"][id$="-${d}"]`).forEach(el=>el.textContent=tot>0?tot:'');
+
+  document.querySelectorAll(`input[type="checkbox"][data-day="${d}"][data-idx="${idx}"]`).forEach(cb=>{
+    if(cb!==e.target)cb.checked=e.target.checked;
+  });
+
+  document.querySelectorAll(`[id^="tc-"][id$="-${d}"]`).forEach(el=>{
+    el.textContent=tot>0?tot:'';
+  });
+
   saveCache(targetYm);
+
   if(rightTab==='habit-home')renderGraph();
-  setTimeout(async()=>{await persistCheck(d,targetYm)},300);
+
+  e.target.disabled=true;
+  setTimeout(()=>{ e.target.disabled=false; },500);
+
+  persistCheck(d,targetYm,true);
 }
+
 
 function renderGraph(){
   const cv=document.getElementById('graphCanvas');
