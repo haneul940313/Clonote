@@ -291,6 +291,9 @@
     }
 
     .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       height: 35px;
       padding: 0 15px;
       border-bottom: 1px solid var(--line);
@@ -298,7 +301,39 @@
       color: #9b958d;
       font-size: 12px;
       font-weight: 800;
-      line-height: 35px;
+    }
+
+    .month-controls {
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel.is-calendar .month-controls {
+      display: inline-flex;
+    }
+
+    .month-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 24px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--active);
+      font-size: 16px;
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .month-label {
+      min-width: 62px;
+      color: #606977;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 950;
     }
 
     .list {
@@ -675,7 +710,10 @@
       }
 
       .panel-head {
-        display: none;
+        display: flex;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        margin-bottom: 9px;
       }
 
       .calendar-head {
@@ -801,8 +839,15 @@
       <button class="tab" id="calendarTab" type="button">□ 캘린더</button>
     </section>
 
-    <section class="panel">
-      <div class="panel-head">공구 일정</div>
+    <section class="panel" id="panel">
+      <div class="panel-head">
+        <div class="month-controls">
+          <button class="month-btn" id="prevMonthBtn" type="button" aria-label="이전 달">&lt;</button>
+          <span class="month-label" id="monthLabel">이번 달</span>
+          <button class="month-btn" id="nextMonthBtn" type="button" aria-label="다음 달">&gt;</button>
+        </div>
+        <span>공구 일정</span>
+      </div>
       <div id="content">
         <div class="loading">정보를 불러오는 중입니다.</div>
       </div>
@@ -830,6 +875,7 @@
       search: '',
       todayOnly: false,
       view: 'list',
+      calendarMonth: null,
       filters: {
         mainCategory: '',
         subCategory: ''
@@ -841,6 +887,10 @@
       todayBtn: document.getElementById('todayBtn'),
       listTab: document.getElementById('listTab'),
       calendarTab: document.getElementById('calendarTab'),
+      panel: document.getElementById('panel'),
+      prevMonthBtn: document.getElementById('prevMonthBtn'),
+      nextMonthBtn: document.getElementById('nextMonthBtn'),
+      monthLabel: document.getElementById('monthLabel'),
       mainCategoryPills: document.getElementById('mainCategoryPills'),
       subCategoryPills: document.getElementById('subCategoryPills'),
       syncStatus: document.getElementById('syncStatus'),
@@ -882,6 +932,14 @@
 
       elements.calendarTab.addEventListener('click', function() {
         setView('calendar');
+      });
+
+      elements.prevMonthBtn.addEventListener('click', function() {
+        moveCalendarMonth(-1);
+      });
+
+      elements.nextMonthBtn.addEventListener('click', function() {
+        moveCalendarMonth(1);
       });
 
       elements.closeModalBtn.addEventListener('click', closeModal);
@@ -1003,7 +1061,17 @@
       state.view = view;
       elements.listTab.classList.toggle('active', view === 'list');
       elements.calendarTab.classList.toggle('active', view === 'calendar');
+      elements.panel.classList.toggle('is-calendar', view === 'calendar');
+      if (view === 'calendar' && !state.calendarMonth) {
+        state.calendarMonth = getInitialCalendarMonth();
+      }
       renderCurrentView();
+    }
+
+    function moveCalendarMonth(offset) {
+      const base = state.calendarMonth || getInitialCalendarMonth();
+      state.calendarMonth = new Date(base.getFullYear(), base.getMonth() + offset, 1);
+      renderCalendar();
     }
 
     function renderCurrentView() {
@@ -1038,7 +1106,9 @@
         return;
       }
 
-      const monthBase = getCalendarBaseDate();
+      const monthBase = state.calendarMonth || getInitialCalendarMonth();
+      state.calendarMonth = monthBase;
+      elements.monthLabel.textContent = monthBase.getFullYear() + '.' + String(monthBase.getMonth() + 1).padStart(2, '0');
       const firstDay = new Date(monthBase.getFullYear(), monthBase.getMonth(), 1);
       const start = new Date(firstDay);
       start.setDate(firstDay.getDate() - firstDay.getDay());
@@ -1097,13 +1167,14 @@
       ].join('');
     }
 
-    function getCalendarBaseDate() {
+    function getInitialCalendarMonth() {
       const firstDatedItem = state.filteredItems.map(function(item) {
         return parseItemDate(item.date);
       }).filter(Boolean).sort(function(a, b) {
         return a - b;
       })[0];
-      return firstDatedItem || new Date();
+      const base = firstDatedItem || new Date();
+      return new Date(base.getFullYear(), base.getMonth(), 1);
     }
 
     function renderItem(item, index) {
