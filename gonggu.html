@@ -109,7 +109,7 @@
     .sub-inner {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       max-width: 1880px;
       margin: 0 auto;
       height: 48px;
@@ -118,17 +118,6 @@
 
     .subtitle {
       font-size: 14px;
-      font-weight: 900;
-    }
-
-    .inquiry {
-      min-height: 30px;
-      padding: 0 13px;
-      border: 1px solid rgba(255, 255, 255, 0.36);
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      font-size: 12px;
       font-weight: 900;
     }
 
@@ -323,6 +312,11 @@
       padding: 11px 15px;
       border-bottom: 1px solid var(--line);
       background: #fffefa;
+      cursor: pointer;
+    }
+
+    .item:hover {
+      background: #fffaf0;
     }
 
     .item:last-child {
@@ -427,6 +421,90 @@
 
     .error {
       color: var(--coral);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(17, 24, 39, 0.48);
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .dialog {
+      position: relative;
+      width: min(420px, 100%);
+      padding: 30px 28px 26px;
+      border-radius: 16px;
+      background: #fffefa;
+      box-shadow: 0 22px 80px rgba(0, 0, 0, 0.28);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 13px;
+      right: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 999px;
+      background: #f1eee8;
+      color: #9a8d7f;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .modal-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 14px;
+    }
+
+    .modal-title {
+      margin: 0 0 16px;
+      font-size: 20px;
+      line-height: 1.35;
+      font-weight: 950;
+      overflow-wrap: anywhere;
+    }
+
+    .modal-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 22px;
+      color: #6c6570;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .modal-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 42px;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #ffc244, #f43f8f, #842bd4);
+      color: #fff;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 950;
+    }
+
+    .modal-link[hidden] {
+      display: none;
     }
 
     @media (max-width: 1100px) {
@@ -539,10 +617,6 @@
         font-size: 11px;
       }
 
-      .inquiry {
-        padding: 0 10px;
-      }
-
       .item {
         grid-template-columns: 1fr;
         gap: 7px;
@@ -573,7 +647,6 @@
   <section class="sub">
     <div class="sub-inner">
       <div class="subtitle">📦 5월 공동구매 일정 모음</div>
-      <button class="inquiry" type="button">💌 제휴·광고 문의</button>
     </div>
   </section>
 
@@ -634,8 +707,20 @@
     </section>
   </main>
 
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="close-btn" id="closeModalBtn" type="button" aria-label="닫기">×</button>
+      <div class="modal-tags" id="modalTags"></div>
+      <h2 class="modal-title" id="modalTitle"></h2>
+      <div class="modal-meta" id="modalMeta"></div>
+      <a class="modal-link" id="modalInstagramLink" target="_blank" rel="noopener">인스타 바로가기</a>
+    </div>
+  </div>
+
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbx-IkvMAjFZnayEzyuitXrHdpO0CvxnKAnmfnLTxRHZ_PSUnzCvu6hzFPgtU2JW5zYi/exec';
+    const DEFAULT_MAIN_CATEGORIES = ['성인', '육아'];
+    const DEFAULT_SUB_CATEGORIES = ['가전', '건강', '식품', '뷰티', '생활', '패션', '책', '교육', '교구', '장난감', '가구', '여행', '기타'];
 
     const state = {
       items: [],
@@ -658,7 +743,13 @@
       todayCount: document.getElementById('todayCount'),
       weekCount: document.getElementById('weekCount'),
       categoryCount: document.getElementById('categoryCount'),
-      content: document.getElementById('content')
+      content: document.getElementById('content'),
+      modal: document.getElementById('modal'),
+      closeModalBtn: document.getElementById('closeModalBtn'),
+      modalTags: document.getElementById('modalTags'),
+      modalTitle: document.getElementById('modalTitle'),
+      modalMeta: document.getElementById('modalMeta'),
+      modalInstagramLink: document.getElementById('modalInstagramLink')
     };
 
     init();
@@ -678,6 +769,19 @@
         state.todayOnly = !state.todayOnly;
         elements.todayBtn.classList.toggle('active', state.todayOnly);
         applyFilters();
+      });
+
+      elements.closeModalBtn.addEventListener('click', closeModal);
+      elements.modal.addEventListener('click', function(event) {
+        if (event.target === elements.modal) {
+          closeModal();
+        }
+      });
+
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+          closeModal();
+        }
       });
     }
 
@@ -728,7 +832,7 @@
     }
 
     function renderFilterPills() {
-      renderPillGroup(elements.mainCategoryPills, ['전체'].concat(uniqueValues(state.items, 'mainCategory')), state.filters.mainCategory || '전체', function(value) {
+      renderPillGroup(elements.mainCategoryPills, ['전체'].concat(mergedValues(DEFAULT_MAIN_CATEGORIES, uniqueValues(state.items, 'mainCategory'))), state.filters.mainCategory || '전체', function(value) {
         state.filters.mainCategory = value === '전체' ? '' : value;
         state.filters.subCategory = '';
         renderFilterPills();
@@ -741,7 +845,7 @@
         })
         : state.items;
 
-      renderPillGroup(elements.subCategoryPills, ['전체'].concat(uniqueValues(subSource, 'subCategory')), state.filters.subCategory || '전체', function(value) {
+      renderPillGroup(elements.subCategoryPills, ['전체'].concat(mergedValues(DEFAULT_SUB_CATEGORIES, uniqueValues(subSource, 'subCategory'))), state.filters.subCategory || '전체', function(value) {
         state.filters.subCategory = value === '전체' ? '' : value;
         renderFilterPills();
         applyFilters();
@@ -789,9 +893,18 @@
       }
 
       elements.content.innerHTML = '<div class="list">' + state.filteredItems.map(renderItem).join('') + '</div>';
+
+      Array.prototype.forEach.call(elements.content.querySelectorAll('.item'), function(itemEl) {
+        itemEl.addEventListener('click', function(event) {
+          if (event.target.closest('a')) {
+            return;
+          }
+          openModal(Number(itemEl.getAttribute('data-index')));
+        });
+      });
     }
 
-    function renderItem(item) {
+    function renderItem(item, index) {
       const url = normalizeUrl(item.instagramUrl);
       const title = item.productName || '상품명 없음';
       const main = item.mainCategory || '분류';
@@ -802,7 +915,7 @@
       const subAlt = ['가전', '식품', '육아', '패션', '여행'].indexOf(sub) !== -1 ? ' alt' : '';
 
       return [
-        '<article class="item">',
+        '<article class="item" data-index="' + index + '">',
           '<div class="item-main">',
             '<div class="tags">',
               '<span class="tag tag-main">' + escapeHtml(main) + '</span>',
@@ -821,6 +934,45 @@
           '</div>',
         '</article>'
       ].join('');
+    }
+
+    function openModal(index) {
+      const item = state.filteredItems[index];
+      if (!item) return;
+
+      const main = item.mainCategory || '분류';
+      const sub = item.subCategory || '기타';
+      const subAlt = ['가전', '식품', '육아', '패션', '여행'].indexOf(sub) !== -1 ? ' alt' : '';
+      const dateText = formatKoreanDate(item.date);
+      const instaText = item.instagramId || item.influencer || '';
+      const url = normalizeUrl(item.instagramUrl);
+
+      elements.modalTags.innerHTML = [
+        '<span class="tag tag-main">' + escapeHtml(main) + '</span>',
+        '<span class="tag tag-sub' + subAlt + '">' + escapeHtml(sub) + '</span>'
+      ].join('');
+      elements.modalTitle.textContent = item.productName || '상품명 없음';
+      elements.modalMeta.innerHTML = [
+        dateText ? '<span>🗓️ ' + escapeHtml(dateText) + '</span>' : '',
+        instaText ? '<span>👤 ' + escapeHtml(instaText) + '</span>' : ''
+      ].filter(Boolean).join('');
+
+      if (url) {
+        elements.modalInstagramLink.href = url;
+        elements.modalInstagramLink.textContent = instaText ? '◎ ' + instaText + ' 인스타 바로가기' : '인스타 바로가기';
+        elements.modalInstagramLink.hidden = false;
+      } else {
+        elements.modalInstagramLink.hidden = true;
+        elements.modalInstagramLink.removeAttribute('href');
+      }
+
+      elements.modal.classList.add('open');
+      elements.modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeModal() {
+      elements.modal.classList.remove('open');
+      elements.modal.setAttribute('aria-hidden', 'true');
     }
 
     function isTodayItem(item) {
@@ -878,6 +1030,16 @@
       }).filter(Boolean))).sort(function(a, b) {
         return String(a).localeCompare(String(b), 'ko');
       });
+    }
+
+    function mergedValues(defaultValues, dataValues) {
+      return Array.from(new Set(defaultValues.concat(dataValues))).filter(Boolean);
+    }
+
+    function formatKoreanDate(value) {
+      const date = parseItemDate(value);
+      if (!date) return value || '';
+      return (date.getMonth() + 1) + '월 ' + date.getDate() + '일';
     }
 
     function renderError(message) {
