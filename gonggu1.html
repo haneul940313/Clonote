@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>공구모아</title>
+  <title>공동구매 일정</title>
   <style>
     :root {
-      --navy: #2f3d5d;
-      --navy-dark: #202940;
+      --navy: #ffffff;
+      --navy-dark: #ffffff;
       --ink: #111827;
       --muted: #8a8f99;
-      --bg: #f4f2ee;
-      --card: #fffefa;
-      --line: #e2ded6;
+      --bg: #ffffff;
+      --card: #ffffff;
+      --line: #e6e8ec;
       --chip: #ffffff;
-      --active: #2b3758;
-      --coral: #ff4e2f;
+      --active: #3864b8;
+      --coral: #f05b3d;
       --blue-tag: #dfeaff;
       --blue-text: #2d62df;
       --green-tag: #cff7df;
@@ -88,7 +88,7 @@
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      color: #b7c0d4;
+      color: #7a8495;
       font-size: 12px;
       white-space: nowrap;
     }
@@ -103,13 +103,14 @@
 
     .sub {
       background: var(--navy-dark);
-      color: #fff;
+      color: var(--ink);
+      border-bottom: 1px solid var(--line);
     }
 
     .sub-inner {
       display: flex;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: space-between;
       max-width: 1880px;
       margin: 0 auto;
       height: 48px;
@@ -293,7 +294,7 @@
       height: 35px;
       padding: 0 15px;
       border-bottom: 1px solid var(--line);
-      background: #f7f4ee;
+      background: #f8fafc;
       color: #9b958d;
       font-size: 12px;
       font-weight: 800;
@@ -311,12 +312,12 @@
       min-height: 64px;
       padding: 11px 15px;
       border-bottom: 1px solid var(--line);
-      background: #fffefa;
+      background: #ffffff;
       cursor: pointer;
     }
 
     .item:hover {
-      background: #fffaf0;
+      background: #f8fbff;
     }
 
     .item:last-child {
@@ -423,6 +424,92 @@
       color: var(--coral);
     }
 
+    .calendar {
+      display: grid;
+    }
+
+    .calendar-head {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      border-bottom: 1px solid var(--line);
+      background: #f8fafc;
+    }
+
+    .calendar-head div {
+      min-height: 34px;
+      padding: 9px 8px;
+      color: #9b958d;
+      font-size: 12px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+
+    .day-cell {
+      min-height: 126px;
+      padding: 8px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: #ffffff;
+    }
+
+    .day-cell:nth-child(7n) {
+      border-right: 0;
+    }
+
+    .day-cell.is-muted {
+      background: #f8fafc;
+    }
+
+    .day-number {
+      margin-bottom: 7px;
+      color: #585f6b;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .day-cell.is-today .day-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: var(--active);
+      color: #fff;
+    }
+
+    .calendar-items {
+      display: grid;
+      gap: 5px;
+    }
+
+    .calendar-item {
+      width: 100%;
+      min-height: 26px;
+      padding: 5px 7px;
+      border: 0;
+      border-radius: 6px;
+      background: #eef3ff;
+      color: #27395f;
+      font-size: 12px;
+      font-weight: 900;
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .calendar-more {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
     .modal {
       position: fixed;
       inset: 0;
@@ -443,7 +530,7 @@
       width: min(420px, 100%);
       padding: 30px 28px 26px;
       border-radius: 16px;
-      background: #fffefa;
+      background: #ffffff;
       box-shadow: 0 22px 80px rgba(0, 0, 0, 0.28);
     }
 
@@ -591,6 +678,30 @@
         display: none;
       }
 
+      .calendar-head {
+        display: none;
+      }
+
+      .calendar-grid {
+        display: grid;
+        gap: 9px;
+      }
+
+      .day-cell {
+        display: none;
+        min-height: 0;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+      }
+
+      .day-cell.has-items {
+        display: block;
+      }
+
+      .day-cell.is-muted {
+        background: #ffffff;
+      }
+
       .list {
         gap: 9px;
       }
@@ -634,19 +745,10 @@
   </style>
 </head>
 <body>
-  <header class="top">
-    <div class="top-inner">
-      <div class="brand">
-        <span class="logo">공구<br>모아</span>
-        <span>공구모아</span>
-      </div>
-      <div class="fresh" id="syncStatus">최신 데이터</div>
-    </div>
-  </header>
-
   <section class="sub">
     <div class="sub-inner">
       <div class="subtitle">📦 5월 공동구매 일정 모음</div>
+      <div class="fresh" id="syncStatus">최신 데이터</div>
     </div>
   </section>
 
@@ -695,14 +797,14 @@
     </section>
 
     <section class="tabs" aria-label="보기 방식">
-      <button class="tab active" type="button">▣ 리스트</button>
-      <button class="tab" type="button">□ 캘린더</button>
+      <button class="tab active" id="listTab" type="button">▣ 리스트</button>
+      <button class="tab" id="calendarTab" type="button">□ 캘린더</button>
     </section>
 
     <section class="panel">
       <div class="panel-head">공구 일정</div>
       <div id="content">
-        <div class="loading">노션 데이터를 불러오고 있습니다.</div>
+        <div class="loading">정보를 불러오는 중입니다.</div>
       </div>
     </section>
   </main>
@@ -727,6 +829,7 @@
       filteredItems: [],
       search: '',
       todayOnly: false,
+      view: 'list',
       filters: {
         mainCategory: '',
         subCategory: ''
@@ -736,6 +839,8 @@
     const elements = {
       searchInput: document.getElementById('searchInput'),
       todayBtn: document.getElementById('todayBtn'),
+      listTab: document.getElementById('listTab'),
+      calendarTab: document.getElementById('calendarTab'),
       mainCategoryPills: document.getElementById('mainCategoryPills'),
       subCategoryPills: document.getElementById('subCategoryPills'),
       syncStatus: document.getElementById('syncStatus'),
@@ -769,6 +874,14 @@
         state.todayOnly = !state.todayOnly;
         elements.todayBtn.classList.toggle('active', state.todayOnly);
         applyFilters();
+      });
+
+      elements.listTab.addEventListener('click', function() {
+        setView('list');
+      });
+
+      elements.calendarTab.addEventListener('click', function() {
+        setView('calendar');
       });
 
       elements.closeModalBtn.addEventListener('click', closeModal);
@@ -883,6 +996,21 @@
           && (!state.filters.subCategory || item.subCategory === state.filters.subCategory);
       });
 
+      renderCurrentView();
+    }
+
+    function setView(view) {
+      state.view = view;
+      elements.listTab.classList.toggle('active', view === 'list');
+      elements.calendarTab.classList.toggle('active', view === 'calendar');
+      renderCurrentView();
+    }
+
+    function renderCurrentView() {
+      if (state.view === 'calendar') {
+        renderCalendar();
+        return;
+      }
       renderItems();
     }
 
@@ -902,6 +1030,80 @@
           openModal(Number(itemEl.getAttribute('data-index')));
         });
       });
+    }
+
+    function renderCalendar() {
+      if (!state.filteredItems.length) {
+        elements.content.innerHTML = '<div class="empty">조건에 맞는 공구 일정이 없습니다.</div>';
+        return;
+      }
+
+      const monthBase = getCalendarBaseDate();
+      const firstDay = new Date(monthBase.getFullYear(), monthBase.getMonth(), 1);
+      const start = new Date(firstDay);
+      start.setDate(firstDay.getDate() - firstDay.getDay());
+
+      const cells = [];
+      for (let i = 0; i < 42; i += 1) {
+        const date = new Date(start);
+        date.setDate(start.getDate() + i);
+        cells.push(renderCalendarCell(date, monthBase));
+      }
+
+      elements.content.innerHTML = [
+        '<div class="calendar">',
+          '<div class="calendar-head">',
+            '<div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>',
+          '</div>',
+          '<div class="calendar-grid">',
+            cells.join(''),
+          '</div>',
+        '</div>'
+      ].join('');
+
+      Array.prototype.forEach.call(elements.content.querySelectorAll('.calendar-item'), function(itemEl) {
+        itemEl.addEventListener('click', function() {
+          openModal(Number(itemEl.getAttribute('data-index')));
+        });
+      });
+    }
+
+    function renderCalendarCell(date, monthBase) {
+      const key = dateKey(date);
+      const todayKey = dateKey(new Date());
+      const items = state.filteredItems.filter(function(item) {
+        const itemDate = parseItemDate(item.date);
+        return itemDate && dateKey(itemDate) === key;
+      });
+      const visibleItems = items.slice(0, 3);
+      const classes = [
+        'day-cell',
+        date.getMonth() !== monthBase.getMonth() ? 'is-muted' : '',
+        key === todayKey ? 'is-today' : '',
+        items.length ? 'has-items' : ''
+      ].filter(Boolean).join(' ');
+
+      return [
+        '<div class="' + classes + '">',
+          '<div class="day-number">' + date.getDate() + '</div>',
+          '<div class="calendar-items">',
+            visibleItems.map(function(item) {
+              const index = state.filteredItems.indexOf(item);
+              return '<button class="calendar-item" type="button" data-index="' + index + '">' + escapeHtml(item.productName || '상품명 없음') + '</button>';
+            }).join(''),
+            items.length > 3 ? '<div class="calendar-more">+' + (items.length - 3) + '개 더 있음</div>' : '',
+          '</div>',
+        '</div>'
+      ].join('');
+    }
+
+    function getCalendarBaseDate() {
+      const firstDatedItem = state.filteredItems.map(function(item) {
+        return parseItemDate(item.date);
+      }).filter(Boolean).sort(function(a, b) {
+        return a - b;
+      })[0];
+      return firstDatedItem || new Date();
     }
 
     function renderItem(item, index) {
@@ -1022,6 +1224,14 @@
       if (diff === 0) return 'D-day';
       if (diff > 0) return 'D-' + diff;
       return '마감';
+    }
+
+    function dateKey(date) {
+      return [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, '0'),
+        String(date.getDate()).padStart(2, '0')
+      ].join('-');
     }
 
     function uniqueValues(items, key) {
