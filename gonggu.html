@@ -453,6 +453,10 @@
       color: var(--coral);
     }
 
+    .date-line.is-soon {
+      color: #db2777;
+    }
+
     .date-line.is-closed {
       color: #9ca3af;
     }
@@ -472,6 +476,11 @@
     .dday.is-soon {
       background: #ffe5ef;
       color: #db2777;
+    }
+
+    .dday.is-today {
+      background: #ffe9e3;
+      color: var(--coral);
     }
 
     .dday.is-muted {
@@ -1324,6 +1333,13 @@
     }
 
     function compareItems(a, b) {
+      const closedA = isClosedItem(a);
+      const closedB = isClosedItem(b);
+
+      if (closedA !== closedB) {
+        return closedA ? 1 : -1;
+      }
+
       const dateA = parseItemDate(a.displayDate);
       const dateB = parseItemDate(b.displayDate);
 
@@ -1474,7 +1490,12 @@
       const date = parseItemDate(item.displayDate);
       if (!date) return '';
       const today = new Date();
-      return dateKey(date) === dateKey(today) ? 'is-today' : '';
+      today.setHours(0, 0, 0, 0);
+      date.setHours(0, 0, 0, 0);
+      const diff = Math.round((date - today) / 86400000);
+      if (diff === 0) return 'is-today';
+      if (diff > 0 && diff <= 3) return 'is-soon';
+      return '';
     }
 
     function getDdayClass(item) {
@@ -1486,7 +1507,9 @@
       today.setHours(0, 0, 0, 0);
       date.setHours(0, 0, 0, 0);
       const diff = Math.round((date - today) / 86400000);
-      return diff >= 0 && diff <= 3 ? 'is-soon' : 'is-muted';
+      if (diff === 0) return 'is-today';
+      if (diff > 0 && diff <= 3) return 'is-soon';
+      return 'is-muted';
     }
 
     function parseItemDate(value) {
