@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>공구모아</title>
+  <style>
+    :root {
+      --navy: #2f3d5d;
+      --navy-dark: #202940;
+      --ink: #111827;
+      --muted: #8a8f99;
+      --bg: #f4f2ee;
+      --card: #fffefa;
+      --line: #e2ded6;
+      --chip: #ffffff;
+      --active: #2b3758;
+      --coral: #ff4e2f;
+      --blue-tag: #dfeaff;
+      --blue-text: #2d62df;
+      --green-tag: #cff7df;
+      --green-text: #138449;
+      --yellow-tag: #fff2bc;
+      --yellow-text: #a66d00;
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .top {
+      background: var(--navy);
+      color: #fff;
+    }
+
+    .top-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1880px;
+      margin: 0 auto;
+      height: 52px;
+      padding: 0 24px 0 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      font-size: 18px;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 39px;
+      height: 39px;
+      border: 2px solid #ff7a53;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 11px;
+      line-height: 1.05;
+      text-align: center;
+      box-shadow: inset 0 0 0 2px #46628f;
+    }
+
+    .fresh {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #b7c0d4;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .fresh::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #41d67a;
+    }
+
+    .sub {
+      background: var(--navy-dark);
+      color: #fff;
+    }
+
+    .sub-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1880px;
+      margin: 0 auto;
+      height: 48px;
+      padding: 0 24px 0 20px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .inquiry {
+      min-height: 30px;
+      padding: 0 13px;
+      border: 1px solid rgba(255, 255, 255, 0.36);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 24px 0 56px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      min-height: 74px;
+      padding: 14px 16px;
+      border-right: 1px solid var(--line);
+    }
+
+    .stat:last-child {
+      border-right: 0;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 28px;
+      line-height: 1;
+      font-weight: 950;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .search {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .search input {
+      width: 100%;
+      height: 40px;
+      padding: 0 15px 0 42px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+      color: var(--ink);
+      outline: none;
+      font-size: 14px;
+    }
+
+    .search input:focus {
+      border-color: var(--active);
+      box-shadow: 0 0 0 3px rgba(43, 55, 88, 0.12);
+    }
+
+    .search svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      width: 17px;
+      height: 17px;
+      color: #a8a29a;
+      transform: translateY(-50%);
+    }
+
+    .filters {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .filter-label {
+      flex: 0 0 auto;
+      color: #5f6470;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .pill {
+      min-height: 30px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--chip);
+      color: #4f5663;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .pill.active {
+      border-color: var(--active);
+      background: var(--active);
+      color: #fff;
+    }
+
+    .today-btn {
+      display: inline-flex;
+      align-items: center;
+      min-height: 31px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--chip);
+      color: #4f5663;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .today-btn.active {
+      border-color: var(--active);
+      background: var(--active);
+      color: #fff;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 20px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 38px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: #a09a90;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .tab.active {
+      border-bottom-color: var(--active);
+      color: var(--active);
+    }
+
+    .panel {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+    }
+
+    .panel-head {
+      height: 35px;
+      padding: 0 15px;
+      border-bottom: 1px solid var(--line);
+      background: #f7f4ee;
+      color: #9b958d;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 35px;
+    }
+
+    .list {
+      display: grid;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 150px;
+      gap: 20px;
+      min-height: 64px;
+      padding: 11px 15px;
+      border-bottom: 1px solid var(--line);
+      background: #fffefa;
+    }
+
+    .item:last-child {
+      border-bottom: 0;
+    }
+
+    .item-main {
+      min-width: 0;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 20px;
+      padding: 0 7px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .tag-main {
+      background: var(--blue-tag);
+      color: var(--blue-text);
+    }
+
+    .tag-sub {
+      background: var(--green-tag);
+      color: var(--green-text);
+    }
+
+    .tag-sub.alt {
+      background: var(--yellow-tag);
+      color: var(--yellow-text);
+    }
+
+    .title {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.4;
+      font-weight: 950;
+      overflow-wrap: anywhere;
+    }
+
+    .item-side {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 5px;
+      min-width: 0;
+      text-align: right;
+    }
+
+    .date-line {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      color: var(--coral);
+      font-size: 12px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .dday {
+      display: inline-flex;
+      align-items: center;
+      min-height: 21px;
+      padding: 0 7px;
+      border-radius: 999px;
+      background: #ffe9e3;
+      color: var(--coral);
+      font-size: 11px;
+      font-weight: 950;
+    }
+
+    .insta {
+      color: #656972;
+      font-size: 12px;
+      text-decoration: none;
+      overflow-wrap: anywhere;
+    }
+
+    .empty,
+    .error,
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 240px;
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .error {
+      color: var(--coral);
+    }
+
+    @media (max-width: 1100px) {
+      .wrap {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .top-inner {
+        height: 44px;
+        padding: 0 16px;
+      }
+
+      .brand {
+        gap: 10px;
+        font-size: 17px;
+      }
+
+      .logo {
+        width: 33px;
+        height: 33px;
+        font-size: 10px;
+      }
+
+      .sub-inner {
+        height: 44px;
+        padding: 0 14px;
+      }
+
+      .wrap {
+        padding: 12px 10px 42px;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-bottom: 20px;
+      }
+
+      .stat {
+        min-height: 70px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .stat:nth-child(2n) {
+        border-right: 0;
+      }
+
+      .stat:nth-last-child(-n + 2) {
+        border-bottom: 0;
+      }
+
+      .filter-row {
+        align-items: flex-start;
+      }
+
+      .filter-label {
+        width: 42px;
+        padding-top: 7px;
+      }
+
+      .pill-list {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        scrollbar-width: none;
+      }
+
+      .pill-list::-webkit-scrollbar {
+        display: none;
+      }
+
+      .tabs {
+        margin-bottom: 18px;
+      }
+
+      .panel {
+        border: 0;
+        background: transparent;
+      }
+
+      .panel-head {
+        display: none;
+      }
+
+      .list {
+        gap: 9px;
+      }
+
+      .item {
+        grid-template-columns: minmax(0, 1fr) auto;
+        min-height: 69px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 12px 16px;
+      }
+
+      .title {
+        font-size: 16px;
+      }
+
+      .item-side {
+        min-width: 70px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .fresh {
+        font-size: 11px;
+      }
+
+      .inquiry {
+        padding: 0 10px;
+      }
+
+      .item {
+        grid-template-columns: 1fr;
+        gap: 7px;
+      }
+
+      .item-side {
+        align-items: flex-start;
+        text-align: left;
+      }
+
+      .date-line {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <div class="brand">
+        <span class="logo">공구<br>모아</span>
+        <span>공구모아</span>
+      </div>
+      <div class="fresh" id="syncStatus">최신 데이터</div>
+    </div>
+  </header>
+
+  <section class="sub">
+    <div class="sub-inner">
+      <div class="subtitle">📦 5월 공동구매 일정 모음</div>
+      <button class="inquiry" type="button">💌 제휴·광고 문의</button>
+    </div>
+  </section>
+
+  <main class="wrap">
+    <section class="stats" aria-label="요약">
+      <div class="stat">
+        <strong id="totalCount">0</strong>
+        <span>전체 공구</span>
+      </div>
+      <div class="stat">
+        <strong id="todayCount">0</strong>
+        <span>🔥 오늘 오픈</span>
+      </div>
+      <div class="stat">
+        <strong id="weekCount">0</strong>
+        <span>이번 주</span>
+      </div>
+      <div class="stat">
+        <strong id="categoryCount">0</strong>
+        <span>카테고리</span>
+      </div>
+    </section>
+
+    <section class="search" aria-label="검색">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="m21 21-4.35-4.35m2.35-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+      </svg>
+      <input id="searchInput" type="search" placeholder="품목명, 인플루언서, 아이디 검색...">
+    </section>
+
+    <section class="filters" aria-label="필터">
+      <div class="filter-row">
+        <div class="filter-label">오늘</div>
+        <button class="today-btn" id="todayBtn" type="button">🔥 오늘 오픈만 보기</button>
+      </div>
+
+      <div class="filter-row">
+        <div class="filter-label">대분류</div>
+        <div class="pill-list" id="mainCategoryPills"></div>
+      </div>
+
+      <div class="filter-row">
+        <div class="filter-label">소분류</div>
+        <div class="pill-list" id="subCategoryPills"></div>
+      </div>
+    </section>
+
+    <section class="tabs" aria-label="보기 방식">
+      <button class="tab active" type="button">▣ 리스트</button>
+      <button class="tab" type="button">□ 캘린더</button>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">공구 일정</div>
+      <div id="content">
+        <div class="loading">노션 데이터를 불러오고 있습니다.</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbx-IkvMAjFZnayEzyuitXrHdpO0CvxnKAnmfnLTxRHZ_PSUnzCvu6hzFPgtU2JW5zYi/exec';
+
+    const state = {
+      items: [],
+      filteredItems: [],
+      search: '',
+      todayOnly: false,
+      filters: {
+        mainCategory: '',
+        subCategory: ''
+      }
+    };
+
+    const elements = {
+      searchInput: document.getElementById('searchInput'),
+      todayBtn: document.getElementById('todayBtn'),
+      mainCategoryPills: document.getElementById('mainCategoryPills'),
+      subCategoryPills: document.getElementById('subCategoryPills'),
+      syncStatus: document.getElementById('syncStatus'),
+      totalCount: document.getElementById('totalCount'),
+      todayCount: document.getElementById('todayCount'),
+      weekCount: document.getElementById('weekCount'),
+      categoryCount: document.getElementById('categoryCount'),
+      content: document.getElementById('content')
+    };
+
+    init();
+
+    function init() {
+      bindEvents();
+      loadItems();
+    }
+
+    function bindEvents() {
+      elements.searchInput.addEventListener('input', function(event) {
+        state.search = event.target.value.trim();
+        applyFilters();
+      });
+
+      elements.todayBtn.addEventListener('click', function() {
+        state.todayOnly = !state.todayOnly;
+        elements.todayBtn.classList.toggle('active', state.todayOnly);
+        applyFilters();
+      });
+    }
+
+    async function loadItems() {
+      if (!API_URL || API_URL.indexOf('여기에_') === 0) {
+        renderError('HTML 코드의 API_URL에 Apps Script 웹앱 URL을 넣어주세요.');
+        return;
+      }
+
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+
+        if (!data.ok) {
+          throw new Error(data.error || '데이터를 불러오지 못했습니다.');
+        }
+
+        state.items = normalizeItems(data.items || []);
+        elements.syncStatus.textContent = '최신 데이터';
+        renderStats();
+        renderFilterPills();
+        applyFilters();
+      } catch (error) {
+        renderError(error.message);
+      }
+    }
+
+    function normalizeItems(items) {
+      return items.map(function(item) {
+        return {
+          productName: clean(item.productName),
+          mainCategory: clean(item.mainCategory),
+          subCategory: clean(item.subCategory),
+          date: clean(item.date),
+          instagramUrl: clean(item.instagramUrl),
+          influencer: clean(item.influencer),
+          instagramId: clean(item.instagramId),
+          lastEditedTime: clean(item.lastEditedTime)
+        };
+      });
+    }
+
+    function renderStats() {
+      elements.totalCount.textContent = state.items.length;
+      elements.todayCount.textContent = state.items.filter(isTodayItem).length;
+      elements.weekCount.textContent = state.items.filter(isThisWeekItem).length;
+      elements.categoryCount.textContent = uniqueValues(state.items, 'subCategory').length || uniqueValues(state.items, 'mainCategory').length;
+    }
+
+    function renderFilterPills() {
+      renderPillGroup(elements.mainCategoryPills, ['전체'].concat(uniqueValues(state.items, 'mainCategory')), state.filters.mainCategory || '전체', function(value) {
+        state.filters.mainCategory = value === '전체' ? '' : value;
+        state.filters.subCategory = '';
+        renderFilterPills();
+        applyFilters();
+      });
+
+      const subSource = state.filters.mainCategory
+        ? state.items.filter(function(item) {
+          return item.mainCategory === state.filters.mainCategory;
+        })
+        : state.items;
+
+      renderPillGroup(elements.subCategoryPills, ['전체'].concat(uniqueValues(subSource, 'subCategory')), state.filters.subCategory || '전체', function(value) {
+        state.filters.subCategory = value === '전체' ? '' : value;
+        renderFilterPills();
+        applyFilters();
+      });
+    }
+
+    function renderPillGroup(container, values, activeValue, onClick) {
+      container.innerHTML = values.map(function(value) {
+        const active = value === activeValue ? ' active' : '';
+        return '<button class="pill' + active + '" type="button" data-value="' + escapeHtml(value) + '">' + escapeHtml(value) + '</button>';
+      }).join('');
+
+      Array.prototype.forEach.call(container.querySelectorAll('.pill'), function(button) {
+        button.addEventListener('click', function() {
+          onClick(button.getAttribute('data-value'));
+        });
+      });
+    }
+
+    function applyFilters() {
+      const keyword = state.search.toLowerCase();
+
+      state.filteredItems = state.items.filter(function(item) {
+        const text = [
+          item.productName,
+          item.mainCategory,
+          item.subCategory,
+          item.influencer,
+          item.instagramId
+        ].join(' ').toLowerCase();
+
+        return (!keyword || text.indexOf(keyword) !== -1)
+          && (!state.todayOnly || isTodayItem(item))
+          && (!state.filters.mainCategory || item.mainCategory === state.filters.mainCategory)
+          && (!state.filters.subCategory || item.subCategory === state.filters.subCategory);
+      });
+
+      renderItems();
+    }
+
+    function renderItems() {
+      if (!state.filteredItems.length) {
+        elements.content.innerHTML = '<div class="empty">조건에 맞는 공구 일정이 없습니다.</div>';
+        return;
+      }
+
+      elements.content.innerHTML = '<div class="list">' + state.filteredItems.map(renderItem).join('') + '</div>';
+    }
+
+    function renderItem(item) {
+      const url = normalizeUrl(item.instagramUrl);
+      const title = item.productName || '상품명 없음';
+      const main = item.mainCategory || '분류';
+      const sub = item.subCategory || '기타';
+      const dateText = formatShortDate(item.date);
+      const dday = getDdayLabel(item.date);
+      const instaText = item.instagramId || item.influencer || '-';
+      const subAlt = ['가전', '식품', '육아', '패션', '여행'].indexOf(sub) !== -1 ? ' alt' : '';
+
+      return [
+        '<article class="item">',
+          '<div class="item-main">',
+            '<div class="tags">',
+              '<span class="tag tag-main">' + escapeHtml(main) + '</span>',
+              '<span class="tag tag-sub' + subAlt + '">' + escapeHtml(sub) + '</span>',
+            '</div>',
+            '<h2 class="title">' + escapeHtml(title) + '</h2>',
+          '</div>',
+          '<div class="item-side">',
+            '<div class="date-line">',
+              dateText ? '<span>' + escapeHtml(dateText) + '</span>' : '',
+              dday ? '<span class="dday">' + escapeHtml(dday) + '</span>' : '',
+            '</div>',
+            url
+              ? '<a class="insta" href="' + escapeHtml(url) + '" target="_blank" rel="noopener">◎ ' + escapeHtml(instaText) + '</a>'
+              : '<span class="insta">◎ ' + escapeHtml(instaText) + '</span>',
+          '</div>',
+        '</article>'
+      ].join('');
+    }
+
+    function isTodayItem(item) {
+      const date = parseItemDate(item.date);
+      if (!date) return false;
+      const today = new Date();
+      return date.getFullYear() === today.getFullYear()
+        && date.getMonth() === today.getMonth()
+        && date.getDate() === today.getDate();
+    }
+
+    function isThisWeekItem(item) {
+      const date = parseItemDate(item.date);
+      if (!date) return false;
+      const today = new Date();
+      const start = new Date(today);
+      start.setHours(0, 0, 0, 0);
+      start.setDate(today.getDate() - today.getDay());
+      const end = new Date(start);
+      end.setDate(start.getDate() + 7);
+      return date >= start && date < end;
+    }
+
+    function parseItemDate(value) {
+      if (!value) return null;
+      const text = String(value).trim();
+      const normalized = text.indexOf('-') === -1 && text.indexOf('/') === -1
+        ? text.replace(/^(\d{1,2})\.(\d{1,2})$/, new Date().getFullYear() + '-$1-$2')
+        : text.replace(/\./g, '-').replace(/\//g, '-');
+      const date = new Date(normalized);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    function formatShortDate(value) {
+      const date = parseItemDate(value);
+      if (!date) return value || '';
+      return (date.getMonth() + 1) + '/' + date.getDate();
+    }
+
+    function getDdayLabel(value) {
+      const date = parseItemDate(value);
+      if (!date) return '';
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      date.setHours(0, 0, 0, 0);
+      const diff = Math.round((date - today) / 86400000);
+      if (diff === 0) return 'D-day';
+      if (diff > 0) return 'D-' + diff;
+      return '마감';
+    }
+
+    function uniqueValues(items, key) {
+      return Array.from(new Set(items.map(function(item) {
+        return item[key];
+      }).filter(Boolean))).sort(function(a, b) {
+        return String(a).localeCompare(String(b), 'ko');
+      });
+    }
+
+    function renderError(message) {
+      elements.syncStatus.textContent = '연결 확인 필요';
+      elements.content.innerHTML = '<div class="error">' + escapeHtml(message) + '</div>';
+    }
+
+    function clean(value) {
+      return value === null || value === undefined ? '' : String(value).trim();
+    }
+
+    function normalizeUrl(url) {
+      if (!url) return '';
+      if (/^https?:\/\//i.test(url)) return url;
+      return 'https://' + url;
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>
