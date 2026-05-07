@@ -309,7 +309,8 @@
       gap: 8px;
     }
 
-    .panel.is-calendar .month-controls {
+    .panel.is-calendar .month-controls,
+    .panel.is-calendar .today-month-btn {
       display: inline-flex;
     }
 
@@ -332,6 +333,20 @@
       min-width: 62px;
       color: #606977;
       text-align: center;
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .today-month-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      min-height: 24px;
+      padding: 0 10px;
+      border: 1px solid var(--active);
+      border-radius: 999px;
+      background: #eef3ff;
+      color: var(--active);
       font-size: 12px;
       font-weight: 950;
     }
@@ -847,6 +862,7 @@
           <button class="month-btn" id="nextMonthBtn" type="button" aria-label="다음 달">&gt;</button>
         </div>
         <span>공구 일정</span>
+        <button class="today-month-btn" id="goTodayBtn" type="button">오늘</button>
       </div>
       <div id="content">
         <div class="loading">정보를 불러오는 중입니다.</div>
@@ -890,6 +906,7 @@
       panel: document.getElementById('panel'),
       prevMonthBtn: document.getElementById('prevMonthBtn'),
       nextMonthBtn: document.getElementById('nextMonthBtn'),
+      goTodayBtn: document.getElementById('goTodayBtn'),
       monthLabel: document.getElementById('monthLabel'),
       mainCategoryPills: document.getElementById('mainCategoryPills'),
       subCategoryPills: document.getElementById('subCategoryPills'),
@@ -940,6 +957,12 @@
 
       elements.nextMonthBtn.addEventListener('click', function() {
         moveCalendarMonth(1);
+      });
+
+      elements.goTodayBtn.addEventListener('click', function() {
+        const today = new Date();
+        state.calendarMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        renderCalendar();
       });
 
       elements.closeModalBtn.addEventListener('click', closeModal);
@@ -1052,7 +1075,7 @@
           && (!state.todayOnly || isTodayItem(item))
           && (!state.filters.mainCategory || item.mainCategory === state.filters.mainCategory)
           && (!state.filters.subCategory || item.subCategory === state.filters.subCategory);
-      });
+      }).sort(compareItems);
 
       renderCurrentView();
     }
@@ -1207,6 +1230,25 @@
           '</div>',
         '</article>'
       ].join('');
+    }
+
+    function compareItems(a, b) {
+      const dateA = parseItemDate(a.date);
+      const dateB = parseItemDate(b.date);
+
+      if (dateA && dateB && dateA.getTime() !== dateB.getTime()) {
+        return dateA - dateB;
+      }
+
+      if (dateA && !dateB) return -1;
+      if (!dateA && dateB) return 1;
+
+      return getEditedTime(b) - getEditedTime(a);
+    }
+
+    function getEditedTime(item) {
+      const time = new Date(item.lastEditedTime).getTime();
+      return Number.isNaN(time) ? 0 : time;
     }
 
     function openModal(index) {
