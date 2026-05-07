@@ -370,6 +370,16 @@
       background: #f8fbff;
     }
 
+    .item.is-closed {
+      background: #f7f7f7;
+      color: #8a8f99;
+      opacity: 0.66;
+    }
+
+    .item.is-closed:hover {
+      background: #f3f4f6;
+    }
+
     .item:last-child {
       border-bottom: 0;
     }
@@ -433,10 +443,18 @@
       align-items: center;
       justify-content: flex-end;
       gap: 6px;
-      color: var(--coral);
+      color: #6b7280;
       font-size: 12px;
       font-weight: 950;
       white-space: nowrap;
+    }
+
+    .date-line.is-today {
+      color: var(--coral);
+    }
+
+    .date-line.is-closed {
+      color: #9ca3af;
     }
 
     .dday {
@@ -449,6 +467,21 @@
       color: var(--coral);
       font-size: 11px;
       font-weight: 950;
+    }
+
+    .dday.is-soon {
+      background: #ffe5ef;
+      color: #db2777;
+    }
+
+    .dday.is-muted {
+      background: #eef0f3;
+      color: #6b7280;
+    }
+
+    .dday.is-closed {
+      background: #e8eaee;
+      color: #9ca3af;
     }
 
     .insta {
@@ -538,20 +571,32 @@
       gap: 5px;
     }
 
-    .calendar-item {
+    .calendar-count {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 100%;
-      min-height: 26px;
+      min-height: 32px;
       padding: 5px 7px;
-      border: 0;
+      border: 1px solid #d9e2f5;
       border-radius: 6px;
       background: #eef3ff;
       color: #27395f;
       font-size: 12px;
       font-weight: 900;
-      text-align: left;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      text-align: center;
+    }
+
+    .calendar-view-btn {
+      width: 100%;
+      min-height: 28px;
+      padding: 5px 7px;
+      border: 1px solid var(--active);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--active);
+      font-size: 12px;
+      font-weight: 950;
     }
 
     .calendar-more {
@@ -642,6 +687,45 @@
 
     .modal-link[hidden] {
       display: none;
+    }
+
+    .day-list {
+      display: grid;
+      gap: 8px;
+      flex: 1 0 100%;
+      max-height: 360px;
+      overflow: auto;
+    }
+
+    .day-list-item {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      text-align: left;
+    }
+
+    .day-list-item.is-closed {
+      background: #f4f4f5;
+      color: #8a8f99;
+      opacity: 0.72;
+    }
+
+    .day-list-title {
+      display: block;
+      margin-top: 6px;
+      font-size: 14px;
+      font-weight: 950;
+      overflow-wrap: anywhere;
+    }
+
+    .day-list-meta {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
     }
 
     @media (max-width: 1100px) {
@@ -881,7 +965,8 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbx-IkvMAjFZnayEzyuitXrHdpO0CvxnKAnmfnLTxRHZ_PSUnzCvu6hzFPgtU2JW5zYi/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwubNJBX_XSJSQbLaQnf7v7HJgwdH3kDkc1fJqxAdz1HoGXkrxJbSeQU95IY-anLvVZ/exec';
+    const REFRESH_INTERVAL_MS = 30000;
     const DEFAULT_MAIN_CATEGORIES = ['성인', '육아'];
     const DEFAULT_SUB_CATEGORIES = ['가전', '건강', '식품', '뷰티', '생활', '패션', '책', '교육', '교구', '장난감', '가구', '여행', '기타'];
 
@@ -929,6 +1014,10 @@
     function init() {
       bindEvents();
       loadItems();
+
+      setInterval(function() {
+        loadItems(true);
+      }, REFRESH_INTERVAL_MS);
     }
 
     function bindEvents() {
@@ -962,7 +1051,7 @@
       elements.goTodayBtn.addEventListener('click', function() {
         const today = new Date();
         state.calendarMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-        renderCalendar();
+        applyFilters();
       });
 
       elements.closeModalBtn.addEventListener('click', closeModal);
@@ -979,7 +1068,7 @@
       });
     }
 
-    async function loadItems() {
+    async function loadItems(isSilent) {
       if (!API_URL || API_URL.indexOf('여기에_') === 0) {
         renderError('HTML 코드의 API_URL에 Apps Script 웹앱 URL을 넣어주세요.');
         return;
@@ -999,7 +1088,9 @@
         renderFilterPills();
         applyFilters();
       } catch (error) {
-        renderError(error.message);
+        if (!isSilent) {
+          renderError(error.message);
+        }
       }
     }
 
@@ -1009,7 +1100,11 @@
           productName: clean(item.productName),
           mainCategory: clean(item.mainCategory),
           subCategory: clean(item.subCategory),
-          date: clean(item.date),
+          openDate: clean(item.openDate || item.date),
+          closeDate: clean(item.closeDate),
+          displayDate: clean(item.displayDate || item.closeDate || item.openDate || item.date),
+          isAlwaysOpen: Boolean(item.isAlwaysOpen || (item.openDate && !item.closeDate)),
+          isClosed: Boolean(item.isClosed),
           instagramUrl: clean(item.instagramUrl),
           influencer: clean(item.influencer),
           instagramId: clean(item.instagramId),
@@ -1019,10 +1114,11 @@
     }
 
     function renderStats() {
-      elements.totalCount.textContent = state.items.length;
-      elements.todayCount.textContent = state.items.filter(isTodayItem).length;
-      elements.weekCount.textContent = state.items.filter(isThisWeekItem).length;
-      elements.categoryCount.textContent = uniqueValues(state.items, 'subCategory').length || uniqueValues(state.items, 'mainCategory').length;
+      const monthItems = state.items.filter(isCurrentMonthItem);
+      elements.totalCount.textContent = monthItems.length;
+      elements.todayCount.textContent = monthItems.filter(isTodayItem).length;
+      elements.weekCount.textContent = monthItems.filter(isThisWeekItem).length;
+      elements.categoryCount.textContent = uniqueValues(monthItems, 'subCategory').length || uniqueValues(monthItems, 'mainCategory').length;
     }
 
     function renderFilterPills() {
@@ -1071,7 +1167,8 @@
           item.instagramId
         ].join(' ').toLowerCase();
 
-        return (!keyword || text.indexOf(keyword) !== -1)
+        return (state.view === 'calendar' || isCurrentMonthItem(item))
+          && (!keyword || text.indexOf(keyword) !== -1)
           && (!state.todayOnly || isTodayItem(item))
           && (!state.filters.mainCategory || item.mainCategory === state.filters.mainCategory)
           && (!state.filters.subCategory || item.subCategory === state.filters.subCategory);
@@ -1088,13 +1185,13 @@
       if (view === 'calendar' && !state.calendarMonth) {
         state.calendarMonth = getInitialCalendarMonth();
       }
-      renderCurrentView();
+      applyFilters();
     }
 
     function moveCalendarMonth(offset) {
       const base = state.calendarMonth || getInitialCalendarMonth();
       state.calendarMonth = new Date(base.getFullYear(), base.getMonth() + offset, 1);
-      renderCalendar();
+      applyFilters();
     }
 
     function renderCurrentView() {
@@ -1124,11 +1221,6 @@
     }
 
     function renderCalendar() {
-      if (!state.filteredItems.length) {
-        elements.content.innerHTML = '<div class="empty">조건에 맞는 공구 일정이 없습니다.</div>';
-        return;
-      }
-
       const monthBase = state.calendarMonth || getInitialCalendarMonth();
       state.calendarMonth = monthBase;
       elements.monthLabel.textContent = monthBase.getFullYear() + '.' + String(monthBase.getMonth() + 1).padStart(2, '0');
@@ -1154,9 +1246,9 @@
         '</div>'
       ].join('');
 
-      Array.prototype.forEach.call(elements.content.querySelectorAll('.calendar-item'), function(itemEl) {
+      Array.prototype.forEach.call(elements.content.querySelectorAll('.calendar-view-btn'), function(itemEl) {
         itemEl.addEventListener('click', function() {
-          openModal(Number(itemEl.getAttribute('data-index')));
+          openDayModal(itemEl.getAttribute('data-date'));
         });
       });
     }
@@ -1165,10 +1257,9 @@
       const key = dateKey(date);
       const todayKey = dateKey(new Date());
       const items = state.filteredItems.filter(function(item) {
-        const itemDate = parseItemDate(item.date);
+        const itemDate = parseItemDate(item.displayDate);
         return itemDate && dateKey(itemDate) === key;
-      });
-      const visibleItems = items.slice(0, 3);
+      }).sort(compareItems);
       const classes = [
         'day-cell',
         date.getMonth() !== monthBase.getMonth() ? 'is-muted' : '',
@@ -1180,11 +1271,8 @@
         '<div class="' + classes + '">',
           '<div class="day-number">' + date.getDate() + '</div>',
           '<div class="calendar-items">',
-            visibleItems.map(function(item) {
-              const index = state.filteredItems.indexOf(item);
-              return '<button class="calendar-item" type="button" data-index="' + index + '">' + escapeHtml(item.productName || '상품명 없음') + '</button>';
-            }).join(''),
-            items.length > 3 ? '<div class="calendar-more">+' + (items.length - 3) + '개 더 있음</div>' : '',
+            items.length ? '<div class="calendar-count">' + items.length + '개</div>' : '',
+            items.length ? '<button class="calendar-view-btn" type="button" data-date="' + key + '">전체보기</button>' : '',
           '</div>',
         '</div>'
       ].join('');
@@ -1192,7 +1280,7 @@
 
     function getInitialCalendarMonth() {
       const firstDatedItem = state.filteredItems.map(function(item) {
-        return parseItemDate(item.date);
+        return parseItemDate(item.displayDate);
       }).filter(Boolean).sort(function(a, b) {
         return a - b;
       })[0];
@@ -1205,13 +1293,16 @@
       const title = item.productName || '상품명 없음';
       const main = item.mainCategory || '분류';
       const sub = item.subCategory || '기타';
-      const dateText = formatShortDate(item.date);
-      const dday = getDdayLabel(item.date);
+      const dateText = formatShortDate(item.displayDate);
+      const dday = getDdayLabel(item);
+      const dateClass = getDateClass(item);
+      const ddayClass = getDdayClass(item);
+      const closed = isClosedItem(item);
       const instaText = item.instagramId || item.influencer || '-';
       const subAlt = ['가전', '식품', '육아', '패션', '여행'].indexOf(sub) !== -1 ? ' alt' : '';
 
       return [
-        '<article class="item" data-index="' + index + '">',
+        '<article class="item' + (closed ? ' is-closed' : '') + '" data-index="' + index + '">',
           '<div class="item-main">',
             '<div class="tags">',
               '<span class="tag tag-main">' + escapeHtml(main) + '</span>',
@@ -1220,9 +1311,9 @@
             '<h2 class="title">' + escapeHtml(title) + '</h2>',
           '</div>',
           '<div class="item-side">',
-            '<div class="date-line">',
+            '<div class="date-line ' + dateClass + '">',
               dateText ? '<span>' + escapeHtml(dateText) + '</span>' : '',
-              dday ? '<span class="dday">' + escapeHtml(dday) + '</span>' : '',
+              dday ? '<span class="dday ' + ddayClass + '">' + escapeHtml(dday) + '</span>' : '',
             '</div>',
             url
               ? '<a class="insta" href="' + escapeHtml(url) + '" target="_blank" rel="noopener">◎ ' + escapeHtml(instaText) + '</a>'
@@ -1233,8 +1324,8 @@
     }
 
     function compareItems(a, b) {
-      const dateA = parseItemDate(a.date);
-      const dateB = parseItemDate(b.date);
+      const dateA = parseItemDate(a.displayDate);
+      const dateB = parseItemDate(b.displayDate);
 
       if (dateA && dateB && dateA.getTime() !== dateB.getTime()) {
         return dateA - dateB;
@@ -1258,7 +1349,8 @@
       const main = item.mainCategory || '분류';
       const sub = item.subCategory || '기타';
       const subAlt = ['가전', '식품', '육아', '패션', '여행'].indexOf(sub) !== -1 ? ' alt' : '';
-      const dateText = formatKoreanDate(item.date);
+      const dateText = formatKoreanDate(item.displayDate);
+      const dateSuffix = item.isAlwaysOpen ? ' · 상시' : '';
       const instaText = item.instagramId || item.influencer || '';
       const url = normalizeUrl(item.instagramUrl);
 
@@ -1268,7 +1360,7 @@
       ].join('');
       elements.modalTitle.textContent = item.productName || '상품명 없음';
       elements.modalMeta.innerHTML = [
-        dateText ? '<span>🗓️ ' + escapeHtml(dateText) + '</span>' : '',
+        dateText ? '<span>🗓️ ' + escapeHtml(dateText + dateSuffix) + '</span>' : '',
         instaText ? '<span>👤 ' + escapeHtml(instaText) + '</span>' : ''
       ].filter(Boolean).join('');
 
@@ -1290,8 +1382,53 @@
       elements.modal.setAttribute('aria-hidden', 'true');
     }
 
+    function openDayModal(dateKeyValue) {
+      const items = state.filteredItems.filter(function(item) {
+        const itemDate = parseItemDate(item.displayDate);
+        return itemDate && dateKey(itemDate) === dateKeyValue;
+      }).sort(compareItems);
+
+      if (!items.length) return;
+
+      const date = parseItemDate(dateKeyValue);
+      elements.modalTags.innerHTML = '<span class="tag tag-main">전체보기</span>';
+      elements.modalTitle.textContent = formatKoreanDate(dateKeyValue) + ' 마감 공구';
+      elements.modalMeta.innerHTML = '<span>' + items.length + '개 일정</span>';
+      elements.modalInstagramLink.hidden = true;
+      elements.modalInstagramLink.removeAttribute('href');
+
+      const list = document.createElement('div');
+      list.className = 'day-list';
+      list.innerHTML = items.map(function(item) {
+        const index = state.filteredItems.indexOf(item);
+        const closed = isClosedItem(item);
+        const main = item.mainCategory || '분류';
+        const sub = item.subCategory || '기타';
+        const instaText = item.instagramId || item.influencer || '-';
+
+        return [
+          '<button class="day-list-item' + (closed ? ' is-closed' : '') + '" type="button" data-index="' + index + '">',
+            '<span class="tag tag-main">' + escapeHtml(main) + '</span> ',
+            '<span class="tag tag-sub">' + escapeHtml(sub) + '</span>',
+            '<span class="day-list-title">' + escapeHtml(item.productName || '상품명 없음') + '</span>',
+            '<span class="day-list-meta">◎ ' + escapeHtml(instaText) + '</span>',
+          '</button>'
+        ].join('');
+      }).join('');
+
+      elements.modalMeta.appendChild(list);
+      Array.prototype.forEach.call(list.querySelectorAll('.day-list-item'), function(button) {
+        button.addEventListener('click', function() {
+          openModal(Number(button.getAttribute('data-index')));
+        });
+      });
+
+      elements.modal.classList.add('open');
+      elements.modal.setAttribute('aria-hidden', 'false');
+    }
+
     function isTodayItem(item) {
-      const date = parseItemDate(item.date);
+      const date = parseItemDate(item.openDate);
       if (!date) return false;
       const today = new Date();
       return date.getFullYear() === today.getFullYear()
@@ -1300,7 +1437,7 @@
     }
 
     function isThisWeekItem(item) {
-      const date = parseItemDate(item.date);
+      const date = parseItemDate(item.displayDate);
       if (!date) return false;
       const today = new Date();
       const start = new Date(today);
@@ -1309,6 +1446,47 @@
       const end = new Date(start);
       end.setDate(start.getDate() + 7);
       return date >= start && date < end;
+    }
+
+    function isCurrentMonthItem(item) {
+      const date = parseItemDate(item.displayDate);
+      if (!date) return false;
+      const today = new Date();
+      return date.getFullYear() === today.getFullYear()
+        && date.getMonth() === today.getMonth();
+    }
+
+    function isClosedItem(item) {
+      if (item.isClosed) return true;
+      if (item.closeDate) {
+        const closeDate = parseItemDate(item.closeDate);
+        if (!closeDate) return false;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        closeDate.setHours(0, 0, 0, 0);
+        return closeDate < today;
+      }
+      return false;
+    }
+
+    function getDateClass(item) {
+      if (isClosedItem(item)) return 'is-closed';
+      const date = parseItemDate(item.displayDate);
+      if (!date) return '';
+      const today = new Date();
+      return dateKey(date) === dateKey(today) ? 'is-today' : '';
+    }
+
+    function getDdayClass(item) {
+      if (isClosedItem(item)) return 'is-closed';
+      if (item.isAlwaysOpen) return 'is-muted';
+      const date = parseItemDate(item.displayDate);
+      if (!date) return '';
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      date.setHours(0, 0, 0, 0);
+      const diff = Math.round((date - today) / 86400000);
+      return diff >= 0 && diff <= 3 ? 'is-soon' : 'is-muted';
     }
 
     function parseItemDate(value) {
@@ -1327,8 +1505,10 @@
       return (date.getMonth() + 1) + '/' + date.getDate();
     }
 
-    function getDdayLabel(value) {
-      const date = parseItemDate(value);
+    function getDdayLabel(item) {
+      if (isClosedItem(item)) return '종료';
+      if (item.isAlwaysOpen) return '상시';
+      const date = parseItemDate(item.displayDate);
       if (!date) return '';
       const today = new Date();
       today.setHours(0, 0, 0, 0);
