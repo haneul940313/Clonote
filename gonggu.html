@@ -558,6 +558,9 @@
     }
 
     .day-number {
+      display: flex;
+      align-items: center;
+      height: 24px;
       margin-bottom: 7px;
       color: #585f6b;
       font-size: 12px;
@@ -565,6 +568,12 @@
     }
 
     .day-cell.is-today .day-number {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .day-cell.is-today .day-number span {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -1278,7 +1287,7 @@
 
       return [
         '<div class="' + classes + '">',
-          '<div class="day-number">' + date.getDate() + '</div>',
+          '<div class="day-number"><span>' + date.getDate() + '</span></div>',
           '<div class="calendar-items">',
             items.length ? '<div class="calendar-count">' + items.length + '개</div>' : '',
             items.length ? '<button class="calendar-view-btn" type="button" data-date="' + key + '">전체보기</button>' : '',
