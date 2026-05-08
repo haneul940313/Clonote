@@ -569,6 +569,8 @@
 
     .calendar {
       display: grid;
+      overflow-x: auto;
+      scrollbar-width: thin;
     }
 
     .calendar-head {
@@ -885,27 +887,50 @@
       }
 
       .calendar-head {
-        display: none;
+        display: grid;
+        min-width: 560px;
       }
 
       .calendar-grid {
         display: grid;
-        gap: 9px;
+        grid-template-columns: repeat(7, minmax(80px, 1fr));
+        min-width: 560px;
+        gap: 0;
       }
 
       .day-cell {
-        display: none;
-        min-height: 0;
-        border: 1px solid var(--line);
-        border-radius: var(--radius);
+        display: block;
+        min-height: 96px;
+        border: 0;
+        border-right: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        border-radius: 0;
       }
 
-      .day-cell.has-items {
-        display: block;
+      .day-cell:nth-child(7n) {
+        border-right: 0;
       }
 
       .day-cell.is-muted {
-        background: #ffffff;
+        background: #f8fafc;
+      }
+
+      .day-number {
+        height: 22px;
+        margin-bottom: 5px;
+        font-size: 11px;
+      }
+
+      .calendar-count {
+        min-height: 26px;
+        padding: 3px 4px;
+        font-size: 11px;
+      }
+
+      .calendar-view-btn {
+        min-height: 25px;
+        padding: 3px 4px;
+        font-size: 11px;
       }
 
       .list {
