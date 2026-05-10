@@ -357,7 +357,6 @@
     .day.sun { color: var(--sun); }
     .day.pending { color: var(--pending); }
     .day.saved { color: var(--saved); }
-    .day.passive { cursor: default; }
 
     .memo-cell, .setup-cell {
       display: flex;
@@ -564,7 +563,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbxlIatoeDhs1h7VgeX3tXfA
 const PAGE_ID = new URLSearchParams(location.search).get('id') || 'default';
 const TOK_KEY = 'clonote_token_' + PAGE_ID;
 const USER_KEY = 'clonote_user_' + PAGE_ID;
-const CACHE_PFX = 'clonote_c7_' + PAGE_ID;
+const CACHE_PFX = 'clonote_c8_' + PAGE_ID;
 const MAX_H = 10;
 const DEF_H = 5;
 
@@ -624,6 +623,7 @@ function clearLegacyCache() {
   clearCachePrefix(`clonote_c4_${PAGE_ID}:`);
   clearCachePrefix(`clonote_c5_${PAGE_ID}:`);
   clearCachePrefix(`clonote_c6_${PAGE_ID}:`);
+  clearCachePrefix(`clonote_c7_${PAGE_ID}:`);
 }
 
 function cacheKey(type, targetYm = ym(), userId = curUser?.userId) {
@@ -853,9 +853,7 @@ async function loadAll(options = {}) {
     if (cR?.success && Array.isArray(cR.checks)) {
       cR.checks.forEach(item => {
         const d = Number(item.day);
-        if (d >= 1 && d <= 31) {
-          nextChecks[d] = Array.isArray(item.checks) ? item.checks : Array(MAX_H).fill(false);
-        }
+        if (d >= 1 && d <= 31) nextChecks[d] = Array.isArray(item.checks) ? item.checks : Array(MAX_H).fill(false);
       });
     }
     mergeDraftChecks(targetYm, nextChecks);
@@ -938,9 +936,7 @@ async function doStart() {
 }
 
 async function doLogout() {
-  try {
-    if (curToken) await pj({ action: 'logout', token: curToken });
-  } catch {}
+  try { if (curToken) await pj({ action: 'logout', token: curToken }); } catch {}
   clearUserCache(curUser?.userId);
   clearAuth();
   resetDisplayedState();
@@ -963,15 +959,17 @@ async function persistCheck(d, targetYm = ym(), silent = false) {
     });
     if (!r.success) {
       if (!silent) setStatus('泥댄겕 ????ㅽ뙣', true);
-      return;
+      return false;
     }
     if (targetYm === ym() && Array.isArray(checkDrafts[key])) {
       checks[d] = [...checkDrafts[key]];
     }
     delete checkDrafts[key];
     saveCache(targetYm);
+    return true;
   } catch {
     if (!silent) setStatus('泥댄겕 ????ㅻ쪟', true);
+    return false;
   }
 }
 
@@ -1044,6 +1042,7 @@ function bindMemo(el) {
       showInd(d, src, '??λ?湲?, true);
       showInd(d, other, '??λ?湲?, true);
     });
+
     inp.addEventListener('keydown', e => {
       if (e.key === 'Enter') e.preventDefault();
     });
@@ -1210,6 +1209,7 @@ function bindSetup(el) {
       saveCache(ym());
       setStatus('?レ옄瑜??꾨Ⅴ硫???λ맗?덈떎.');
     });
+
     inp.addEventListener('keydown', e => {
       if (e.key === 'Enter') e.preventDefault();
     });
@@ -1248,10 +1248,14 @@ async function saveHabitsByNumber(idx) {
 }
 
 function bindChecks(el) {
-  el.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', onCheck));
+  el.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', onCheck);
+  });
+
   el.querySelectorAll('[data-check-save]').forEach(dayEl => {
     dayEl.addEventListener('click', () => saveChecksByDay(+dayEl.dataset.checkSave, dayEl.dataset.src));
   });
+
   const wp = el.querySelector('#wPrev');
   const wn = el.querySelector('#wNext');
   if (wp) wp.addEventListener('click', () => { weekOff--; renderAll(); });
@@ -1282,7 +1286,8 @@ function onCheck(e) {
 
 async function saveChecksByDay(d, src) {
   if (!curUser) return;
-  await persistCheck(d, ym(), false);
+  const ok = await persistCheck(d, ym(), false);
+  if (!ok) return;
   markSaved('check', d, src);
   const other = src === 'rh' ? 'ra' : 'rh';
   document.querySelectorAll(`[id^="check-day-"][id$="-${other}-${d}"]`).forEach(el => {
@@ -1435,10 +1440,9 @@ async function init() {
   clearLegacyCache();
   renderMeta();
   renderAll();
+
   let cachedUser = null;
-  try {
-    cachedUser = JSON.parse(stGet(USER_KEY) || 'null');
-  } catch {}
+  try { cachedUser = JSON.parse(stGet(USER_KEY) || 'null'); } catch {}
 
   if (curToken && cachedUser) {
     curUser = cachedUser;
