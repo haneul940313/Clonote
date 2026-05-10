@@ -6,6 +6,7 @@
   <title>Clonote</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
     :root {
       --paper: #fbfbf8;
       --paper-r: #f8f8f5;
@@ -30,6 +31,7 @@
       --status-h: 18px;
       --spine-w: 18px;
     }
+
     html, body {
       width: 100%;
       height: 100%;
@@ -38,6 +40,7 @@
       color: var(--text);
       overflow: hidden;
     }
+
     .book {
       display: flex;
       flex-direction: column;
@@ -46,6 +49,7 @@
       overflow: hidden;
       box-shadow: 0 2px 16px rgba(0,0,0,.1);
     }
+
     .top {
       height: var(--topbar-h);
       display: flex;
@@ -54,6 +58,7 @@
       background: linear-gradient(to right, var(--paper) 0%, var(--paper) 50%, var(--paper-r) 50%, var(--paper-r) 100%);
       border-bottom: 1px solid rgba(132,184,196,.22);
     }
+
     .nav {
       display: flex;
       align-items: center;
@@ -62,6 +67,7 @@
       min-width: 0;
       flex-wrap: nowrap;
     }
+
     .btn, .menu-btn {
       border: none;
       background: transparent;
@@ -69,12 +75,14 @@
       color: #3a3630;
       flex-shrink: 0;
     }
+
     .btn {
       font-size: 22px;
       font-weight: 700;
       width: 28px;
       height: 28px;
     }
+
     .menu-btn {
       font-size: 18px;
       width: 24px;
@@ -83,6 +91,7 @@
       align-items: center;
       justify-content: center;
     }
+
     .month {
       font-size: 14px;
       font-weight: 700;
@@ -91,6 +100,7 @@
       white-space: nowrap;
       flex-shrink: 0;
     }
+
     .divider {
       width: 1px;
       height: 16px;
@@ -98,6 +108,7 @@
       margin: 0 8px;
       flex-shrink: 0;
     }
+
     .user {
       font-size: 13px;
       font-weight: 600;
@@ -107,6 +118,7 @@
       text-overflow: ellipsis;
       min-width: 0;
     }
+
     .save-guide {
       font-size: 10px;
       color: #8d8d8d;
@@ -115,7 +127,9 @@
       flex-shrink: 0;
       margin-left: 2px;
     }
+
     .menu-wrap { position: relative; flex-shrink: 0; }
+
     .menu-pop {
       display: none;
       position: absolute;
@@ -129,7 +143,9 @@
       padding: 5px;
       z-index: 50;
     }
+
     .menu-pop.show { display: block; }
+
     .menu-item {
       width: 100%;
       height: 32px;
@@ -142,6 +158,7 @@
       cursor: pointer;
       white-space: nowrap;
     }
+
     .login {
       display: none;
       background: rgba(255,255,255,.85);
@@ -150,18 +167,22 @@
       padding: 10px 12px;
       margin: 4px 10px;
     }
+
     .login.show { display: block; }
+
     .guide {
       font-size: 10px;
       color: var(--muted);
       margin-bottom: 6px;
     }
+
     .login-row {
       display: flex;
       gap: 5px;
       align-items: center;
       flex-wrap: wrap;
     }
+
     .inp {
       height: 30px;
       border: 1px solid rgba(0,0,0,.09);
@@ -173,6 +194,7 @@
       flex: 1;
       min-width: 80px;
     }
+
     .text-btn {
       height: 30px;
       padding: 0 10px;
@@ -183,24 +205,28 @@
       background: rgba(255,255,255,.55);
       cursor: pointer;
     }
+
     .login-status {
       min-height: 14px;
       font-size: 11px;
       color: #666;
       margin-top: 3px;
     }
+
     .spread {
       flex: 1;
       display: flex;
       overflow: hidden;
       min-height: 0;
     }
+
     .page {
       flex: 1;
       min-width: 0;
       overflow: hidden;
       padding: 0 14px;
     }
+
     .left {
       background-color: var(--paper);
       background-image:
@@ -222,6 +248,7 @@
       background-size: 100% 100%, 100% var(--row-h);
       background-position: 0 0, 0 0;
     }
+
     .right {
       background-color: var(--paper-r);
       background-image:
@@ -243,6 +270,7 @@
       background-size: 100% 100%, 100% var(--row-h);
       background-position: 0 0, 0 0;
     }
+
     .spine {
       width: var(--spine-w);
       flex-shrink: 0;
@@ -250,6 +278,7 @@
       position: relative;
       background: linear-gradient(to right, var(--spine-edge), var(--spine-mid), var(--spine-edge));
     }
+
     .spine::before {
       content: "";
       position: absolute;
@@ -265,6 +294,7 @@
         rgba(0,0,0,.06) 11px
       );
     }
+
     .page-head {
       display: flex;
       align-items: center;
@@ -272,6 +302,7 @@
       height: var(--row-h);
       padding: 0 2px;
     }
+
     .page-title {
       font-size: 10px;
       font-weight: 700;
@@ -279,10 +310,12 @@
       letter-spacing: .05em;
       text-transform: uppercase;
     }
+
     .tabs {
       display: flex;
       gap: 2px;
     }
+
     .tab {
       border: none;
       background: transparent;
@@ -293,17 +326,21 @@
       border-radius: 5px;
       cursor: pointer;
     }
+
     .tab.active {
       background: rgba(93,134,200,.14);
       color: var(--accent);
     }
+
     .memo-row, .setup-row {
       display: grid;
       grid-template-columns: var(--left-date) 1fr;
       height: var(--row-h);
       align-items: center;
     }
+
     .setup-row { grid-template-columns: var(--right-date) 1fr; }
+
     .day {
       height: var(--row-h);
       display: flex;
@@ -315,11 +352,13 @@
       user-select: none;
       cursor: pointer;
     }
+
     .day.sat { color: var(--sat); }
     .day.sun { color: var(--sun); }
     .day.pending { color: var(--pending); }
     .day.saved { color: var(--saved); }
     .day.passive { cursor: default; }
+
     .memo-cell, .setup-cell {
       display: flex;
       align-items: center;
@@ -328,6 +367,7 @@
       position: relative;
       overflow: hidden;
     }
+
     .memo-input, .setup-input {
       width: 100%;
       height: 100%;
@@ -337,6 +377,7 @@
       font-size: 13px;
       color: var(--text);
     }
+
     .save-ind {
       position: absolute;
       right: 2px;
@@ -346,17 +387,21 @@
       color: #9a9a9a;
       opacity: 0;
     }
+
     .save-ind.show { opacity: 1; }
+
     .habit-hdr, .check-row {
       display: grid;
       align-items: center;
       height: var(--row-h);
     }
+
     .hdr, .total, .cb {
       display: flex;
       align-items: center;
       justify-content: center;
     }
+
     .hdr {
       font-size: 9px;
       font-weight: 700;
@@ -365,16 +410,19 @@
       white-space: nowrap;
       text-overflow: ellipsis;
     }
+
     .total {
       font-size: 10px;
       font-weight: 700;
       color: var(--accent);
     }
+
     .cb input {
       width: 15px;
       height: 15px;
       accent-color: var(--accent);
     }
+
     .week-nav {
       display: flex;
       align-items: center;
@@ -382,11 +430,13 @@
       height: var(--row-h);
       padding-left: var(--right-date);
     }
+
     .week-lbl {
       font-size: 10px;
       font-weight: 700;
       color: var(--muted);
     }
+
     .w-btn {
       border: none;
       background: transparent;
@@ -396,7 +446,9 @@
       cursor: pointer;
       padding: 0 4px;
     }
+
     .graph-wrap { overflow: hidden; }
+
     .status {
       height: var(--status-h);
       display: flex;
@@ -407,6 +459,7 @@
       background: linear-gradient(to right, var(--paper) 0%, var(--paper) 50%, var(--paper-r) 50%, var(--paper-r) 100%);
       border-top: 1px solid rgba(132,184,196,.22);
     }
+
     @media (max-width: 640px) {
       :root {
         --topbar-h: 44px;
@@ -416,24 +469,29 @@
         --right-date: 42px;
         --right-margin: 50px;
       }
+
       html, body {
         overflow: auto;
         height: auto;
       }
+
       .book {
         height: auto;
         min-height: 100vh;
         box-shadow: none;
       }
+
       .spread {
         flex-direction: column;
         overflow: visible;
       }
+
       .page {
         overflow: visible;
         height: auto !important;
         padding: 0 12px 12px;
       }
+
       .spine { display: none; }
       .login-row { flex-direction: column; }
       .inp, .text-btn { width: 100%; }
@@ -530,7 +588,7 @@ let autoSyncTimer = null;
 let refreshJobs = {};
 
 const $ = id => document.getElementById(id);
-const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 const yr = () => curDate.getFullYear();
 const mo = () => curDate.getMonth() + 1;
 const ym = () => yr() + '-' + String(mo()).padStart(2, '0');
@@ -539,8 +597,8 @@ const dow = d => new Date(yr(), mo() - 1, d).getDay();
 const dcls = d => dow(d) === 6 ? 'sat' : dow(d) === 0 ? 'sun' : '';
 const hcnt = () => Math.max(habits.filter(h => String(h || '').trim() !== '').length, DEF_H);
 const memoDraftKey = (d, targetYm = ym()) => `${targetYm}:${d}`;
-const checkDraftKey = (d, targetYm = ym()) => `${targetYm}:${d}`;
 const habitDraftKey = (i, targetYm = ym()) => `${targetYm}:${i}`;
+const checkDraftKey = (d, targetYm = ym()) => `${targetYm}:${d}`;
 
 function setStatus(m, e = false) {
   $('statusText').textContent = m || '';
@@ -578,12 +636,12 @@ function clearUserCache(userId = curUser?.userId) {
 
 function clearMonthCache(userId = curUser?.userId, targetYm = ym()) {
   if (!userId) return;
-  ['h','hd','c','cd','m','md'].forEach(t => stDel(cacheKey(t, targetYm, userId)));
+  ['h', 'hd', 'c', 'cd', 'm', 'md'].forEach(t => stDel(cacheKey(t, targetYm, userId)));
 }
 
 function scopedDrafts(store, targetYm) {
-  const out = {};
   const prefix = `${targetYm}:`;
+  const out = {};
   Object.entries(store).forEach(([k, v]) => {
     if (k.startsWith(prefix)) out[k] = v;
   });
@@ -622,7 +680,6 @@ function hasMonthCache(targetYm = ym()) {
 
 function applyCachedState(cc) {
   if (Array.isArray(cc.h)) habits = cc.h;
-
   if (cc.hd && typeof cc.hd === 'object') {
     Object.entries(cc.hd).forEach(([k, v]) => { habitDrafts[k] = v; });
   }
@@ -633,16 +690,16 @@ function applyCachedState(cc) {
       checks[+d] = Array.isArray(v) ? v : Array(MAX_H).fill(false);
     });
   }
-
   if (cc.cd && typeof cc.cd === 'object') {
     Object.entries(cc.cd).forEach(([k, v]) => { checkDrafts[k] = v; });
   }
 
   if (cc.m && typeof cc.m === 'object') {
     memos = {};
-    Object.entries(cc.m).forEach(([d, v]) => { memos[+d] = String(v ?? ''); });
+    Object.entries(cc.m).forEach(([d, v]) => {
+      memos[+d] = String(v ?? '');
+    });
   }
-
   if (cc.md && typeof cc.md === 'object') {
     Object.entries(cc.md).forEach(([k, v]) => { memoDrafts[k] = v; });
   }
@@ -658,6 +715,48 @@ function clearAllDrafts() {
   habitDrafts = {};
   checkDrafts = {};
   memoDrafts = {};
+}
+
+function dayHasPending(kind, index, targetYm = ym()) {
+  const key = kind === 'memo'
+    ? memoDraftKey(index, targetYm)
+    : kind === 'habit'
+      ? habitDraftKey(index, targetYm)
+      : checkDraftKey(index, targetYm);
+  const store = kind === 'memo' ? memoDrafts : kind === 'habit' ? habitDrafts : checkDrafts;
+  return Object.prototype.hasOwnProperty.call(store, key);
+}
+
+function dayStateClass(kind, index, targetYm = ym()) {
+  return dayHasPending(kind, index, targetYm) ? 'pending' : '';
+}
+
+function markSaved(kind, index, src) {
+  let selector = '';
+  if (kind === 'memo') selector = `[id^="memo-day-"][id$="-${src}-${index}"]`;
+  if (kind === 'habit') selector = `#habit-day-${index}`;
+  if (kind === 'check') selector = `[id^="check-day-"][id$="-${src}-${index}"]`;
+
+  document.querySelectorAll(selector).forEach(el => {
+    el.classList.remove('pending');
+    el.classList.add('saved');
+  });
+
+  setTimeout(() => {
+    document.querySelectorAll(selector).forEach(el => el.classList.remove('saved'));
+  }, 900);
+}
+
+function markPending(kind, index, src) {
+  let selector = '';
+  if (kind === 'memo') selector = `[id^="memo-day-"][id$="-${src}-${index}"]`;
+  if (kind === 'habit') selector = `#habit-day-${index}`;
+  if (kind === 'check') selector = `[id^="check-day-"][id$="-${src}-${index}"]`;
+
+  document.querySelectorAll(selector).forEach(el => {
+    el.classList.remove('saved');
+    el.classList.add('pending');
+  });
 }
 
 async function reqJson(url, options) {
@@ -754,7 +853,9 @@ async function loadAll(options = {}) {
     if (cR?.success && Array.isArray(cR.checks)) {
       cR.checks.forEach(item => {
         const d = Number(item.day);
-        if (d >= 1 && d <= 31) nextChecks[d] = Array.isArray(item.checks) ? item.checks : Array(MAX_H).fill(false);
+        if (d >= 1 && d <= 31) {
+          nextChecks[d] = Array.isArray(item.checks) ? item.checks : Array(MAX_H).fill(false);
+        }
       });
     }
     mergeDraftChecks(targetYm, nextChecks);
@@ -774,7 +875,9 @@ async function loadAll(options = {}) {
       saveCache(targetYm);
       renderAll();
     } else {
-      const ph = habits, pc = checks, pm = memos;
+      const ph = habits;
+      const pc = checks;
+      const pm = memos;
       habits = nextHabits;
       checks = nextChecks;
       memos = nextMemos;
@@ -835,7 +938,9 @@ async function doStart() {
 }
 
 async function doLogout() {
-  try { if (curToken) await pj({ action: 'logout', token: curToken }); } catch {}
+  try {
+    if (curToken) await pj({ action: 'logout', token: curToken });
+  } catch {}
   clearUserCache(curUser?.userId);
   clearAuth();
   resetDisplayedState();
@@ -895,39 +1000,6 @@ function renderAll() {
   renderRight(rowH, graphRows);
 }
 
-function dayStateClass(kind, index, targetYm = ym()) {
-  const key = kind === 'memo' ? memoDraftKey(index, targetYm)
-    : kind === 'habit' ? habitDraftKey(index, targetYm)
-    : checkDraftKey(index, targetYm);
-  const store = kind === 'memo' ? memoDrafts : kind === 'habit' ? habitDrafts : checkDrafts;
-  return Object.prototype.hasOwnProperty.call(store, key) ? 'pending' : '';
-}
-
-function markSaved(kind, index, src) {
-  let selector = '';
-  if (kind === 'memo') selector = `[id^="memo-day-"][id$="-${src}-${index}"]`;
-  if (kind === 'habit') selector = `#habit-day-${index}`;
-  if (kind === 'check') selector = `[id^="check-day-"][id$="-${src}-${index}"]`;
-  document.querySelectorAll(selector).forEach(el => {
-    el.classList.remove('pending');
-    el.classList.add('saved');
-  });
-  setTimeout(() => {
-    document.querySelectorAll(selector).forEach(el => el.classList.remove('saved'));
-  }, 900);
-}
-
-function markPending(kind, index, src) {
-  let selector = '';
-  if (kind === 'memo') selector = `[id^="memo-day-"][id$="-${src}-${index}"]`;
-  if (kind === 'habit') selector = `#habit-day-${index}`;
-  if (kind === 'check') selector = `[id^="check-day-"][id$="-${src}-${index}"]`;
-  document.querySelectorAll(selector).forEach(el => {
-    el.classList.remove('saved');
-    el.classList.add('pending');
-  });
-}
-
 function renderLeft() {
   const el = $('memoContent');
   el.innerHTML = leftTab === 'memo-month' ? buildMemoRows(1, last(), 'lm') : buildMemoWeek();
@@ -972,7 +1044,9 @@ function bindMemo(el) {
       showInd(d, src, '??λ?湲?, true);
       showInd(d, other, '??λ?湲?, true);
     });
-    inp.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') e.preventDefault();
+    });
   });
 
   el.querySelectorAll('[data-memo-save]').forEach(dayEl => {
@@ -1009,7 +1083,6 @@ async function doMemoSave(d, src, options = {}) {
       day: d,
       memo: val
     });
-
     if (!r.success) throw new Error(r.message || '硫붾え ????ㅽ뙣');
 
     if (val) memos[d] = val;
@@ -1081,19 +1154,19 @@ function buildHabitAll() {
   return h;
 }
 
-function effectiveChecks(d) {
-  const key = checkDraftKey(d);
-  if (Array.isArray(checkDrafts[key])) return checkDrafts[key];
-  if (Array.isArray(checks[d])) return checks[d];
-  return Array(MAX_H).fill(false);
-}
-
 function buildCheckHeader() {
   const cnt = hcnt();
   const col = `var(--right-date) repeat(${cnt},1fr) var(--total-w)`;
   let cells = '';
   habits.slice(0, cnt).forEach(n => { cells += `<div class="hdr">${esc(n || '?듦?')}</div>`; });
   return `<div class="habit-hdr" style="grid-template-columns:${col};"><div></div>${cells}<div class="hdr">??/div></div>`;
+}
+
+function effectiveChecks(d) {
+  const key = checkDraftKey(d);
+  if (Array.isArray(checkDrafts[key])) return checkDrafts[key];
+  if (Array.isArray(checks[d])) return checks[d];
+  return Array(MAX_H).fill(false);
 }
 
 function buildCheckRow(d, src) {
@@ -1137,11 +1210,13 @@ function bindSetup(el) {
       saveCache(ym());
       setStatus('?レ옄瑜??꾨Ⅴ硫???λ맗?덈떎.');
     });
-    inp.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') e.preventDefault();
+    });
   });
 
-  el.querySelectorAll('[data-habit-save]').forEach(btn => {
-    btn.addEventListener('click', () => saveHabitsByNumber(+btn.dataset.habitSave));
+  el.querySelectorAll('[data-habit-save]').forEach(dayEl => {
+    dayEl.addEventListener('click', () => saveHabitsByNumber(+dayEl.dataset.habitSave));
   });
 }
 
@@ -1190,7 +1265,7 @@ function onCheck(e) {
   const idx = +e.target.dataset.idx;
   const cnt = hcnt();
   const key = checkDraftKey(d, targetYm);
-  const prev = Array.isArray(effectiveChecks(d)) ? [...effectiveChecks(d)] : Array(MAX_H).fill(false);
+  const prev = [...effectiveChecks(d)];
   prev[idx] = e.target.checked;
   checks[d] = prev;
   checkDrafts[key] = [...prev];
@@ -1209,12 +1284,11 @@ async function saveChecksByDay(d, src) {
   if (!curUser) return;
   await persistCheck(d, ym(), false);
   markSaved('check', d, src);
-  if (src === 'rh') {
-    document.querySelectorAll(`[id^="check-day-"][id$="-ra-${d}"]`).forEach(el => { el.classList.remove('pending'); el.classList.add('saved'); });
-  }
-  if (src === 'ra') {
-    document.querySelectorAll(`[id^="check-day-"][id$="-rh-${d}"]`).forEach(el => { el.classList.remove('pending'); el.classList.add('saved'); });
-  }
+  const other = src === 'rh' ? 'ra' : 'rh';
+  document.querySelectorAll(`[id^="check-day-"][id$="-${other}-${d}"]`).forEach(el => {
+    el.classList.remove('pending');
+    el.classList.add('saved');
+  });
   setStatus(`${d}??泥댄겕 ???);
   setTimeout(() => setStatus(''), 1200);
 }
@@ -1258,7 +1332,10 @@ function renderGraph() {
   if (!hasAny) return;
   const pts = [];
   for (let d = 1; d <= today; d++) {
-    pts.push({ x: p.l + ((d - 1) / (ld - 1 || 1)) * gW, y: p.t + gH - (data[d - 1] / cnt) * gH });
+    pts.push({
+      x: p.l + ((d - 1) / (ld - 1 || 1)) * gW,
+      y: p.t + gH - (data[d - 1] / cnt) * gH
+    });
   }
   ctx.beginPath();
   ctx.moveTo(pts[0].x, p.t + gH);
@@ -1329,8 +1406,13 @@ $('logoutBtn').addEventListener('click', doLogout);
 $('forceSyncBtn').addEventListener('click', doForceReload);
 $('loginName').addEventListener('keydown', e => { if (e.key === 'Enter') $('loginPass').focus(); });
 $('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doStart(); });
-$('menuBtn').addEventListener('click', e => { e.stopPropagation(); $('menuPop').classList.toggle('show'); });
-document.addEventListener('click', e => { if (!$('menuWrap').contains(e.target)) $('menuPop').classList.remove('show'); });
+$('menuBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  $('menuPop').classList.toggle('show');
+});
+document.addEventListener('click', e => {
+  if (!$('menuWrap').contains(e.target)) $('menuPop').classList.remove('show');
+});
 document.querySelectorAll('[data-ltab]').forEach(b => b.addEventListener('click', () => {
   leftTab = b.dataset.ltab;
   document.querySelectorAll('[data-ltab]').forEach(x => x.classList.toggle('active', x === b));
@@ -1354,7 +1436,10 @@ async function init() {
   renderMeta();
   renderAll();
   let cachedUser = null;
-  try { cachedUser = JSON.parse(stGet(USER_KEY) || 'null'); } catch {}
+  try {
+    cachedUser = JSON.parse(stGet(USER_KEY) || 'null');
+  } catch {}
+
   if (curToken && cachedUser) {
     curUser = cachedUser;
     renderMeta();
@@ -1377,6 +1462,7 @@ async function init() {
     startAutoSync();
     return;
   }
+
   const ok = await tryAutoLogin();
   if (ok) {
     renderAll();
