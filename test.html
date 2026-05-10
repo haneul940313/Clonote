@@ -532,28 +532,28 @@
 <div class="book">
   <div class="top">
     <div class="nav">
-      <button class="btn" id="prevBtn">??/button>
+      <button class="btn" id="prevBtn">‹</button>
       <div class="month" id="monthTitle"></div>
-      <button class="btn" id="nextBtn">??/button>
-      <button class="menu-btn" id="forceSyncBtn" title="?곗씠??遺덈윭?ㅺ린" style="display:none;">?뱿</button>
+      <button class="btn" id="nextBtn">›</button>
+      <button class="menu-btn" id="forceSyncBtn" title="데이터 불러오기" style="display:none;">📥</button>
       <div class="divider"></div>
-      <div class="user" id="userNameText">?ъ슜??/div>
+      <div class="user" id="userNameText">사용자</div>
       <div class="menu-wrap" id="menuWrap" style="display:none;">
-        <button class="menu-btn" id="menuBtn">??/button>
+        <button class="menu-btn" id="menuBtn">⋯</button>
         <div class="menu-pop" id="menuPop">
-          <button class="menu-item" id="logoutBtn">濡쒓렇?꾩썐</button>
+          <button class="menu-item" id="logoutBtn">로그아웃</button>
         </div>
       </div>
-      <div class="save-guide">?쇱옄? 踰덊샇瑜??꾨Ⅴ硫???λ맗?덈떎.</div>
+      <div class="save-guide">일자와 번호를 누르면 저장됩니다.</div>
     </div>
   </div>
 
   <div class="login" id="loginBox">
-    <div class="guide">理쒖큹 1踰덈쭔 ?낅젰?섎㈃ ?먮룞 濡쒓렇?몃맗?덈떎.</div>
+    <div class="guide">최초 1번만 입력하면 자동 로그인됩니다.</div>
     <div class="login-row">
-      <input class="inp" id="loginName" type="text" placeholder="?ъ슜???대쫫" maxlength="30" autocomplete="username" />
-      <input class="inp" id="loginPass" type="password" placeholder="鍮꾨?踰덊샇" maxlength="30" autocomplete="current-password" />
-      <button class="text-btn" id="startBtn">?쒖옉</button>
+      <input class="inp" id="loginName" type="text" placeholder="사용자 이름" maxlength="30" autocomplete="username" />
+      <input class="inp" id="loginPass" type="password" placeholder="비밀번호" maxlength="30" autocomplete="current-password" />
+      <button class="text-btn" id="startBtn">시작</button>
     </div>
     <div class="login-status" id="loginStatus"></div>
   </div>
@@ -561,10 +561,10 @@
   <div class="spread">
     <div class="page left" id="pageLeft">
       <div class="page-head">
-        <div class="page-title">硫붾え</div>
+        <div class="page-title">메모</div>
         <div class="tabs">
-          <button class="tab active" data-ltab="memo-month">?붽컙</button>
-          <button class="tab" data-ltab="memo-week">二쇨컙</button>
+          <button class="tab active" data-ltab="memo-month">월간</button>
+          <button class="tab" data-ltab="memo-week">주간</button>
         </div>
       </div>
       <div id="memoContent"></div>
@@ -574,11 +574,11 @@
 
     <div class="page right" id="pageRight">
       <div class="page-head">
-        <div class="page-title">?듦?</div>
+        <div class="page-title">습관</div>
         <div class="tabs">
-          <button class="tab active" data-rtab="habit-home">??/button>
-          <button class="tab" data-rtab="habit-setup">?ㅼ젙</button>
-          <button class="tab" data-rtab="habit-all">?꾩껜</button>
+          <button class="tab active" data-rtab="habit-home">홈</button>
+          <button class="tab" data-rtab="habit-setup">설정</button>
+          <button class="tab" data-rtab="habit-all">전체</button>
         </div>
       </div>
       <div id="habitContent"></div>
@@ -690,8 +690,8 @@ async function tryAutoLogin(){
 function clearAuth(){stDel(TOK_KEY);stDel(USER_KEY);curToken='';curUser=null}
 
 function renderMeta(){
-  $('monthTitle').textContent=`${yr()}??${mo()}??;
-  $('userNameText').textContent=curUser?.userName||'?ъ슜??;
+  $('monthTitle').textContent=`${yr()}년 ${mo()}월`;
+  $('userNameText').textContent=curUser?.userName||'사용자';
   $('loginBox').classList.toggle('show',!curUser);
   $('menuWrap').style.display=curUser?'block':'none';
   $('forceSyncBtn').style.display=curUser?'flex':'none';
@@ -708,7 +708,7 @@ async function loadAll(options={}){
   if(force)clearMonthCache(curUser.userId,targetYm);
   else if(activeMonth&&hasMonthCache(targetYm)){applyCachedState(loadCache(targetYm));renderAll()}
 
-  if(!silent&&!hasMonthCache(targetYm))setStatus('?곗씠?곕? 遺덈윭?ㅻ뒗 以?..');
+  if(!silent&&!hasMonthCache(targetYm))setStatus('데이터를 불러오는 중...');
 
   try{
     const [y,m]=targetYm.split('-').map(Number);
@@ -749,7 +749,7 @@ async function loadAll(options={}){
     if(!silent)setStatus('');
   }catch(err){
     if(activeMonth&&seq!==loadSeq)return;
-    if(!silent)setStatus('濡쒕뱶 ?ㅽ뙣: '+(err.message||'?ㅽ듃?뚰겕 ?ㅻ쪟'),true);
+    if(!silent)setStatus('로드 실패: '+(err.message||'네트워크 오류'),true);
   }
 }
 
@@ -764,13 +764,13 @@ function queueBackgroundRefresh(targetYm,force=false){
 
 async function doStart(){
   const n=$('loginName').value.trim(),p=$('loginPass').value.trim();
-  if(!n||!p){setLS('?대쫫怨?鍮꾨?踰덊샇瑜??낅젰??二쇱꽭??',true);return}
+  if(!n||!p){setLS('이름과 비밀번호를 입력해 주세요.',true);return}
   $('startBtn').disabled=true;
-  setLS('?뺤씤 以?..');
+  setLS('확인 중...');
   try{
     await pj({action:'registerUser',userName:n,password:p});
     const r=await pj({action:'login',userName:n,password:p});
-    if(!r.success||!r.token||!r.user)throw new Error(r.message||'濡쒓렇???ㅽ뙣');
+    if(!r.success||!r.token||!r.user)throw new Error(r.message||'로그인 실패');
     curToken=r.token;
     curUser=r.user;
     stSet(TOK_KEY,curToken);
@@ -783,7 +783,7 @@ async function doStart(){
     await loadAll({force:!hasMonthCache(ym())});
     startAutoSync();
   }catch(e){
-    setLS(e.message||'?ㅽ뙣',true);
+    setLS(e.message||'실패',true);
   }finally{
     $('startBtn').disabled=false;
   }
@@ -797,7 +797,7 @@ async function doLogout(){
   stopAutoSync();
   renderMeta();
   renderAll();
-  setStatus('濡쒓렇?꾩썐?섏뿀?듬땲??');
+  setStatus('로그아웃되었습니다.');
 }
 
 async function persistCheck(d,targetYm=ym(),silent=false){
@@ -811,7 +811,7 @@ async function persistCheck(d,targetYm=ym(),silent=false){
       checks:checkDrafts[key]||checks[d]||Array(MAX_H).fill(false)
     });
     if(!r.success){
-      if(!silent)setStatus('泥댄겕 ????ㅽ뙣',true);
+      if(!silent)setStatus('체크 저장 실패',true);
       return false;
     }
     if(targetYm===ym()&&Array.isArray(checkDrafts[key])) checks[d]=[...checkDrafts[key]];
@@ -819,7 +819,7 @@ async function persistCheck(d,targetYm=ym(),silent=false){
     saveCache(targetYm);
     return true;
   }catch{
-    if(!silent)setStatus('泥댄겕 ????ㅻ쪟',true);
+    if(!silent)setStatus('체크 저장 오류',true);
     return false;
   }
 }
@@ -852,7 +852,7 @@ function buildMemoRows(from,to,src){
     const value=Object.prototype.hasOwnProperty.call(memoDrafts,key)?memoDrafts[key]:(memos[d]||'');
     const isPending=Object.prototype.hasOwnProperty.call(memoDrafts,key);
     h+=`<div class="memo-row">
-      <div class="day ${dcls(d)} ${isPending?'pending':''}" data-day-save="${d}" data-src="${src}" id="day-save-${src}-${d}">${d}??/div>
+      <div class="day ${dcls(d)} ${isPending?'pending':''}" data-day-save="${d}" data-src="${src}" id="day-save-${src}-${d}">${d}일</div>
       <div class="memo-cell">
         <input class="memo-input" id="mi-${src}-${d}" type="text" data-day="${d}" data-src="${src}" value="${esc(value)}" ${curUser?'':'disabled'} autocomplete="off"/>
         <span class="save-ind" id="si-${src}-${d}"></span>
@@ -864,7 +864,7 @@ function buildMemoRows(from,to,src){
 
 function buildMemoWeek(){
   const days=getWeekDays();
-  return days.length?buildMemoRows(days[0],days[days.length-1],'lw'):'<div style="padding:8px 4px;font-size:11px;color:var(--muted);">?대떦 ?놁쓬</div>';
+  return days.length?buildMemoRows(days[0],days[days.length-1],'lw'):'<div style="padding:8px 4px;font-size:11px;color:var(--muted);">해당 없음</div>';
 }
 
 function bindMemo(el){
@@ -880,8 +880,8 @@ function bindMemo(el){
       if(twin&&twin.value!==inp.value)twin.value=inp.value;
       markMemoPending(d);
       saveCache(ym());
-      showInd(d,src,'??λ?湲?,true);
-      showInd(d,other,'??λ?湲?,true);
+      showInd(d,src,'저장대기',true);
+      showInd(d,other,'저장대기',true);
     });
     inp.addEventListener('keydown',e=>{if(e.key==='Enter')e.preventDefault();});
   });
@@ -930,7 +930,7 @@ async function doMemoSave(d,src,options={}){
 
   try{
     const r=await pj({action:'saveRecord',userId:curUser.userId,year:yr(),month:mo(),day:d,memo:val});
-    if(!r.success) throw new Error(r.message||'硫붾え ????ㅽ뙣');
+    if(!r.success) throw new Error(r.message||'메모 저장 실패');
 
     if(val) memos[d]=val;
     else delete memos[d];
@@ -938,8 +938,8 @@ async function doMemoSave(d,src,options={}){
     delete memoDrafts[key];
     saveCache(ym());
     markMemoSaved(d);
-    showInd(d,src,'??μ셿猷?,true);
-    showInd(d,other,'??μ셿猷?,true);
+    showInd(d,src,'저장완료',true);
+    showInd(d,other,'저장완료',true);
 
     setTimeout(()=>{
       showInd(d,src,'',false);
@@ -947,14 +947,14 @@ async function doMemoSave(d,src,options={}){
     },900);
 
     if(!silent){
-      setStatus(val?`${d}??硫붾え ???:`${d}??硫붾え ??젣`);
+      setStatus(val?`${d}일 메모 저장`:`${d}일 메모 삭제`);
       setTimeout(()=>setStatus(''),1200);
     }
   }catch(err){
     markMemoPending(d);
-    showInd(d,src,'?ㅻ쪟',true);
-    showInd(d,other,'?ㅻ쪟',true);
-    if(!silent)setStatus(err.message||'硫붾え ????ㅻ쪟',true);
+    showInd(d,src,'오류',true);
+    showInd(d,other,'오류',true);
+    if(!silent)setStatus(err.message||'메모 저장 오류',true);
   }
 }
 
@@ -976,8 +976,8 @@ function renderRight(rowH,graphRows){
 }
 
 function buildHabitHome(rowH,graphRows){
-  const days=getWeekDays(),lastDay=last(),minD=days[0]||1,maxD=days[days.length-1]||lastDay,lbl=days.length?`${days[0]}??${days[days.length-1]}??:'';
-  let h=`<div class="graph-wrap" style="height:${rowH*graphRows}px;"><canvas id="graphCanvas"></canvas></div><div class="week-nav"><button class="w-btn" id="wPrev" ${minD<=1?'disabled':''}>??/button><div class="week-lbl">${lbl}</div><button class="w-btn" id="wNext" ${maxD>=lastDay?'disabled':''}>??/button></div>`;
+  const days=getWeekDays(),lastDay=last(),minD=days[0]||1,maxD=days[days.length-1]||lastDay,lbl=days.length?`${days[0]}일~${days[days.length-1]}일`:'';
+  let h=`<div class="graph-wrap" style="height:${rowH*graphRows}px;"><canvas id="graphCanvas"></canvas></div><div class="week-nav"><button class="w-btn" id="wPrev" ${minD<=1?'disabled':''}>‹</button><div class="week-lbl">${lbl}</div><button class="w-btn" id="wNext" ${maxD>=lastDay?'disabled':''}>›</button></div>`;
   if(days.length){h+=buildCheckHeader();days.forEach(d=>h+=buildCheckRow(d,'rh'))}
   return h;
 }
@@ -991,8 +991,8 @@ function buildHabitAll(){
 function buildCheckHeader(){
   const cnt=hcnt(),col=`var(--right-date) repeat(${cnt},1fr) var(--total-w)`;
   let cells='';
-  habits.slice(0,cnt).forEach(n=>cells+=`<div class="hdr">${esc(n||'?듦?')}</div>`);
-  return `<div class="habit-hdr" style="grid-template-columns:${col};"><div></div>${cells}<div class="hdr">??/div></div>`;
+  habits.slice(0,cnt).forEach(n=>cells+=`<div class="hdr">${esc(n||'습관')}</div>`);
+  return `<div class="habit-hdr" style="grid-template-columns:${col};"><div></div>${cells}<div class="hdr">합</div></div>`;
 }
 
 function effectiveChecks(d){
@@ -1013,7 +1013,7 @@ function buildCheckRow(d,src){
   const tot=ch.slice(0,cnt).filter(Boolean).length;
   let cbs='';
   for(let i=0;i<cnt;i++)cbs+=`<div class="cb"><input type="checkbox" data-day="${d}" data-idx="${i}" data-src="${src}" ${ch[i]?'checked':''} ${curUser?'':'disabled'}></div>`;
-  return `<div class="check-row" style="grid-template-columns:${col};"><div class="day ${dcls(d)} ${checkDayStateClass(d)}" data-check-save="${d}" data-src="${src}" id="check-day-${src}-${d}">${d}??/div>${cbs}<div class="total" id="tc-${src}-${d}">${tot>0?tot:''}</div></div>`;
+  return `<div class="check-row" style="grid-template-columns:${col};"><div class="day ${dcls(d)} ${checkDayStateClass(d)}" data-check-save="${d}" data-src="${src}" id="check-day-${src}-${d}">${d}일</div>${cbs}<div class="total" id="tc-${src}-${d}">${tot>0?tot:''}</div></div>`;
 }
 
 function buildHabitSetup(){
@@ -1022,7 +1022,7 @@ function buildHabitSetup(){
     const key=habitDraftKey(i);
     const value=Object.prototype.hasOwnProperty.call(habitDrafts,key)?habitDrafts[key]:(habits[i]||'');
     const state=Object.prototype.hasOwnProperty.call(habitDrafts,key)?'pending':'';
-    h+=`<div class="setup-row"><div class="day ${state}" data-hsave="${i}" id="habit-save-${i}">${i+1}</div><div class="setup-cell"><input class="setup-input" type="text" data-hi="${i}" value="${esc(value)}" placeholder="?듦? ${i+1}" maxlength="20" ${curUser?'':'disabled'} autocomplete="off"></div></div>`;
+    h+=`<div class="setup-row"><div class="day ${state}" data-hsave="${i}" id="habit-save-${i}">${i+1}</div><div class="setup-cell"><input class="setup-input" type="text" data-hi="${i}" value="${esc(value)}" placeholder="습관 ${i+1}" maxlength="20" ${curUser?'':'disabled'} autocomplete="off"></div></div>`;
   }
   return h;
 }
@@ -1036,7 +1036,7 @@ function bindSetup(el){
       const dayEl=document.getElementById(`habit-save-${idx}`);
       if(dayEl){dayEl.classList.remove('saved');dayEl.classList.add('pending');}
       saveCache(ym());
-      setStatus('踰덊샇瑜??꾨Ⅴ硫???λ맗?덈떎.');
+      setStatus('번호를 누르면 저장됩니다.');
     });
     inp.addEventListener('keydown',e=>{if(e.key==='Enter')e.preventDefault();});
   });
@@ -1059,19 +1059,19 @@ async function saveHabitsByNumber(idx){
   const targetYm=ym();
   const payload=Array.from(document.querySelectorAll('.setup-input')).map(i=>i.value.trim());
   payload.forEach((v,i)=>{habitDrafts[habitDraftKey(i)]=v;});
-  setStatus('???以?..');
+  setStatus('저장 중...');
   try{
     const r=await pj({action:'saveHabits',userId:curUser.userId,yearMonth:targetYm,habits:payload});
-    if(!r.success)throw new Error(r.message||'????ㅽ뙣');
+    if(!r.success)throw new Error(r.message||'저장 실패');
     habits=Array.isArray(r.habits)?r.habits.map(v=>String(v??'').trim()):payload;
     for(let i=0;i<MAX_H;i++) delete habitDrafts[habitDraftKey(i)];
     saveCache(targetYm);
     renderAll();
     markHabitSaved(idx);
-    setStatus('?듦?????λ릺?덉뒿?덈떎.');
+    setStatus('습관이 저장되었습니다.');
     setTimeout(()=>setStatus(''),1200);
   }catch(e){
-    setStatus(e.message||'????ㅽ뙣',true);
+    setStatus(e.message||'저장 실패',true);
   }
 }
 
@@ -1119,7 +1119,7 @@ async function saveChecksByDay(d,src){
   setTimeout(()=>{
     document.querySelectorAll(`[id^="check-day-"][id$="-${d}"]`).forEach(el=>el.classList.remove('saved'));
   },900);
-  setStatus(`${d}??泥댄겕 ???);
+  setStatus(`${d}일 체크 저장`);
   setTimeout(()=>setStatus(''),1200);
 }
 
@@ -1207,7 +1207,7 @@ async function init(){
       resetMonthState();
       renderMeta();
       renderAll();
-      setStatus('濡쒓렇?몄씠 留뚮즺?섏뿀?듬땲??',true);
+      setStatus('로그인이 만료되었습니다.',true);
       return;
     }
     if(!hasMonthCache(ym()))await loadAll({force:true});
