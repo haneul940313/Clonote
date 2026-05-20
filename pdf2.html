@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>거래명세표 PDF</title>
+  <style>
+    :root {
+      --ink: #202020;
+      --line: #404040;
+      --blue: #dff2f5;
+      --pink: #e9b7b7;
+      --bg: #f5f6f8;
+      --white: #ffffff;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --dark: #374151;
+      --danger: #c2410c;
+      --ok: #047857;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, "Malgun Gothic", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      color: #fff;
+      font-weight: 700;
+      min-height: 42px;
+      padding: 0 16px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: .55;
+    }
+
+    .primary {
+      background: var(--accent);
+    }
+
+    .secondary {
+      background: var(--dark);
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 32px 16px 48px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .status {
+      min-height: 24px;
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .status.ok {
+      color: var(--ok);
+    }
+
+    .empty {
+      padding: 54px 16px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed #d1d5db;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .statement {
+      width: 100%;
+      max-width: 820px;
+      margin: 0 auto;
+      background: var(--white);
+      border: 2px solid var(--line);
+      padding: 8px;
+      overflow-x: auto;
+      box-shadow: 0 16px 34px rgba(15, 23, 42, .08);
+    }
+
+    .paper {
+      min-width: 760px;
+    }
+
+    .title {
+      margin: 8px 0 24px;
+      text-align: center;
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: 8px;
+      text-decoration: underline;
+      text-underline-offset: 6px;
+    }
+
+    .top-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 1.55fr;
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+
+    .recipient {
+      padding: 8px 0 0;
+      min-height: 126px;
+      font-size: 15px;
+    }
+
+    .date-line {
+      margin: 0 0 34px;
+      font-weight: 700;
+    }
+
+    .to-line {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      margin-left: 20px;
+    }
+
+    .to-name {
+      flex: 1;
+      border-bottom: 1px solid var(--line);
+      min-height: 26px;
+      text-align: right;
+      padding-right: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 5px 6px;
+      height: 28px;
+      font-size: 13px;
+      vertical-align: middle;
+      word-break: keep-all;
+    }
+
+    th {
+      background: var(--blue);
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .supplier td {
+      height: 29px;
+    }
+
+    .supplier-label {
+      width: 34px;
+      background: var(--blue);
+      text-align: center;
+      font-weight: 700;
+      writing-mode: vertical-rl;
+      letter-spacing: 6px;
+    }
+
+    .label {
+      background: #f8fbfc;
+      text-align: center;
+      font-weight: 700;
+      width: 88px;
+    }
+
+    .seal {
+      text-align: center;
+      color: #555;
+    }
+
+    .amount-bar {
+      margin-bottom: 0;
+    }
+
+    .amount-bar td {
+      height: 34px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .amount-title {
+      width: 145px;
+      text-align: center;
+    }
+
+    .amount-korean {
+      background: var(--pink);
+      text-align: center;
+    }
+
+    .amount-won {
+      width: 52px;
+      background: var(--pink);
+      text-align: center;
+    }
+
+    .amount-number {
+      width: 130px;
+      background: var(--pink);
+      text-align: right;
+      padding-right: 10px;
+    }
+
+    .items th {
+      height: 28px;
+    }
+
+    .items td {
+      height: 27px;
+    }
+
+    .col-date {
+      width: 76px;
+    }
+
+    .col-name {
+      width: 290px;
+    }
+
+    .col-unit {
+      width: 58px;
+    }
+
+    .col-qty {
+      width: 58px;
+    }
+
+    .col-price {
+      width: 84px;
+    }
+
+    .col-amount {
+      width: 128px;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .pink {
+      background: var(--pink);
+    }
+
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 235px;
+    }
+
+    .memo {
+      border: 1px solid var(--line);
+      border-top: 0;
+      min-height: 78px;
+      padding: 7px;
+      font-weight: 700;
+      background: #fff;
+    }
+
+    .totals {
+      border-top: 0;
+    }
+
+    .totals td {
+      height: 26px;
+      font-weight: 700;
+    }
+
+    .totals .label {
+      background: var(--blue);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(15, 23, 42, .45);
+      z-index: 20;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(420px, 100%);
+      background: #fff;
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, .25);
+    }
+
+    .modal h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .modal select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 0 10px;
+      margin-bottom: 14px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    @media (max-width: 760px) {
+      .toolbar {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .statement {
+        padding: 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="toolbar">
+      <button id="createBtn" class="primary" type="button">파일 생성하기</button>
+      <button id="pdfBtn" class="secondary" type="button" disabled>PDF 다운로드 받기</button>
+    </div>
+
+    <p id="status" class="status">파일 생성하기 버튼을 눌러주세요.</p>
+
+    <section id="preview" class="empty">
+      아직 생성된 거래명세표가 없습니다.
+    </section>
+  </main>
+
+  <div id="projectModal" class="modal-backdrop">
+    <div class="modal">
+      <h2>프로젝트 선택</h2>
+      <select id="projectSelect"></select>
+      <div class="modal-actions">
+        <button id="cancelProjectBtn" class="secondary" type="button">취소</button>
+        <button id="confirmProjectBtn" class="primary" type="button">선택</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby1Edjk8W4MRLim6AIa-aoa-yoVhOIRBz2DWO-q8qid0_Ye9ac1z8I9ruclIl7f3Ii3/exec';
+
+    const state = {
+      statement: null,
+      selectedProject: '',
+      busy: false,
+    };
+
+    const els = {
+      createBtn: document.querySelector('#createBtn'),
+      pdfBtn: document.querySelector('#pdfBtn'),
+      status: document.querySelector('#status'),
+      preview: document.querySelector('#preview'),
+      modal: document.querySelector('#projectModal'),
+      projectSelect: document.querySelector('#projectSelect'),
+      cancelProjectBtn: document.querySelector('#cancelProjectBtn'),
+      confirmProjectBtn: document.querySelector('#confirmProjectBtn'),
+    };
+
+    els.createBtn.addEventListener('click', openProjectPicker);
+    els.pdfBtn.addEventListener('click', downloadPdf);
+    els.cancelProjectBtn.addEventListener('click', closeProjectPicker);
+    els.confirmProjectBtn.addEventListener('click', confirmProject);
+
+    async function openProjectPicker() {
+      setBusy(true);
+      setStatus('프로젝트 목록을 불러오는 중입니다.');
+
+      try {
+        const data = await fetchJson(`${WEB_APP_URL}?action=projects`);
+
+        if (!data.ok) {
+          throw new Error(data.error || '프로젝트 목록을 불러오지 못했습니다.');
+        }
+
+        renderProjectOptions(data.projects || []);
+        els.modal.classList.add('open');
+        setBusy(false);
+        setStatus('프로젝트를 선택해주세요.');
+      } catch (error) {
+        showError(error);
+      }
+    }
+
+    function renderProjectOptions(projects) {
+      if (!projects.length) {
+        els.projectSelect.innerHTML = '<option value="">프로젝트 없음</option>';
+        return;
+      }
+
+      els.projectSelect.innerHTML = projects.map((project) => {
+        const label = `${project.name || '프로젝트 없음'} (${project.count || 0}건)`;
+        return `<option value="${escapeHtml(project.name || '')}">${escapeHtml(label)}</option>`;
+      }).join('');
+    }
+
+    function closeProjectPicker() {
+      els.modal.classList.remove('open');
+      setStatus('파일 생성하기 버튼을 눌러주세요.');
+    }
+
+    async function confirmProject() {
+      const projectName = els.projectSelect.value;
+      els.modal.classList.remove('open');
+      await createFile(projectName);
+    }
+
+    async function createFile(projectName) {
+      setBusy(true);
+      setStatus('노션 DB 내용을 불러오는 중입니다.');
+
+      try {
+        const url = `${WEB_APP_URL}?project=${encodeURIComponent(projectName || '')}`;
+        const data = await fetchJson(url);
+
+        if (!data.ok) {
+          throw new Error(data.error || '데이터를 불러오지 못했습니다.');
+        }
+
+        state.statement = data.statement;
+        state.selectedProject = projectName || '';
+        renderStatement(data.statement);
+
+        setBusy(false);
+        setStatus(`${data.statement.rows.length.toLocaleString()}개 품목으로 거래명세표를 생성했습니다.`, 'ok');
+      } catch (error) {
+        showError(error);
+      }
+    }
+
+    async function downloadPdf() {
+      setBusy(true);
+      setStatus('PDF 파일을 만드는 중입니다.');
+
+      try {
+        const url = `${WEB_APP_URL}?action=pdf&project=${encodeURIComponent(state.selectedProject || '')}`;
+        const data = await fetchJson(url);
+
+        if (!data.ok) {
+          throw new Error(data.error || 'PDF를 만들지 못했습니다.');
+        }
+
+        const link = document.createElement('a');
+        link.href = `data:application/pdf;base64,${data.base64}`;
+        link.download = data.fileName || '거래명세표.pdf';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        setBusy(false);
+        setStatus('PDF 다운로드를 시작했습니다.', 'ok');
+      } catch (error) {
+        showError(error);
+      }
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url, {
+        method: 'GET',
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        throw new Error(`웹앱 호출 실패: ${response.status}`);
+      }
+
+      return response.json();
+    }
+
+    function renderStatement(statement) {
+      const rows = buildRows(statement.rows || [], 15);
+      const supplyAmount = Number(statement.totals?.supplyAmount || 0);
+      const taxAmount = Number(statement.totals?.taxAmount || 0);
+      const totalAmount = Number(statement.totals?.totalAmount || 0);
+
+      els.preview.className = 'statement';
+      els.preview.innerHTML = `
+        <div class="paper">
+          <h1 class="title">거 래 명 세 서</h1>
+
+          <div class="top-grid">
+            <div class="recipient">
+              <div class="date-line">날짜 : ${formatTodayKorean()}</div>
+              <div class="to-line">
+                <span class="to-name">${escapeHtml(statement.projectName || statement.customerName || '')}</span>
+                <strong>귀하</strong>
+              </div>
+            </div>
+
+            <table class="supplier">
+              <tr>
+                <td class="supplier-label" rowspan="4">공급자</td>
+                <td class="label">상호</td>
+                <td>${escapeHtml(statement.projectName || '-')}</td>
+                <td class="label">대표자</td>
+                <td class="seal">${escapeHtml(statement.manager || '-')} &nbsp; (인)</td>
+              </tr>
+              <tr>
+                <td class="label">전화번호</td>
+                <td colspan="3">${escapeHtml(statement.phone || '-')}</td>
+              </tr>
+              <tr>
+                <td class="label">주소</td>
+                <td colspan="3">${escapeHtml(statement.address || '-')}</td>
+              </tr>
+              <tr>
+                <td class="label">비고</td>
+                <td colspan="3"></td>
+              </tr>
+            </table>
+          </div>
+
+          <table class="amount-bar">
+            <tr>
+              <td class="amount-title">합계금액 :</td>
+              <td class="amount-korean">${escapeHtml(numberToKoreanAmount(totalAmount))}</td>
+              <td class="amount-won">₩</td>
+              <td class="amount-number">${formatNumber(totalAmount)}</td>
+            </tr>
+          </table>
+
+          <table class="items">
+            <thead>
+              <tr>
+                <th class="col-date">날짜</th>
+                <th class="col-name">품명 / 규격</th>
+                <th class="col-unit">단위</th>
+                <th class="col-qty">수량</th>
+                <th class="col-price">단가</th>
+                <th class="col-amount">금액</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+
+          <div class="bottom-grid">
+            <div class="memo">비 고</div>
+            <table class="totals">
+              <tr>
+                <td class="label">공급가</td>
+                <td class="right pink">${formatNumber(supplyAmount)}</td>
+              </tr>
+              <tr>
+                <td class="label">부가세</td>
+                <td class="right pink">${formatNumber(taxAmount)}</td>
+              </tr>
+              <tr>
+                <td class="label">합계금액</td>
+                <td class="right pink">${formatNumber(totalAmount)}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function buildRows(items, minRows) {
+      const filledRows = items.map((row) => {
+        const nameSpec = [row.itemName, row.spec].filter(Boolean).join(' / ');
+        return `
+          <tr>
+            <td class="center">${escapeHtml(row.date || '')}</td>
+            <td>${escapeHtml(nameSpec)}</td>
+            <td class="center">${escapeHtml(row.unit || '')}</td>
+            <td class="right">${formatNumber(row.quantity)}</td>
+            <td class="right">${formatNumber(row.unitPrice)}</td>
+            <td class="right pink">${formatNumber(row.supplyAmount)}</td>
+          </tr>
+        `;
+      });
+
+      while (filledRows.length < minRows) {
+        filledRows.push(`
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="right pink">-</td>
+          </tr>
+        `);
+      }
+
+      return filledRows.join('');
+    }
+
+    function setBusy(nextBusy) {
+      state.busy = nextBusy;
+      els.createBtn.disabled = nextBusy;
+
+      if (nextBusy) {
+        els.pdfBtn.disabled = true;
+      } else {
+        els.pdfBtn.disabled = !state.statement;
+      }
+    }
+
+    function setStatus(message, type = '') {
+      els.status.textContent = message;
+      els.status.className = `status ${type}`;
+    }
+
+    function showError(error) {
+      setBusy(false);
+      setStatus(error && error.message ? error.message : String(error), 'error');
+    }
+
+    function formatTodayKorean() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}년 ${month}월 ${day}일`;
+    }
+
+    function formatNumber(value) {
+      const number = Number(value || 0);
+      if (!number) return '';
+      return number.toLocaleString('ko-KR');
+    }
+
+    function numberToKoreanAmount(value) {
+      const number = Number(value || 0);
+      if (!number) return '영원정';
+      return `${number.toLocaleString('ko-KR')}원정`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+  </script>
+</body>
+</html>
