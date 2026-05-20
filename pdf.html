@@ -200,6 +200,8 @@
   </main>
 
   <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwPJKtEETLQ7imFdp9DCnZeEarad1i1eKhCBH-zupgclGhyn1wCr0A5_snbNUspsMrk/exec';
+
     const state = {
       statement: null,
       busy: false,
@@ -215,40 +217,64 @@
     els.createBtn.addEventListener('click', createFile);
     els.pdfBtn.addEventListener('click', downloadPdf);
 
-    function createFile() {
+    async function createFile() {
       setBusy(true);
       setStatus('노션 DB 내용을 불러오는 중입니다.');
 
-      google.script.run
-        .withSuccessHandler((statement) => {
-          state.statement = statement;
-          renderStatement(statement);
-          els.pdfBtn.disabled = false;
-          setBusy(false);
-          setStatus(`${statement.rows.length.toLocaleString()}개 품목으로 거래명세표를 생성했습니다.`, 'ok');
-        })
-        .withFailureHandler(showError)
-        .loadStatementData();
+      try {
+        const data = await fetchJson(WEB_APP_URL);
+
+        if (!data.ok) {
+          throw new Error(data.error || '데이터를 불러오지 못했습니다.');
+        }
+
+        state.statement = data.statement;
+        renderStatement(data.statement);
+        els.pdfBtn.disabled = false;
+
+        setBusy(false);
+        setStatus(`${data.statement.rows.length.toLocaleString()}개 품목으로 거래명세표를 생성했습니다.`, 'ok');
+      } catch (error) {
+        showError(error);
+      }
     }
 
-    function downloadPdf() {
+    async function downloadPdf() {
       setBusy(true);
       setStatus('PDF 파일을 만드는 중입니다.');
 
-      google.script.run
-        .withSuccessHandler((pdf) => {
-          const link = document.createElement('a');
-          link.href = `data:application/pdf;base64,${pdf.base64}`;
-          link.download = pdf.fileName;
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
+      try {
+        const data = await fetchJson(`${WEB_APP_URL}?action=pdf`);
 
-          setBusy(false);
-          setStatus('PDF 다운로드를 시작했습니다.', 'ok');
-        })
-        .withFailureHandler(showError)
-        .createStatementPdf();
+        if (!data.ok) {
+          throw new Error(data.error || 'PDF를 만들지 못했습니다.');
+        }
+
+        const link = document.createElement('a');
+        link.href = `data:application/pdf;base64,${data.base64}`;
+        link.download = data.fileName || '거래명세표.pdf';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        setBusy(false);
+        setStatus('PDF 다운로드를 시작했습니다.', 'ok');
+      } catch (error) {
+        showError(error);
+      }
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url, {
+        method: 'GET',
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        throw new Error(`웹앱 호출 실패: ${response.status}`);
+      }
+
+      return response.json();
     }
 
     function renderStatement(statement) {
