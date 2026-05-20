@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>거래명세표 PDF</title>
+  <style>
+    :root {
+      --ink: #15171a;
+      --muted: #6b7280;
+      --line: #d9dde3;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --accent: #1f6feb;
+      --dark: #374151;
+      --danger: #c2410c;
+      --ok: #047857;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Malgun Gothic", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      min-height: 42px;
+      padding: 0 16px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: .55;
+    }
+
+    .primary {
+      background: var(--accent);
+    }
+
+    .secondary {
+      background: var(--dark);
+    }
+
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 32px 18px 48px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      line-height: 1.2;
+    }
+
+    .hint {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .status {
+      min-height: 24px;
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .status.ok {
+      color: var(--ok);
+    }
+
+    .empty {
+      padding: 54px 16px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .statement-image {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 28px;
+      overflow-x: auto;
+      box-shadow: 0 16px 34px rgba(15, 23, 42, .08);
+    }
+
+    .doc-title {
+      text-align: center;
+      margin: 0 0 24px;
+      font-size: 30px;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 2px solid var(--ink);
+      border-left: 1px solid var(--ink);
+      margin-bottom: 18px;
+    }
+
+    .meta div {
+      border-right: 1px solid var(--ink);
+      border-bottom: 1px solid var(--ink);
+      padding: 9px 10px;
+      min-height: 40px;
+    }
+
+    .meta b {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 12px;
+      color: #444;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--ink);
+      padding: 8px 7px;
+      font-size: 13px;
+    }
+
+    th {
+      background: #eef1f5;
+      text-align: center;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .total td {
+      background: #f7f7f7;
+      font-weight: 800;
+    }
+
+    @media (max-width: 700px) {
+      .toolbar {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .meta {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>거래명세표 PDF 테스트</h1>
+    <p class="hint">파일 생성하기를 누르면 노션 DB 내용을 불러와 아래에 거래명세표 이미지가 표시됩니다.</p>
+
+    <div class="toolbar">
+      <button id="createBtn" class="primary" type="button">파일 생성하기</button>
+      <button id="pdfBtn" class="secondary" type="button" disabled>PDF 다운로드 받기</button>
+    </div>
+
+    <p id="status" class="status">파일 생성하기 버튼을 눌러주세요.</p>
+
+    <section id="preview" class="empty">
+      아직 생성된 파일이 없습니다.
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      statement: null,
+      busy: false,
+    };
+
+    const els = {
+      createBtn: document.querySelector('#createBtn'),
+      pdfBtn: document.querySelector('#pdfBtn'),
+      status: document.querySelector('#status'),
+      preview: document.querySelector('#preview'),
+    };
+
+    els.createBtn.addEventListener('click', createFile);
+    els.pdfBtn.addEventListener('click', downloadPdf);
+
+    function createFile() {
+      setBusy(true);
+      setStatus('노션 DB 내용을 불러오는 중입니다.');
+
+      google.script.run
+        .withSuccessHandler((statement) => {
+          state.statement = statement;
+          renderStatement(statement);
+          els.pdfBtn.disabled = false;
+          setBusy(false);
+          setStatus(`${statement.rows.length.toLocaleString()}개 품목으로 거래명세표를 생성했습니다.`, 'ok');
+        })
+        .withFailureHandler(showError)
+        .loadStatementData();
+    }
+
+    function downloadPdf() {
+      setBusy(true);
+      setStatus('PDF 파일을 만드는 중입니다.');
+
+      google.script.run
+        .withSuccessHandler((pdf) => {
+          const link = document.createElement('a');
+          link.href = `data:application/pdf;base64,${pdf.base64}`;
+          link.download = pdf.fileName;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+
+          setBusy(false);
+          setStatus('PDF 다운로드를 시작했습니다.', 'ok');
+        })
+        .withFailureHandler(showError)
+        .createStatementPdf();
+    }
+
+    function renderStatement(statement) {
+      els.preview.className = 'statement-image';
+      els.preview.innerHTML = `
+        <h2 class="doc-title">거래명세표</h2>
+        <div class="meta">
+          <div><b>거래처</b>${escapeHtml(statement.customerName || '-')}</div>
+          <div><b>작성일</b>${escapeHtml(statement.date || '-')}</div>
+          <div><b>문서명</b>${escapeHtml(statement.title || '-')}</div>
+          <div><b>합계금액</b>${formatCurrency(statement.totals.totalAmount)}</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>품목</th>
+              <th>규격</th>
+              <th>수량</th>
+              <th>단가</th>
+              <th>공급가액</th>
+              <th>세액</th>
+              <th>합계</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${statement.rows.map((row, index) => `
+              <tr>
+                <td class="center">${index + 1}</td>
+                <td>${escapeHtml(row.itemName)}</td>
+                <td>${escapeHtml(row.spec)}</td>
+                <td class="right">${formatNumber(row.quantity)}</td>
+                <td class="right">${formatCurrency(row.unitPrice)}</td>
+                <td class="right">${formatCurrency(row.supplyAmount)}</td>
+                <td class="right">${formatCurrency(row.taxAmount)}</td>
+                <td class="right">${formatCurrency((row.supplyAmount || 0) + (row.taxAmount || 0))}</td>
+              </tr>
+            `).join('')}
+            <tr class="total">
+              <td colspan="3" class="center">합계</td>
+              <td class="right">${formatNumber(statement.totals.quantity)}</td>
+              <td></td>
+              <td class="right">${formatCurrency(statement.totals.supplyAmount)}</td>
+              <td class="right">${formatCurrency(statement.totals.taxAmount)}</td>
+              <td class="right">${formatCurrency(statement.totals.totalAmount)}</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+    }
+
+    function setBusy(nextBusy) {
+      state.busy = nextBusy;
+      els.createBtn.disabled = nextBusy;
+
+      if (nextBusy) {
+        els.pdfBtn.disabled = true;
+      } else {
+        els.pdfBtn.disabled = !state.statement;
+      }
+    }
+
+    function setStatus(message, type = '') {
+      els.status.textContent = message;
+      els.status.className = `status ${type}`;
+    }
+
+    function showError(error) {
+      setBusy(false);
+      setStatus(error && error.message ? error.message : String(error), 'error');
+    }
+
+    function formatNumber(value) {
+      return Number(value || 0).toLocaleString('ko-KR');
+    }
+
+    function formatCurrency(value) {
+      return `${Number(value || 0).toLocaleString('ko-KR')}원`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+  </script>
+</body>
+</html>
