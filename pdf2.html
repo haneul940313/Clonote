@@ -58,7 +58,7 @@
     }
 
     .wrap {
-      max-width: 980px;
+      max-width: 1060px;
       margin: 0 auto;
       padding: 32px 16px 48px;
     }
@@ -95,7 +95,7 @@
 
     .statement {
       width: 100%;
-      max-width: 820px;
+      max-width: 940px;
       margin: 0 auto;
       background: var(--white);
       border: 2px solid var(--line);
@@ -105,7 +105,7 @@
     }
 
     .paper {
-      min-width: 760px;
+      min-width: 900px;
     }
 
     .title {
@@ -215,6 +215,17 @@
       text-align: center;
     }
 
+    .amount-won {
+      width: 46px;
+      text-align: center;
+    }
+
+    .amount-number {
+      width: 130px;
+      text-align: right;
+      padding-right: 10px;
+    }
+
     .items th {
       height: 28px;
     }
@@ -228,23 +239,25 @@
     }
 
     .col-name {
-      width: 290px;
+      width: 250px;
     }
 
     .col-unit {
-      width: 58px;
+      width: 56px;
     }
 
     .col-qty {
-      width: 58px;
+      width: 54px;
     }
 
     .col-price {
-      width: 84px;
+      width: 78px;
     }
 
-    .col-amount {
-      width: 128px;
+    .col-amount,
+    .col-tax,
+    .col-total {
+      width: 108px;
     }
 
     .right {
@@ -257,7 +270,7 @@
 
     .bottom-grid {
       display: grid;
-      grid-template-columns: 1fr 235px;
+      grid-template-columns: 1fr 260px;
     }
 
     .memo {
@@ -535,7 +548,8 @@
             <tr>
               <td class="amount-title">합계금액 :</td>
               <td class="amount-korean">${escapeHtml(numberToKoreanAmount(totalAmount))}</td>
-              <td class="amount-number right">${formatNumber(totalAmount)}</td>
+              <td class="amount-won">₩</td>
+              <td class="amount-number">${formatNumber(totalAmount)}</td>
             </tr>
           </table>
 
@@ -548,6 +562,8 @@
                 <th class="col-qty">수량</th>
                 <th class="col-price">단가</th>
                 <th class="col-amount">금액</th>
+                <th class="col-tax">부가세</th>
+                <th class="col-total">합계금액</th>
               </tr>
             </thead>
             <tbody>
@@ -578,6 +594,10 @@
 
     function buildRows(items, minRows) {
       const filledRows = items.map((row) => {
+        const supplyAmount = Number(row.supplyAmount || 0);
+        const taxAmount = Number(row.taxAmount || 0);
+        const totalAmount = Number(row.totalAmount || supplyAmount + taxAmount);
+
         return `
           <tr>
             <td class="center">${escapeHtml(row.date || '')}</td>
@@ -585,7 +605,9 @@
             <td class="center">${escapeHtml(row.spec || '')}</td>
             <td class="right">${formatNumber(row.quantity)}</td>
             <td class="right">${formatNumber(row.unitPrice)}</td>
-            <td class="right">${formatNumber(row.supplyAmount)}</td>
+            <td class="right">${formatNumber(supplyAmount)}</td>
+            <td class="right">${formatNumber(taxAmount)}</td>
+            <td class="right">${formatNumber(totalAmount)}</td>
           </tr>
         `;
       });
@@ -598,6 +620,8 @@
             <td></td>
             <td></td>
             <td></td>
+            <td class="right">-</td>
+            <td class="right">-</td>
             <td class="right">-</td>
           </tr>
         `);
@@ -642,9 +666,37 @@
     }
 
     function numberToKoreanAmount(value) {
-      const number = Number(value || 0);
+      const number = Math.floor(Number(value || 0));
       if (!number) return '영원 정';
-      return `${number.toLocaleString('ko-KR')}원 정`;
+
+      const digits = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구'];
+      const smallUnits = ['', '십', '백', '천'];
+      const largeUnits = ['', '만', '억', '조'];
+      const groups = [];
+      let remaining = number;
+
+      while (remaining > 0) {
+        groups.push(remaining % 10000);
+        remaining = Math.floor(remaining / 10000);
+      }
+
+      const text = groups.map((group, groupIndex) => {
+        if (!group) return '';
+
+        let groupText = '';
+        const chars = String(group).padStart(4, '0').split('').map(Number);
+
+        chars.forEach((digit, index) => {
+          if (!digit) return;
+          const unitIndex = 3 - index;
+          const omitOne = digit === 1 && unitIndex > 0;
+          groupText += (omitOne ? '' : digits[digit]) + smallUnits[unitIndex];
+        });
+
+        return groupText + largeUnits[groupIndex];
+      }).reverse().join('');
+
+      return `${text}원 정`;
     }
 
     function escapeHtml(value) {
