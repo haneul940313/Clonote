@@ -215,15 +215,11 @@
       text-align: center;
     }
 
-    .amount-won {
-      width: 46px;
-      text-align: center;
-    }
-
-    .amount-number {
-      width: 130px;
+    .amount-money {
+      width: 176px;
       text-align: right;
       padding-right: 10px;
+      white-space: nowrap;
     }
 
     .items th {
@@ -344,6 +340,42 @@
         padding: 6px;
       }
     }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .toolbar,
+      .status,
+      .modal-backdrop {
+        display: none !important;
+      }
+
+      .wrap {
+        max-width: none;
+        padding: 0;
+      }
+
+      .statement {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        border: 0;
+        padding: 0;
+        box-shadow: none;
+        overflow: visible;
+      }
+
+      .paper {
+        min-width: 0;
+      }
+
+      @page {
+        size: A4 landscape;
+        margin: 8mm;
+      }
+    }
   </style>
 </head>
 <body>
@@ -462,30 +494,19 @@
       }
     }
 
-    async function downloadPdf() {
-      setBusy(true);
-      setStatus('PDF 파일을 만드는 중입니다.');
-
-      try {
-        const url = `${WEB_APP_URL}?action=pdf&project=${encodeURIComponent(state.selectedProject || '')}`;
-        const data = await fetchJson(url);
-
-        if (!data.ok) {
-          throw new Error(data.error || 'PDF를 만들지 못했습니다.');
-        }
-
-        const link = document.createElement('a');
-        link.href = `data:application/pdf;base64,${data.base64}`;
-        link.download = data.fileName || '거래명세표.pdf';
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-
-        setBusy(false);
-        setStatus('PDF 다운로드를 시작했습니다.', 'ok');
-      } catch (error) {
-        showError(error);
+    function downloadPdf() {
+      if (!state.statement) {
+        setStatus('먼저 파일을 생성해주세요.', 'error');
+        return;
       }
+
+      if (window.self !== window.top) {
+        window.open(window.location.href, '_blank', 'noopener,noreferrer');
+        setStatus('노션 임베드에서는 PDF 저장이 제한될 수 있어 새 탭으로 열었습니다. 새 탭에서 PDF 다운로드 받기를 눌러주세요.', 'ok');
+        return;
+      }
+
+      window.print();
     }
 
     async function fetchJson(url) {
@@ -548,8 +569,7 @@
             <tr>
               <td class="amount-title">합계금액 :</td>
               <td class="amount-korean">${escapeHtml(numberToKoreanAmount(totalAmount))}</td>
-              <td class="amount-won">₩</td>
-              <td class="amount-number">${formatNumber(totalAmount)}</td>
+              <td class="amount-money">₩ ${formatNumber(totalAmount)}</td>
             </tr>
           </table>
 
