@@ -8,8 +8,6 @@
     :root {
       --ink: #202020;
       --line: #404040;
-      --blue: #dff2f5;
-      --pink: #e9b7b7;
       --bg: #f5f6f8;
       --white: #ffffff;
       --muted: #6b7280;
@@ -167,10 +165,10 @@
       font-size: 13px;
       vertical-align: middle;
       word-break: keep-all;
+      background: #fff;
     }
 
     th {
-      background: var(--blue);
       text-align: center;
       font-weight: 700;
     }
@@ -181,7 +179,6 @@
 
     .supplier-label {
       width: 34px;
-      background: var(--blue);
       text-align: center;
       font-weight: 700;
       writing-mode: vertical-rl;
@@ -189,7 +186,6 @@
     }
 
     .label {
-      background: #f8fbfc;
       text-align: center;
       font-weight: 700;
       width: 88px;
@@ -216,21 +212,7 @@
     }
 
     .amount-korean {
-      background: var(--pink);
       text-align: center;
-    }
-
-    .amount-won {
-      width: 52px;
-      background: var(--pink);
-      text-align: center;
-    }
-
-    .amount-number {
-      width: 130px;
-      background: var(--pink);
-      text-align: right;
-      padding-right: 10px;
     }
 
     .items th {
@@ -273,10 +255,6 @@
       text-align: center;
     }
 
-    .pink {
-      background: var(--pink);
-    }
-
     .bottom-grid {
       display: grid;
       grid-template-columns: 1fr 235px;
@@ -298,10 +276,6 @@
     .totals td {
       height: 26px;
       font-weight: 700;
-    }
-
-    .totals .label {
-      background: var(--blue);
     }
 
     .modal-backdrop {
@@ -561,8 +535,7 @@
             <tr>
               <td class="amount-title">합계금액 :</td>
               <td class="amount-korean">${escapeHtml(numberToKoreanAmount(totalAmount))}</td>
-              <td class="amount-won">₩</td>
-              <td class="amount-number">${formatNumber(totalAmount)}</td>
+              <td class="amount-number right">${formatNumber(totalAmount)}</td>
             </tr>
           </table>
 
@@ -570,7 +543,7 @@
             <thead>
               <tr>
                 <th class="col-date">날짜</th>
-                <th class="col-name">품명 / 규격</th>
+                <th class="col-name">품명</th>
                 <th class="col-unit">단위</th>
                 <th class="col-qty">수량</th>
                 <th class="col-price">단가</th>
@@ -587,15 +560,15 @@
             <table class="totals">
               <tr>
                 <td class="label">공급가</td>
-                <td class="right pink">${formatNumber(supplyAmount)}</td>
+                <td class="right">${formatNumber(supplyAmount)}</td>
               </tr>
               <tr>
                 <td class="label">부가세</td>
-                <td class="right pink">${formatNumber(taxAmount)}</td>
+                <td class="right">${formatNumber(taxAmount)}</td>
               </tr>
               <tr>
                 <td class="label">합계금액</td>
-                <td class="right pink">${formatNumber(totalAmount)}</td>
+                <td class="right">${formatNumber(totalAmount)}</td>
               </tr>
             </table>
           </div>
@@ -605,15 +578,14 @@
 
     function buildRows(items, minRows) {
       const filledRows = items.map((row) => {
-        const nameSpec = [row.itemName, row.spec].filter(Boolean).join(' / ');
         return `
           <tr>
             <td class="center">${escapeHtml(row.date || '')}</td>
-            <td>${escapeHtml(nameSpec)}</td>
-            <td class="center">${escapeHtml(row.unit || '')}</td>
+            <td>${escapeHtml(row.itemName || '')}</td>
+            <td class="center">${escapeHtml(row.spec || '')}</td>
             <td class="right">${formatNumber(row.quantity)}</td>
             <td class="right">${formatNumber(row.unitPrice)}</td>
-            <td class="right pink">${formatNumber(row.supplyAmount)}</td>
+            <td class="right">${formatNumber(row.supplyAmount)}</td>
           </tr>
         `;
       });
@@ -626,7 +598,7 @@
             <td></td>
             <td></td>
             <td></td>
-            <td class="right pink">-</td>
+            <td class="right">-</td>
           </tr>
         `);
       }
@@ -671,8 +643,8 @@
 
     function numberToKoreanAmount(value) {
       const number = Number(value || 0);
-      if (!number) return '영원정';
-      return `${number.toLocaleString('ko-KR')}원정`;
+      if (!number) return '영원 정';
+      return `${number.toLocaleString('ko-KR')}원 정`;
     }
 
     function escapeHtml(value) {
