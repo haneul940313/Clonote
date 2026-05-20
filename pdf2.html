@@ -212,7 +212,8 @@
     }
 
     .amount-korean {
-      text-align: center;
+      text-align: right;
+      padding-right: 12px;
     }
 
     .amount-money {
@@ -372,7 +373,7 @@
       }
 
       @page {
-        size: A4 landscape;
+        size: A4 portrait;
         margin: 8mm;
       }
     }
@@ -497,12 +498,6 @@
     function downloadPdf() {
       if (!state.statement) {
         setStatus('먼저 파일을 생성해주세요.', 'error');
-        return;
-      }
-
-      if (window.self !== window.top) {
-        window.open(window.location.href, '_blank', 'noopener,noreferrer');
-        setStatus('노션 임베드에서는 PDF 저장이 제한될 수 있어 새 탭으로 열었습니다. 새 탭에서 PDF 다운로드 받기를 눌러주세요.', 'ok');
         return;
       }
 
