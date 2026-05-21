@@ -109,20 +109,13 @@
     }
 
     .title {
-      margin: 8px 0 24px;
+      margin: 8px 0 20px;
       text-align: center;
       font-size: 30px;
       font-weight: 700;
       letter-spacing: 8px;
       text-decoration: underline;
       text-underline-offset: 6px;
-    }
-
-    .top-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 8px;
     }
 
     .site-line,
@@ -134,6 +127,13 @@
 
     .date-line {
       margin-bottom: 12px;
+    }
+
+    .top-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 8px;
     }
 
     table {
@@ -230,29 +230,29 @@
     }
 
     .col-no {
-      width: 48px;
+      width: 42px;
     }
 
     .col-name {
-      width: 250px;
+      width: 220px;
     }
 
     .col-work {
-      width: 76px;
+      width: 70px;
     }
 
     .col-qty {
-      width: 54px;
+      width: 50px;
     }
 
     .col-price {
-      width: 78px;
+      width: 76px;
     }
 
     .col-amount,
     .col-tax,
     .col-total {
-      width: 108px;
+      width: 94px;
     }
 
     .right {
@@ -265,7 +265,7 @@
 
     .bottom-grid {
       display: grid;
-      grid-template-columns: 1fr 260px;
+      grid-template-columns: 1fr 240px;
     }
 
     .memo {
@@ -341,8 +341,11 @@
     }
 
     @media print {
+      html,
       body {
+        width: 210mm;
         background: #fff;
+        overflow: hidden;
       }
 
       .toolbar,
@@ -352,8 +355,10 @@
       }
 
       .wrap {
+        width: 100%;
         max-width: none;
         padding: 0;
+        margin: 0;
       }
 
       .statement {
@@ -367,7 +372,63 @@
       }
 
       .paper {
+        width: 194mm;
         min-width: 0;
+        margin: 0 auto;
+      }
+
+      th,
+      td {
+        font-size: 10px;
+        padding: 3px 4px;
+        height: 22px;
+      }
+
+      .title {
+        font-size: 24px;
+        margin: 0 0 12px;
+      }
+
+      .site-line,
+      .date-line {
+        font-size: 11px;
+        margin-bottom: 5px;
+      }
+
+      .date-line {
+        margin-bottom: 8px;
+      }
+
+      .party-title {
+        font-size: 11px;
+        height: 23px;
+      }
+
+      .party td {
+        height: 23px;
+      }
+
+      .amount-bar td {
+        font-size: 11px;
+        height: 25px;
+      }
+
+      .items th,
+      .items td {
+        height: 21px;
+      }
+
+      .memo {
+        min-height: 58px;
+      }
+
+      .totals td {
+        height: 22px;
+      }
+
+      .seal-img {
+        width: 34px;
+        height: 34px;
       }
 
       @page {
@@ -403,7 +464,7 @@
   </div>
 
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyYSm6cfTH5OCpwbxiyxd8KfczvELnia601T6S5kBsMKOM7CGnPlLgydFBWEFYESUJT/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbws4JwRYL9F4ZtLilq487su8McXyJFHZoORiHY3ZUeiXuFmPsT9ekH7eX1KQP_vKsNn/exec';
 
     const state = {
       statement: null,
@@ -522,14 +583,13 @@
       const totalAmount = Number(statement.totals?.totalAmount || 0);
       const supplier = statement.supplier || {};
       const recipient = statement.recipient || {};
-      const siteNumber = statement.siteNumber || statement.siteName || '';
 
       els.preview.className = 'statement';
       els.preview.innerHTML = `
         <div class="paper">
           <h1 class="title">거 래 명 세 서</h1>
 
-          <div class="site-line">현장번호 : ${escapeHtml(siteNumber || '-')}</div>
+          <div class="site-line">현장번호 : ${escapeHtml(statement.siteName || '-')}</div>
           <div class="date-line">날짜 : ${formatTodayKorean()}</div>
 
           <div class="top-grid">
@@ -553,7 +613,7 @@
               </tr>
               <tr>
                 <td class="label">현장</td>
-                <td colspan="3">${escapeHtml(statement.siteName || '-')}</td>
+                <td colspan="3">${escapeHtml(statement.workName || statement.siteName || '-')}</td>
               </tr>
             </table>
 
