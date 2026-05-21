@@ -176,26 +176,26 @@
     .label {
       text-align: center;
       font-weight: 700;
-      width: 92px;
     }
 
     .seal-cell {
       position: relative;
       text-align: center;
       color: #555;
-      overflow: hidden;
+      overflow: visible;
     }
 
     .seal-img {
       position: absolute;
-      right: 8px;
+      right: 0;
       top: 50%;
-      width: 42px;
-      height: 42px;
+      width: 84px;
+      height: 84px;
       object-fit: contain;
       transform: translateY(-50%);
-      opacity: .86;
+      opacity: .88;
       pointer-events: none;
+      z-index: 5;
     }
 
     .amount-bar {
@@ -209,7 +209,6 @@
     }
 
     .amount-title {
-      width: 145px;
       text-align: center;
     }
 
@@ -219,10 +218,14 @@
     }
 
     .amount-money {
-      width: 176px;
       text-align: right;
       padding-right: 10px;
       white-space: nowrap;
+    }
+
+    .items th,
+    .items td {
+      height: 26px;
     }
 
     .right {
@@ -233,32 +236,20 @@
       text-align: center;
     }
 
-    .bottom-grid {
-      display: grid;
-      grid-template-columns: 1fr 260px;
-    }
-
-    .memo {
-      border: 1px solid var(--line);
-      border-top: 0;
-      min-height: 78px;
-      padding: 7px;
-      font-weight: 700;
-      background: #fff;
+    .totals-wrap {
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
     }
 
     .totals {
+      width: 260px;
       border-top: 0;
     }
 
     .totals td {
       height: 26px;
       font-weight: 700;
-    }
-
-    .items td,
-    .items th {
-      height: 26px;
     }
 
     .modal-backdrop {
@@ -316,11 +307,8 @@
     }
 
     @media print {
-      html,
       body {
-        width: 210mm;
         background: #fff;
-        overflow: hidden;
       }
 
       .toolbar,
@@ -347,32 +335,28 @@
       }
 
       .paper {
-        width: 194mm;
-        min-width: 194mm;
-        max-width: 194mm;
+        width: 196mm;
+        min-width: 196mm;
+        max-width: 196mm;
         margin: 0 auto;
-      }
-
-      table {
-        table-layout: fixed;
       }
 
       th,
       td {
-        font-size: 9.5px;
+        font-size: 9.2px;
         padding: 2px 3px;
-        height: 20px;
-        line-height: 1.1;
+        height: 19px;
+        line-height: 1.08;
       }
 
       .title {
-        font-size: 23px;
-        margin: 0 0 10px;
+        font-size: 22px;
+        margin: 0 0 9px;
       }
 
       .site-line,
       .date-line {
-        font-size: 10.5px;
+        font-size: 10px;
         margin-bottom: 4px;
       }
 
@@ -381,47 +365,31 @@
       }
 
       .top-grid {
-        gap: 8px;
+        gap: 7px;
         margin-bottom: 6px;
       }
 
       .party-title {
-        font-size: 10.5px;
-        height: 21px;
+        font-size: 10px;
+        height: 20px;
       }
 
       .party td {
-        height: 21px;
-      }
-
-      .label {
-        width: 70px;
+        height: 20px;
       }
 
       .amount-bar td {
-        font-size: 10.5px;
-        height: 23px;
-      }
-
-      .amount-title {
-        width: 115px;
-      }
-
-      .amount-money {
-        width: 130px;
+        font-size: 10px;
+        height: 22px;
       }
 
       .items th,
       .items td {
-        height: 19px;
+        height: 18px;
       }
 
-      .memo {
-        min-height: 55px;
-      }
-
-      .bottom-grid {
-        grid-template-columns: 1fr 225px;
+      .totals {
+        width: 220px;
       }
 
       .totals td {
@@ -429,13 +397,13 @@
       }
 
       .seal-img {
-        width: 30px;
-        height: 30px;
+        width: 68px;
+        height: 68px;
       }
 
       @page {
         size: A4 portrait;
-        margin: 8mm;
+        margin: 7mm;
       }
     }
   </style>
@@ -597,10 +565,10 @@
           <div class="top-grid">
             <table class="party">
               <colgroup>
-                <col style="width:70px">
-                <col>
-                <col style="width:70px">
-                <col>
+                <col style="width:18%">
+                <col style="width:32%">
+                <col style="width:18%">
+                <col style="width:32%">
               </colgroup>
               <tr>
                 <td class="party-title" colspan="4">공급받는자</td>
@@ -627,10 +595,10 @@
 
             <table class="party">
               <colgroup>
-                <col style="width:70px">
-                <col>
-                <col style="width:70px">
-                <col>
+                <col style="width:18%">
+                <col style="width:32%">
+                <col style="width:18%">
+                <col style="width:32%">
               </colgroup>
               <tr>
                 <td class="party-title" colspan="4">공급자</td>
@@ -640,7 +608,7 @@
                 <td colspan="3">${escapeHtml(supplier.businessNumber || '-')}</td>
               </tr>
               <tr>
-                <td class="label">상호</td>
+                <td class="label">공급자명</td>
                 <td>${escapeHtml(supplier.companyName || '-')}</td>
                 <td class="label">대표자</td>
                 <td class="seal-cell">
@@ -661,9 +629,9 @@
 
           <table class="amount-bar">
             <colgroup>
-              <col style="width:115px">
-              <col>
-              <col style="width:130px">
+              <col style="width:14%">
+              <col style="width:68%">
+              <col style="width:18%">
             </colgroup>
             <tr>
               <td class="amount-title">합계금액 :</td>
@@ -674,14 +642,14 @@
 
           <table class="items">
             <colgroup>
-              <col style="width:40px">
-              <col style="width:230px">
-              <col style="width:72px">
-              <col style="width:46px">
-              <col style="width:74px">
-              <col style="width:90px">
-              <col style="width:90px">
-              <col style="width:92px">
+              <col style="width:5%">
+              <col style="width:32%">
+              <col style="width:10%">
+              <col style="width:7%">
+              <col style="width:10%">
+              <col style="width:12%">
+              <col style="width:12%">
+              <col style="width:12%">
             </colgroup>
             <thead>
               <tr>
@@ -700,12 +668,11 @@
             </tbody>
           </table>
 
-          <div class="bottom-grid">
-            <div class="memo">비 고</div>
+          <div class="totals-wrap">
             <table class="totals">
               <colgroup>
-                <col style="width:82px">
-                <col>
+                <col style="width:40%">
+                <col style="width:60%">
               </colgroup>
               <tr>
                 <td class="label">공급가</td>
