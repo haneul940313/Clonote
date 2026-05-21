@@ -129,37 +129,6 @@
       min-height: 320px;
     }
 
-    .summary {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .summary-card {
-      border: 1px solid var(--line);
-      border-radius: 7px;
-      padding: 12px;
-      background: #fff;
-    }
-
-    .summary-card b {
-      display: block;
-      margin-bottom: 8px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .summary-card strong {
-      display: block;
-      text-align: right;
-      font-size: 18px;
-    }
-
-    .summary-card.final strong {
-      color: var(--accent);
-    }
-
     .employee-meta {
       display: flex;
       justify-content: space-between;
@@ -169,88 +138,8 @@
       font-size: 13px;
     }
 
-    .site-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .site {
-      border: 1px solid var(--line);
-      border-radius: 7px;
-      overflow: hidden;
-      background: #fff;
-    }
-
-    .site-head {
-      display: grid;
-      grid-template-columns: 1fr 110px 110px 110px 120px 28px;
-      gap: 8px;
-      align-items: center;
-      width: 100%;
-      border: 0;
-      border-radius: 0;
-      background: #fff;
-      color: var(--ink);
-      min-height: 50px;
-      padding: 10px 12px;
-      text-align: left;
-      font-weight: 400;
-    }
-
-    .site-head:hover {
-      background: #f8fafc;
-    }
-
-    .site-title {
-      min-width: 0;
-    }
-
-    .site-title strong {
-      display: block;
-      font-size: 14px;
-    }
-
-    .site-title span {
-      display: block;
-      margin-top: 3px;
-      color: var(--muted);
-      font-size: 12px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .money-box {
-      text-align: right;
-      font-size: 12px;
-    }
-
-    .money-box b {
-      display: block;
-      color: var(--muted);
-      font-size: 11px;
-      margin-bottom: 3px;
-    }
-
-    .chevron {
-      text-align: center;
-      font-size: 18px;
-      color: var(--muted);
-    }
-
-    .site.open .chevron {
-      transform: rotate(180deg);
-    }
-
-    .detail {
-      display: none;
-      border-top: 1px solid var(--line);
-      padding: 10px 12px 12px;
-      background: #fbfcfd;
-    }
-
-    .site.open .detail {
-      display: block;
+    .summary-table {
+      margin-bottom: 16px;
     }
 
     table {
@@ -282,6 +171,85 @@
       text-align: center;
     }
 
+    .final {
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    .site-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .site {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .site-head {
+      display: grid;
+      grid-template-columns: 1fr 110px 110px 110px 120px;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+      border: 0;
+      border-radius: 0;
+      background: #fff;
+      color: var(--ink);
+      min-height: 50px;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 400;
+    }
+
+    .site-head.partner {
+      grid-template-columns: 1fr 110px 110px 120px;
+    }
+
+    .site-head:hover {
+      background: #f8fafc;
+    }
+
+    .site-title {
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .site-title strong {
+      font-size: 14px;
+      color: var(--ink);
+      margin-right: 8px;
+    }
+
+    .money-box {
+      text-align: right;
+      font-size: 12px;
+    }
+
+    .money-box b {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 3px;
+    }
+
+    .detail {
+      display: none;
+      border-top: 1px solid var(--line);
+      padding: 10px 12px 12px;
+      background: #fbfcfd;
+    }
+
+    .site.open .detail {
+      display: block;
+    }
+
     .empty {
       border: 1px dashed var(--line);
       border-radius: 7px;
@@ -296,16 +264,13 @@
         display: grid;
       }
 
-      .summary {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .site-head {
-        grid-template-columns: 1fr 28px;
+      .site-head,
+      .site-head.partner {
+        grid-template-columns: 1fr;
       }
 
       .money-box {
-        display: none;
+        text-align: left;
       }
     }
   </style>
@@ -335,6 +300,7 @@
       settlement: null,
       activeEmployee: '',
       busy: false,
+      cache: {},
     };
 
     const els = {
@@ -352,9 +318,19 @@
     loadSettlement();
 
     async function loadSettlement() {
+      renderMonth();
+
+      if (state.cache[state.month]) {
+        state.settlement = state.cache[state.month];
+        syncActiveEmployee();
+        renderTabs();
+        renderPanel();
+        setStatus(`${state.month} 정산 데이터를 캐시에서 불러왔습니다.`, 'ok');
+        return;
+      }
+
       setBusy(true);
       setStatus('정산 데이터를 불러오는 중입니다.');
-      renderMonth();
 
       try {
         const data = await fetchJson(`${WEB_APP_URL}?action=settlement&month=${encodeURIComponent(state.month)}`);
@@ -364,12 +340,9 @@
         }
 
         state.settlement = data.settlement;
-        const employees = state.settlement.employees || [];
+        state.cache[state.month] = data.settlement;
 
-        if (!employees.some((employee) => employee.employeeName === state.activeEmployee)) {
-          state.activeEmployee = employees.length ? employees[0].employeeName : '';
-        }
-
+        syncActiveEmployee();
         renderTabs();
         renderPanel();
         setBusy(false);
@@ -380,6 +353,14 @@
         renderTabs();
         renderPanel();
         showError(error);
+      }
+    }
+
+    function syncActiveEmployee() {
+      const employees = state.settlement?.employees || [];
+
+      if (!employees.some((employee) => employee.employeeName === state.activeEmployee)) {
+        state.activeEmployee = employees.length ? employees[0].employeeName : '';
       }
     }
 
@@ -437,37 +418,18 @@
         return;
       }
 
+      const partner = isPartner(employee.employeeType);
+
       els.panel.innerHTML = `
         <div class="employee-meta">
           <span>작업자: <strong>${escapeHtml(employee.employeeName)}</strong></span>
           <span>직원유형: <strong>${escapeHtml(employee.employeeType || '-')}</strong></span>
         </div>
 
-        <div class="summary">
-          <div class="summary-card">
-            <b>총 매출</b>
-            <strong>₩ ${formatNumber(employee.totalSales)}</strong>
-          </div>
-          <div class="summary-card">
-            <b>현장차감 자재비</b>
-            <strong>₩ ${formatNumber(employee.materialDeduction)}</strong>
-          </div>
-          <div class="summary-card">
-            <b>공용비</b>
-            <strong>₩ ${formatNumber(employee.officeDeduction)}</strong>
-          </div>
-          <div class="summary-card">
-            <b>총 차감액</b>
-            <strong>₩ ${formatNumber(employee.totalDeduction)}</strong>
-          </div>
-          <div class="summary-card final">
-            <b>최종 정산금액</b>
-            <strong>₩ ${formatNumber(employee.settlementAmount)}</strong>
-          </div>
-        </div>
+        ${renderSummaryTable(employee, partner)}
 
         <div class="site-list">
-          ${(employee.sites || []).length ? employee.sites.map(renderSite).join('') : '<div class="empty">해당 월의 현장 정산이 없습니다.</div>'}
+          ${(employee.sites || []).length ? employee.sites.map((site, index) => renderSite(site, index, partner)).join('') : '<div class="empty">해당 월의 현장 정산이 없습니다.</div>'}
         </div>
       `;
 
@@ -478,10 +440,35 @@
       });
     }
 
-    function renderSite(site, index) {
+    function renderSummaryTable(employee, partner) {
+      return `
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>총 매출</th>
+              <th>현장차감 자재비</th>
+              ${partner ? '' : '<th>공용비</th>'}
+              <th>총 차감액</th>
+              <th>최종 정산금액</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="right">₩ ${formatNumber(employee.totalSales)}</td>
+              <td class="right">₩ ${formatNumber(employee.materialDeduction)}</td>
+              ${partner ? '' : `<td class="right">₩ ${formatNumber(employee.officeDeduction)}</td>`}
+              <td class="right">₩ ${formatNumber(employee.totalDeduction)}</td>
+              <td class="right final">₩ ${formatNumber(employee.settlementAmount)}</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderSite(site, index, partner) {
       return `
         <article class="site">
-          <button class="site-head" type="button">
+          <button class="site-head ${partner ? 'partner' : ''}" type="button">
             <div class="site-title">
               <strong>${index + 1}. ${escapeHtml(site.siteName || '현장 없음')}</strong>
               <span>${escapeHtml(site.workName || '')}</span>
@@ -494,15 +481,16 @@
               <b>자재비</b>
               ₩ ${formatNumber(site.materialDeduction)}
             </div>
-            <div class="money-box">
-              <b>공용비</b>
-              ₩ ${formatNumber(site.officeDeduction)}
-            </div>
+            ${partner ? '' : `
+              <div class="money-box">
+                <b>공용비</b>
+                ₩ ${formatNumber(site.officeDeduction)}
+              </div>
+            `}
             <div class="money-box">
               <b>정산</b>
               ₩ ${formatNumber(site.settlementAmount)}
             </div>
-            <div class="chevron">⌄</div>
           </button>
 
           <div class="detail">
@@ -522,6 +510,7 @@
           <thead>
             <tr>
               <th style="width:46px">No</th>
+              <th style="width:100px">구매날짜</th>
               <th>자재</th>
               <th style="width:100px">구분</th>
               <th style="width:80px">수량</th>
@@ -533,6 +522,7 @@
             ${usages.map((usage, index) => `
               <tr>
                 <td class="center">${index + 1}</td>
+                <td class="center">${escapeHtml(usage.purchaseDate || usage.useDate || '')}</td>
                 <td>${escapeHtml(usage.materialName || usage.title || '')}</td>
                 <td class="center">${escapeHtml(usage.materialCategory || '-')}</td>
                 <td class="right">${formatNumber(usage.quantity)}</td>
@@ -577,6 +567,11 @@
     function getCurrentMonth() {
       const now = new Date();
       return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    function isPartner(type) {
+      const value = String(type || '');
+      return value.includes('동업') || value.includes('파트너');
     }
 
     function formatNumber(value) {
