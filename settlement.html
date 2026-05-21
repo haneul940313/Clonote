@@ -72,6 +72,12 @@
       gap: 8px;
     }
 
+    .month-nav button {
+      min-width: 42px;
+      font-size: 20px;
+      line-height: 1;
+    }
+
     .month-label {
       min-width: 128px;
       text-align: center;
@@ -101,6 +107,7 @@
       overflow-x: auto;
       border-bottom: 1px solid var(--line);
       margin-bottom: 0;
+      -webkit-overflow-scrolling: touch;
     }
 
     .tab {
@@ -250,6 +257,15 @@
       display: block;
     }
 
+    .table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .table-scroll table {
+      min-width: 720px;
+    }
+
     .empty {
       border: 1px dashed var(--line);
       border-radius: 7px;
@@ -260,17 +276,154 @@
     }
 
     @media (max-width: 900px) {
+      .wrap {
+        padding: 16px 10px 36px;
+      }
+
       .top {
         display: grid;
+        gap: 10px;
+      }
+
+      h1 {
+        font-size: 21px;
+      }
+
+      .month-nav {
+        width: 100%;
+        justify-content: space-between;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 8px;
+      }
+
+      .month-nav button {
+        min-width: 48px;
+        min-height: 44px;
+        font-size: 24px;
+      }
+
+      .month-label {
+        flex: 1;
+        min-width: 0;
+        font-size: 18px;
+      }
+
+      .tabs {
+        gap: 8px;
+        border-bottom: 0;
+        padding: 2px 0 10px;
+      }
+
+      .tab {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: #fff;
+        min-height: 38px;
+        padding: 0 14px;
+      }
+
+      .tab.active {
+        top: 0;
+        background: var(--accent);
+        color: #fff;
+        border-color: var(--accent);
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+      }
+
+      .employee-meta {
+        display: grid;
+        gap: 5px;
+        font-size: 12px;
+      }
+
+      .summary-table,
+      .summary-table thead,
+      .summary-table tbody,
+      .summary-table tr,
+      .summary-table th,
+      .summary-table td {
+        display: block;
+      }
+
+      .summary-table thead {
+        display: none;
+      }
+
+      .summary-table tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .summary-table td {
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        min-height: 62px;
+        padding: 10px;
+        text-align: right;
+        font-size: 15px;
+        font-weight: 800;
+      }
+
+      .summary-table td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 8px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 700;
+        text-align: left;
+      }
+
+      .summary-table td.final {
+        background: #f8fbff;
       }
 
       .site-head,
       .site-head.partner {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+        min-height: auto;
+        padding: 12px;
+      }
+
+      .site-title {
+        grid-column: 1 / -1;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        line-height: 1.35;
+      }
+
+      .site-title strong {
+        display: inline;
+        font-size: 14px;
       }
 
       .money-box {
         text-align: left;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 8px;
+        background: #fafafa;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      .money-box b {
+        font-size: 11px;
+      }
+
+      .detail {
+        padding: 10px;
       }
     }
   </style>
@@ -293,7 +446,7 @@
   </main>
 
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxKVqHqEnPLmhMP1-Pp1fE-g9egc-nkRuUrfLan67ev9jPmNESvCL9i-20AxSqVNHTi/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyGwym0gIS1JY_oP_je5SmG79HQcVSJYyiG6aDs7SxrhQESWdeA_KEjf_QqOOcLI_yD/exec';
 
     const state = {
       month: getCurrentMonth(),
@@ -454,11 +607,11 @@
           </thead>
           <tbody>
             <tr>
-              <td class="right">₩ ${formatNumber(employee.totalSales)}</td>
-              <td class="right">₩ ${formatNumber(employee.materialDeduction)}</td>
-              ${partner ? '' : `<td class="right">₩ ${formatNumber(employee.officeDeduction)}</td>`}
-              <td class="right">₩ ${formatNumber(employee.totalDeduction)}</td>
-              <td class="right final">₩ ${formatNumber(employee.settlementAmount)}</td>
+              <td class="right" data-label="총 매출">₩ ${formatNumber(employee.totalSales)}</td>
+              <td class="right" data-label="현장차감 자재비">₩ ${formatNumber(employee.materialDeduction)}</td>
+              ${partner ? '' : `<td class="right" data-label="공용비">₩ ${formatNumber(employee.officeDeduction)}</td>`}
+              <td class="right" data-label="총 차감액">₩ ${formatNumber(employee.totalDeduction)}</td>
+              <td class="right final" data-label="최종 정산금액">₩ ${formatNumber(employee.settlementAmount)}</td>
             </tr>
           </tbody>
         </table>
@@ -506,32 +659,34 @@
       }
 
       return `
-        <table>
-          <thead>
-            <tr>
-              <th style="width:46px">No</th>
-              <th style="width:100px">구매날짜</th>
-              <th>자재</th>
-              <th style="width:100px">구분</th>
-              <th style="width:80px">수량</th>
-              <th style="width:110px">단가</th>
-              <th style="width:120px">금액</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${usages.map((usage, index) => `
+        <div class="table-scroll">
+          <table>
+            <thead>
               <tr>
-                <td class="center">${index + 1}</td>
-                <td class="center">${escapeHtml(usage.purchaseDate || usage.useDate || '')}</td>
-                <td>${escapeHtml(usage.materialName || usage.title || '')}</td>
-                <td class="center">${escapeHtml(usage.materialCategory || '-')}</td>
-                <td class="right">${formatNumber(usage.quantity)}</td>
-                <td class="right">₩ ${formatNumber(usage.unitPrice)}</td>
-                <td class="right">₩ ${formatNumber(usage.materialCost)}</td>
+                <th style="width:46px">No</th>
+                <th style="width:100px">사용날짜</th>
+                <th>자재</th>
+                <th style="width:100px">구분</th>
+                <th style="width:80px">수량</th>
+                <th style="width:110px">단가</th>
+                <th style="width:120px">금액</th>
               </tr>
-            `).join('')}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              ${usages.map((usage, index) => `
+                <tr>
+                  <td class="center">${index + 1}</td>
+                  <td class="center">${escapeHtml(usage.useDate || '')}</td>
+                  <td>${escapeHtml(usage.materialName || usage.title || '')}</td>
+                  <td class="center">${escapeHtml(usage.materialCategory || '-')}</td>
+                  <td class="right">${formatNumber(usage.quantity)}</td>
+                  <td class="right">₩ ${formatNumber(usage.unitPrice)}</td>
+                  <td class="right">₩ ${formatNumber(usage.materialCost)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
       `;
     }
 
