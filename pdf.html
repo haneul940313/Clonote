@@ -120,35 +120,20 @@
 
     .top-grid {
       display: grid;
-      grid-template-columns: 1.05fr 1.55fr;
-      gap: 14px;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
       margin-bottom: 8px;
     }
 
-    .recipient {
-      padding: 8px 0 0;
-      min-height: 126px;
-      font-size: 15px;
+    .site-line,
+    .date-line {
+      margin: 0 0 8px;
+      font-weight: 700;
+      font-size: 14px;
     }
 
     .date-line {
-      margin: 0 0 34px;
-      font-weight: 700;
-    }
-
-    .to-line {
-      display: flex;
-      align-items: flex-end;
-      gap: 8px;
-      margin-left: 20px;
-    }
-
-    .to-name {
-      flex: 1;
-      border-bottom: 1px solid var(--line);
-      min-height: 26px;
-      text-align: right;
-      padding-right: 12px;
+      margin-bottom: 12px;
     }
 
     table {
@@ -173,27 +158,40 @@
       font-weight: 700;
     }
 
-    .supplier td {
-      height: 29px;
+    .party td {
+      height: 30px;
     }
 
-    .supplier-label {
-      width: 34px;
+    .party-title {
+      height: 30px;
       text-align: center;
       font-weight: 700;
-      writing-mode: vertical-rl;
-      letter-spacing: 6px;
+      font-size: 14px;
     }
 
     .label {
       text-align: center;
       font-weight: 700;
-      width: 88px;
+      width: 92px;
     }
 
-    .seal {
+    .seal-cell {
+      position: relative;
       text-align: center;
       color: #555;
+      overflow: hidden;
+    }
+
+    .seal-img {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+      transform: translateY(-50%);
+      opacity: .86;
+      pointer-events: none;
     }
 
     .amount-bar {
@@ -231,8 +229,8 @@
       height: 27px;
     }
 
-    .col-date {
-      width: 76px;
+    .col-no {
+      width: 48px;
     }
 
     .col-name {
@@ -405,7 +403,7 @@
   </div>
 
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwqmQdOBSMBNnCe4faGNFWTbdLTyEvq4jagnOxEAYgKclyzLbSzcq-TkN4PExZ07PeE/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyYSm6cfTH5OCpwbxiyxd8KfczvELnia601T6S5kBsMKOM7CGnPlLgydFBWEFYESUJT/exec';
 
     const state = {
       statement: null,
@@ -430,11 +428,6 @@
     els.confirmSiteBtn.addEventListener('click', confirmSite);
 
     async function openSitePicker() {
-      if (!WEB_APP_URL) {
-        setStatus('HTML 코드의 WEB_APP_URL에 Apps Script 웹앱 URL을 넣어주세요.', 'error');
-        return;
-      }
-
       setBusy(true);
       setStatus('현장 목록을 불러오는 중입니다.');
 
@@ -527,40 +520,67 @@
       const supplyAmount = Number(statement.totals?.supplyAmount || 0);
       const taxAmount = Number(statement.totals?.taxAmount || 0);
       const totalAmount = Number(statement.totals?.totalAmount || 0);
+      const supplier = statement.supplier || {};
+      const recipient = statement.recipient || {};
+      const siteNumber = statement.siteNumber || statement.siteName || '';
 
       els.preview.className = 'statement';
       els.preview.innerHTML = `
         <div class="paper">
           <h1 class="title">거 래 명 세 서</h1>
 
-          <div class="top-grid">
-            <div class="recipient">
-              <div class="date-line">날짜 : ${formatTodayKorean()}</div>
-              <div class="to-line">
-                <span class="to-name">${escapeHtml(statement.siteName || '')}</span>
-                <strong>귀하</strong>
-              </div>
-            </div>
+          <div class="site-line">현장번호 : ${escapeHtml(siteNumber || '-')}</div>
+          <div class="date-line">날짜 : ${formatTodayKorean()}</div>
 
-            <table class="supplier">
+          <div class="top-grid">
+            <table class="party">
               <tr>
-                <td class="supplier-label" rowspan="4">공급자</td>
-                <td class="label">상호</td>
-                <td>${escapeHtml(statement.companyName || '-')}</td>
-                <td class="label">대표자</td>
-                <td class="seal">${escapeHtml(statement.manager || '-')} &nbsp; (인)</td>
+                <td class="party-title" colspan="4">공급받는자</td>
               </tr>
               <tr>
+                <td class="label">상호</td>
+                <td colspan="3">${escapeHtml(recipient.companyName || '-')}</td>
+              </tr>
+              <tr>
+                <td class="label">담당자</td>
+                <td>${escapeHtml(recipient.manager || '-')}</td>
                 <td class="label">전화번호</td>
-                <td colspan="3">${escapeHtml(statement.phone || '-')}</td>
+                <td>${escapeHtml(recipient.phone || '-')}</td>
               </tr>
               <tr>
                 <td class="label">주소</td>
-                <td colspan="3">${escapeHtml(statement.address || '-')}</td>
+                <td colspan="3">${escapeHtml(recipient.address || '-')}</td>
               </tr>
               <tr>
                 <td class="label">현장</td>
                 <td colspan="3">${escapeHtml(statement.siteName || '-')}</td>
+              </tr>
+            </table>
+
+            <table class="party">
+              <tr>
+                <td class="party-title" colspan="4">공급자</td>
+              </tr>
+              <tr>
+                <td class="label">사업자번호</td>
+                <td colspan="3">${escapeHtml(supplier.businessNumber || '-')}</td>
+              </tr>
+              <tr>
+                <td class="label">상호</td>
+                <td>${escapeHtml(supplier.companyName || '-')}</td>
+                <td class="label">대표자</td>
+                <td class="seal-cell">
+                  ${escapeHtml(supplier.representative || '-')} &nbsp; (인)
+                  ${supplier.sealUrl ? `<img class="seal-img" src="${escapeHtml(supplier.sealUrl)}" alt="인감">` : ''}
+                </td>
+              </tr>
+              <tr>
+                <td class="label">전화번호</td>
+                <td colspan="3">${escapeHtml(supplier.phone || '-')}</td>
+              </tr>
+              <tr>
+                <td class="label">주소</td>
+                <td colspan="3">${escapeHtml(supplier.address || '-')}</td>
               </tr>
             </table>
           </div>
@@ -576,7 +596,7 @@
           <table class="items">
             <thead>
               <tr>
-                <th class="col-date">No</th>
+                <th class="col-no">No</th>
                 <th class="col-name">청구내역</th>
                 <th class="col-work">작업구분</th>
                 <th class="col-qty">수량</th>
