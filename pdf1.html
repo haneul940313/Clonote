@@ -239,8 +239,8 @@
       width: 250px;
     }
 
-    .col-unit {
-      width: 56px;
+    .col-work {
+      width: 76px;
     }
 
     .col-qty {
@@ -393,23 +393,23 @@
     </section>
   </main>
 
-  <div id="projectModal" class="modal-backdrop">
+  <div id="siteModal" class="modal-backdrop">
     <div class="modal">
-      <h2>프로젝트 선택</h2>
-      <select id="projectSelect"></select>
+      <h2>현장 선택</h2>
+      <select id="siteSelect"></select>
       <div class="modal-actions">
-        <button id="cancelProjectBtn" class="secondary" type="button">취소</button>
-        <button id="confirmProjectBtn" class="primary" type="button">선택</button>
+        <button id="cancelSiteBtn" class="secondary" type="button">취소</button>
+        <button id="confirmSiteBtn" class="primary" type="button">선택</button>
       </div>
     </div>
   </div>
 
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby1Edjk8W4MRLim6AIa-aoa-yoVhOIRBz2DWO-q8qid0_Ye9ac1z8I9ruclIl7f3Ii3/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwqmQdOBSMBNnCe4faGNFWTbdLTyEvq4jagnOxEAYgKclyzLbSzcq-TkN4PExZ07PeE/exec';
 
     const state = {
       statement: null,
-      selectedProject: '',
+      selectedSite: '',
       busy: false,
     };
 
@@ -418,66 +418,71 @@
       pdfBtn: document.querySelector('#pdfBtn'),
       status: document.querySelector('#status'),
       preview: document.querySelector('#preview'),
-      modal: document.querySelector('#projectModal'),
-      projectSelect: document.querySelector('#projectSelect'),
-      cancelProjectBtn: document.querySelector('#cancelProjectBtn'),
-      confirmProjectBtn: document.querySelector('#confirmProjectBtn'),
+      modal: document.querySelector('#siteModal'),
+      siteSelect: document.querySelector('#siteSelect'),
+      cancelSiteBtn: document.querySelector('#cancelSiteBtn'),
+      confirmSiteBtn: document.querySelector('#confirmSiteBtn'),
     };
 
-    els.createBtn.addEventListener('click', openProjectPicker);
+    els.createBtn.addEventListener('click', openSitePicker);
     els.pdfBtn.addEventListener('click', downloadPdf);
-    els.cancelProjectBtn.addEventListener('click', closeProjectPicker);
-    els.confirmProjectBtn.addEventListener('click', confirmProject);
+    els.cancelSiteBtn.addEventListener('click', closeSitePicker);
+    els.confirmSiteBtn.addEventListener('click', confirmSite);
 
-    async function openProjectPicker() {
+    async function openSitePicker() {
+      if (!WEB_APP_URL) {
+        setStatus('HTML 코드의 WEB_APP_URL에 Apps Script 웹앱 URL을 넣어주세요.', 'error');
+        return;
+      }
+
       setBusy(true);
-      setStatus('프로젝트 목록을 불러오는 중입니다.');
+      setStatus('현장 목록을 불러오는 중입니다.');
 
       try {
-        const data = await fetchJson(`${WEB_APP_URL}?action=projects`);
+        const data = await fetchJson(`${WEB_APP_URL}?action=sites`);
 
         if (!data.ok) {
-          throw new Error(data.error || '프로젝트 목록을 불러오지 못했습니다.');
+          throw new Error(data.error || '현장 목록을 불러오지 못했습니다.');
         }
 
-        renderProjectOptions(data.projects || []);
+        renderSiteOptions(data.sites || []);
         els.modal.classList.add('open');
         setBusy(false);
-        setStatus('프로젝트를 선택해주세요.');
+        setStatus('현장을 선택해주세요.');
       } catch (error) {
         showError(error);
       }
     }
 
-    function renderProjectOptions(projects) {
-      if (!projects.length) {
-        els.projectSelect.innerHTML = '<option value="">프로젝트 없음</option>';
+    function renderSiteOptions(sites) {
+      if (!sites.length) {
+        els.siteSelect.innerHTML = '<option value="">현장 없음</option>';
         return;
       }
 
-      els.projectSelect.innerHTML = projects.map((project) => {
-        const label = `${project.name || '프로젝트 없음'} (${project.count || 0}건)`;
-        return `<option value="${escapeHtml(project.name || '')}">${escapeHtml(label)}</option>`;
+      els.siteSelect.innerHTML = sites.map((site) => {
+        const label = `${site.name || '현장 없음'} (${site.count || 0}건)`;
+        return `<option value="${escapeHtml(site.name || '')}">${escapeHtml(label)}</option>`;
       }).join('');
     }
 
-    function closeProjectPicker() {
+    function closeSitePicker() {
       els.modal.classList.remove('open');
       setStatus('파일 생성하기 버튼을 눌러주세요.');
     }
 
-    async function confirmProject() {
-      const projectName = els.projectSelect.value;
+    async function confirmSite() {
+      const siteName = els.siteSelect.value;
       els.modal.classList.remove('open');
-      await createFile(projectName);
+      await createFile(siteName);
     }
 
-    async function createFile(projectName) {
+    async function createFile(siteName) {
       setBusy(true);
       setStatus('노션 DB 내용을 불러오는 중입니다.');
 
       try {
-        const url = `${WEB_APP_URL}?project=${encodeURIComponent(projectName || '')}`;
+        const url = `${WEB_APP_URL}?site=${encodeURIComponent(siteName || '')}`;
         const data = await fetchJson(url);
 
         if (!data.ok) {
@@ -485,11 +490,11 @@
         }
 
         state.statement = data.statement;
-        state.selectedProject = projectName || '';
+        state.selectedSite = siteName || '';
         renderStatement(data.statement);
 
         setBusy(false);
-        setStatus(`${data.statement.rows.length.toLocaleString()}개 품목으로 거래명세표를 생성했습니다.`, 'ok');
+        setStatus(`${data.statement.rows.length.toLocaleString()}개 항목으로 거래명세표를 생성했습니다.`, 'ok');
       } catch (error) {
         showError(error);
       }
@@ -532,7 +537,7 @@
             <div class="recipient">
               <div class="date-line">날짜 : ${formatTodayKorean()}</div>
               <div class="to-line">
-                <span class="to-name">${escapeHtml(statement.projectName || statement.customerName || '')}</span>
+                <span class="to-name">${escapeHtml(statement.siteName || '')}</span>
                 <strong>귀하</strong>
               </div>
             </div>
@@ -541,7 +546,7 @@
               <tr>
                 <td class="supplier-label" rowspan="4">공급자</td>
                 <td class="label">상호</td>
-                <td>${escapeHtml(statement.projectName || '-')}</td>
+                <td>${escapeHtml(statement.companyName || '-')}</td>
                 <td class="label">대표자</td>
                 <td class="seal">${escapeHtml(statement.manager || '-')} &nbsp; (인)</td>
               </tr>
@@ -554,8 +559,8 @@
                 <td colspan="3">${escapeHtml(statement.address || '-')}</td>
               </tr>
               <tr>
-                <td class="label">비고</td>
-                <td colspan="3"></td>
+                <td class="label">현장</td>
+                <td colspan="3">${escapeHtml(statement.siteName || '-')}</td>
               </tr>
             </table>
           </div>
@@ -571,14 +576,14 @@
           <table class="items">
             <thead>
               <tr>
-                <th class="col-date">날짜</th>
-                <th class="col-name">품명</th>
-                <th class="col-unit">단위</th>
+                <th class="col-date">No</th>
+                <th class="col-name">청구내역</th>
+                <th class="col-work">작업구분</th>
                 <th class="col-qty">수량</th>
                 <th class="col-price">단가</th>
-                <th class="col-amount">금액</th>
+                <th class="col-amount">공급가</th>
                 <th class="col-tax">부가세</th>
-                <th class="col-total">합계금액</th>
+                <th class="col-total">총금액</th>
               </tr>
             </thead>
             <tbody>
@@ -591,15 +596,15 @@
             <table class="totals">
               <tr>
                 <td class="label">공급가</td>
-                <td class="right">${formatNumber(supplyAmount)}</td>
+                <td class="right">₩ ${formatNumber(supplyAmount)}</td>
               </tr>
               <tr>
                 <td class="label">부가세</td>
-                <td class="right">${formatNumber(taxAmount)}</td>
+                <td class="right">₩ ${formatNumber(taxAmount)}</td>
               </tr>
               <tr>
                 <td class="label">합계금액</td>
-                <td class="right">${formatNumber(totalAmount)}</td>
+                <td class="right">₩ ${formatNumber(totalAmount)}</td>
               </tr>
             </table>
           </div>
@@ -608,21 +613,21 @@
     }
 
     function buildRows(items, minRows) {
-      const filledRows = items.map((row) => {
+      const filledRows = items.map((row, index) => {
         const supplyAmount = Number(row.supplyAmount || 0);
         const taxAmount = Number(row.taxAmount || 0);
         const totalAmount = Number(row.totalAmount || supplyAmount + taxAmount);
 
         return `
           <tr>
-            <td class="center">${escapeHtml(row.date || '')}</td>
-            <td>${escapeHtml(row.itemName || '')}</td>
-            <td class="center">${escapeHtml(row.spec || '')}</td>
+            <td class="center">${index + 1}</td>
+            <td>${escapeHtml(row.title || '')}</td>
+            <td class="center">${escapeHtml(row.workType || '')}</td>
             <td class="right">${formatNumber(row.quantity)}</td>
-            <td class="right">${formatNumber(row.unitPrice)}</td>
-            <td class="right">${formatNumber(supplyAmount)}</td>
-            <td class="right">${formatNumber(taxAmount)}</td>
-            <td class="right">${formatNumber(totalAmount)}</td>
+            <td class="right">₩ ${formatNumber(row.unitPrice)}</td>
+            <td class="right">₩ ${formatNumber(supplyAmount)}</td>
+            <td class="right">₩ ${formatNumber(taxAmount)}</td>
+            <td class="right">₩ ${formatNumber(totalAmount)}</td>
           </tr>
         `;
       });
