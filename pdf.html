@@ -105,7 +105,9 @@
     }
 
     .paper {
+      width: 900px;
       min-width: 900px;
+      margin: 0 auto;
     }
 
     .title {
@@ -140,6 +142,7 @@
       width: 100%;
       border-collapse: collapse;
       table-layout: fixed;
+      border-spacing: 0;
     }
 
     th,
@@ -148,6 +151,7 @@
       padding: 5px 6px;
       height: 28px;
       font-size: 13px;
+      line-height: 1.15;
       vertical-align: middle;
       word-break: keep-all;
       background: #fff;
@@ -221,40 +225,6 @@
       white-space: nowrap;
     }
 
-    .items th {
-      height: 28px;
-    }
-
-    .items td {
-      height: 27px;
-    }
-
-    .col-no {
-      width: 42px;
-    }
-
-    .col-name {
-      width: 220px;
-    }
-
-    .col-work {
-      width: 70px;
-    }
-
-    .col-qty {
-      width: 50px;
-    }
-
-    .col-price {
-      width: 76px;
-    }
-
-    .col-amount,
-    .col-tax,
-    .col-total {
-      width: 94px;
-    }
-
     .right {
       text-align: right;
     }
@@ -265,7 +235,7 @@
 
     .bottom-grid {
       display: grid;
-      grid-template-columns: 1fr 240px;
+      grid-template-columns: 1fr 260px;
     }
 
     .memo {
@@ -284,6 +254,11 @@
     .totals td {
       height: 26px;
       font-weight: 700;
+    }
+
+    .items td,
+    .items th {
+      height: 26px;
     }
 
     .modal-backdrop {
@@ -373,62 +348,89 @@
 
       .paper {
         width: 194mm;
-        min-width: 0;
+        min-width: 194mm;
+        max-width: 194mm;
         margin: 0 auto;
+      }
+
+      table {
+        table-layout: fixed;
       }
 
       th,
       td {
-        font-size: 10px;
-        padding: 3px 4px;
-        height: 22px;
+        font-size: 9.5px;
+        padding: 2px 3px;
+        height: 20px;
+        line-height: 1.1;
       }
 
       .title {
-        font-size: 24px;
-        margin: 0 0 12px;
+        font-size: 23px;
+        margin: 0 0 10px;
       }
 
       .site-line,
       .date-line {
-        font-size: 11px;
-        margin-bottom: 5px;
+        font-size: 10.5px;
+        margin-bottom: 4px;
       }
 
       .date-line {
-        margin-bottom: 8px;
+        margin-bottom: 7px;
+      }
+
+      .top-grid {
+        gap: 8px;
+        margin-bottom: 6px;
       }
 
       .party-title {
-        font-size: 11px;
-        height: 23px;
+        font-size: 10.5px;
+        height: 21px;
       }
 
       .party td {
-        height: 23px;
+        height: 21px;
+      }
+
+      .label {
+        width: 70px;
       }
 
       .amount-bar td {
-        font-size: 11px;
-        height: 25px;
+        font-size: 10.5px;
+        height: 23px;
+      }
+
+      .amount-title {
+        width: 115px;
+      }
+
+      .amount-money {
+        width: 130px;
       }
 
       .items th,
       .items td {
-        height: 21px;
+        height: 19px;
       }
 
       .memo {
-        min-height: 58px;
+        min-height: 55px;
+      }
+
+      .bottom-grid {
+        grid-template-columns: 1fr 225px;
       }
 
       .totals td {
-        height: 22px;
+        height: 20px;
       }
 
       .seal-img {
-        width: 34px;
-        height: 34px;
+        width: 30px;
+        height: 30px;
       }
 
       @page {
@@ -594,6 +596,12 @@
 
           <div class="top-grid">
             <table class="party">
+              <colgroup>
+                <col style="width:70px">
+                <col>
+                <col style="width:70px">
+                <col>
+              </colgroup>
               <tr>
                 <td class="party-title" colspan="4">공급받는자</td>
               </tr>
@@ -618,6 +626,12 @@
             </table>
 
             <table class="party">
+              <colgroup>
+                <col style="width:70px">
+                <col>
+                <col style="width:70px">
+                <col>
+              </colgroup>
               <tr>
                 <td class="party-title" colspan="4">공급자</td>
               </tr>
@@ -646,6 +660,11 @@
           </div>
 
           <table class="amount-bar">
+            <colgroup>
+              <col style="width:115px">
+              <col>
+              <col style="width:130px">
+            </colgroup>
             <tr>
               <td class="amount-title">합계금액 :</td>
               <td class="amount-korean">${escapeHtml(numberToKoreanAmount(totalAmount))}</td>
@@ -654,16 +673,26 @@
           </table>
 
           <table class="items">
+            <colgroup>
+              <col style="width:40px">
+              <col style="width:230px">
+              <col style="width:72px">
+              <col style="width:46px">
+              <col style="width:74px">
+              <col style="width:90px">
+              <col style="width:90px">
+              <col style="width:92px">
+            </colgroup>
             <thead>
               <tr>
-                <th class="col-no">No</th>
-                <th class="col-name">청구내역</th>
-                <th class="col-work">작업구분</th>
-                <th class="col-qty">수량</th>
-                <th class="col-price">단가</th>
-                <th class="col-amount">공급가</th>
-                <th class="col-tax">부가세</th>
-                <th class="col-total">총금액</th>
+                <th>No</th>
+                <th>청구내역</th>
+                <th>작업구분</th>
+                <th>수량</th>
+                <th>단가</th>
+                <th>공급가</th>
+                <th>부가세</th>
+                <th>총금액</th>
               </tr>
             </thead>
             <tbody>
@@ -674,6 +703,10 @@
           <div class="bottom-grid">
             <div class="memo">비 고</div>
             <table class="totals">
+              <colgroup>
+                <col style="width:82px">
+                <col>
+              </colgroup>
               <tr>
                 <td class="label">공급가</td>
                 <td class="right">₩ ${formatNumber(supplyAmount)}</td>
