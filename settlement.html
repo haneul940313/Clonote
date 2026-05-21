@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>직원 정산</title>
+  <style>
+    :root {
+      --ink: #15171a;
+      --muted: #6b7280;
+      --line: #d9dde3;
+      --bg: #f5f6f8;
+      --panel: #ffffff;
+      --soft: #f1f3f5;
+      --accent: #2563eb;
+      --dark: #374151;
+      --danger: #c2410c;
+      --ok: #047857;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, "Malgun Gothic", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      min-height: 38px;
+      padding: 0 13px;
+      cursor: pointer;
+      background: var(--dark);
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: wait;
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .month-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .month-label {
+      min-width: 128px;
+      text-align: center;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .status {
+      min-height: 22px;
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status.error {
+      color: var(--danger);
+    }
+
+    .status.ok {
+      color: var(--ok);
+    }
+
+    .tabs {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 0;
+    }
+
+    .tab {
+      border: 1px solid var(--line);
+      border-bottom: 0;
+      border-radius: 7px 7px 0 0;
+      background: #e9edf2;
+      color: var(--ink);
+      min-height: 38px;
+      padding: 0 15px;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      background: var(--panel);
+      color: var(--accent);
+      position: relative;
+      top: 1px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-top: 0;
+      padding: 16px;
+      min-height: 320px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .summary-card {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .summary-card b {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .summary-card strong {
+      display: block;
+      text-align: right;
+      font-size: 18px;
+    }
+
+    .summary-card.final strong {
+      color: var(--accent);
+    }
+
+    .employee-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .site-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .site {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .site-head {
+      display: grid;
+      grid-template-columns: 1fr 110px 110px 110px 120px 28px;
+      gap: 8px;
+      align-items: center;
+      width: 100%;
+      border: 0;
+      border-radius: 0;
+      background: #fff;
+      color: var(--ink);
+      min-height: 50px;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 400;
+    }
+
+    .site-head:hover {
+      background: #f8fafc;
+    }
+
+    .site-title {
+      min-width: 0;
+    }
+
+    .site-title strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .site-title span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .money-box {
+      text-align: right;
+      font-size: 12px;
+    }
+
+    .money-box b {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 3px;
+    }
+
+    .chevron {
+      text-align: center;
+      font-size: 18px;
+      color: var(--muted);
+    }
+
+    .site.open .chevron {
+      transform: rotate(180deg);
+    }
+
+    .detail {
+      display: none;
+      border-top: 1px solid var(--line);
+      padding: 10px 12px 12px;
+      background: #fbfcfd;
+    }
+
+    .site.open .detail {
+      display: block;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      background: #fff;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 7px 8px;
+      font-size: 12px;
+      vertical-align: middle;
+    }
+
+    th {
+      background: var(--soft);
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: 7px;
+      padding: 42px 12px;
+      text-align: center;
+      color: var(--muted);
+      background: #fff;
+    }
+
+    @media (max-width: 900px) {
+      .top {
+        display: grid;
+      }
+
+      .summary {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .site-head {
+        grid-template-columns: 1fr 28px;
+      }
+
+      .money-box {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top">
+      <h1>직원 정산</h1>
+      <div class="month-nav">
+        <button id="prevBtn" type="button">‹</button>
+        <div id="monthLabel" class="month-label"></div>
+        <button id="nextBtn" type="button">›</button>
+      </div>
+    </div>
+
+    <p id="status" class="status">정산 데이터를 불러오는 중입니다.</p>
+
+    <div id="tabs" class="tabs"></div>
+    <section id="panel" class="panel"></section>
+  </main>
+
+  <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyGwym0gIS1JY_oP_je5SmG79HQcVSJYyiG6aDs7SxrhQESWdeA_KEjf_QqOOcLI_yD/exec';
+
+    const state = {
+      month: getCurrentMonth(),
+      settlement: null,
+      activeEmployee: '',
+      busy: false,
+    };
+
+    const els = {
+      prevBtn: document.querySelector('#prevBtn'),
+      nextBtn: document.querySelector('#nextBtn'),
+      monthLabel: document.querySelector('#monthLabel'),
+      status: document.querySelector('#status'),
+      tabs: document.querySelector('#tabs'),
+      panel: document.querySelector('#panel'),
+    };
+
+    els.prevBtn.addEventListener('click', () => moveMonth(-1));
+    els.nextBtn.addEventListener('click', () => moveMonth(1));
+
+    loadSettlement();
+
+    async function loadSettlement() {
+      setBusy(true);
+      setStatus('정산 데이터를 불러오는 중입니다.');
+      renderMonth();
+
+      try {
+        const data = await fetchJson(`${WEB_APP_URL}?action=settlement&month=${encodeURIComponent(state.month)}`);
+
+        if (!data.ok) {
+          throw new Error(data.error || '정산 데이터를 불러오지 못했습니다.');
+        }
+
+        state.settlement = data.settlement;
+        const employees = state.settlement.employees || [];
+
+        if (!employees.some((employee) => employee.employeeName === state.activeEmployee)) {
+          state.activeEmployee = employees.length ? employees[0].employeeName : '';
+        }
+
+        renderTabs();
+        renderPanel();
+        setBusy(false);
+        setStatus(`${state.month} 정산 데이터를 불러왔습니다.`, 'ok');
+      } catch (error) {
+        state.settlement = null;
+        state.activeEmployee = '';
+        renderTabs();
+        renderPanel();
+        showError(error);
+      }
+    }
+
+    function moveMonth(delta) {
+      const [year, month] = state.month.split('-').map(Number);
+      const date = new Date(year, month - 1 + delta, 1);
+      state.month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      loadSettlement();
+    }
+
+    function renderMonth() {
+      const [year, month] = state.month.split('-');
+      els.monthLabel.textContent = `${year}년 ${month}월`;
+    }
+
+    function renderTabs() {
+      const employees = state.settlement?.employees || [];
+
+      if (!employees.length) {
+        els.tabs.innerHTML = '';
+        return;
+      }
+
+      els.tabs.innerHTML = employees.map((employee) => `
+        <button
+          type="button"
+          class="tab ${employee.employeeName === state.activeEmployee ? 'active' : ''}"
+          data-employee="${escapeHtml(employee.employeeName)}"
+        >
+          ${escapeHtml(employee.employeeName)}
+        </button>
+      `).join('');
+
+      els.tabs.querySelectorAll('.tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          state.activeEmployee = tab.dataset.employee;
+          renderTabs();
+          renderPanel();
+        });
+      });
+    }
+
+    function renderPanel() {
+      const employees = state.settlement?.employees || [];
+
+      if (!employees.length) {
+        els.panel.innerHTML = '<div class="empty">해당 월의 정산 데이터가 없습니다.</div>';
+        return;
+      }
+
+      const employee = employees.find((item) => item.employeeName === state.activeEmployee) || employees[0];
+
+      if (!employee) {
+        els.panel.innerHTML = '<div class="empty">작업자를 선택해주세요.</div>';
+        return;
+      }
+
+      els.panel.innerHTML = `
+        <div class="employee-meta">
+          <span>작업자: <strong>${escapeHtml(employee.employeeName)}</strong></span>
+          <span>직원유형: <strong>${escapeHtml(employee.employeeType || '-')}</strong></span>
+        </div>
+
+        <div class="summary">
+          <div class="summary-card">
+            <b>총 매출</b>
+            <strong>₩ ${formatNumber(employee.totalSales)}</strong>
+          </div>
+          <div class="summary-card">
+            <b>현장차감 자재비</b>
+            <strong>₩ ${formatNumber(employee.materialDeduction)}</strong>
+          </div>
+          <div class="summary-card">
+            <b>공용비</b>
+            <strong>₩ ${formatNumber(employee.officeDeduction)}</strong>
+          </div>
+          <div class="summary-card">
+            <b>총 차감액</b>
+            <strong>₩ ${formatNumber(employee.totalDeduction)}</strong>
+          </div>
+          <div class="summary-card final">
+            <b>최종 정산금액</b>
+            <strong>₩ ${formatNumber(employee.settlementAmount)}</strong>
+          </div>
+        </div>
+
+        <div class="site-list">
+          ${(employee.sites || []).length ? employee.sites.map(renderSite).join('') : '<div class="empty">해당 월의 현장 정산이 없습니다.</div>'}
+        </div>
+      `;
+
+      els.panel.querySelectorAll('.site-head').forEach((button) => {
+        button.addEventListener('click', () => {
+          button.closest('.site').classList.toggle('open');
+        });
+      });
+    }
+
+    function renderSite(site, index) {
+      return `
+        <article class="site">
+          <button class="site-head" type="button">
+            <div class="site-title">
+              <strong>${index + 1}. ${escapeHtml(site.siteName || '현장 없음')}</strong>
+              <span>${escapeHtml(site.workName || '')}</span>
+            </div>
+            <div class="money-box">
+              <b>매출</b>
+              ₩ ${formatNumber(site.totalSales)}
+            </div>
+            <div class="money-box">
+              <b>자재비</b>
+              ₩ ${formatNumber(site.materialDeduction)}
+            </div>
+            <div class="money-box">
+              <b>공용비</b>
+              ₩ ${formatNumber(site.officeDeduction)}
+            </div>
+            <div class="money-box">
+              <b>정산</b>
+              ₩ ${formatNumber(site.settlementAmount)}
+            </div>
+            <div class="chevron">⌄</div>
+          </button>
+
+          <div class="detail">
+            ${renderUsageTable(site.usages || [])}
+          </div>
+        </article>
+      `;
+    }
+
+    function renderUsageTable(usages) {
+      if (!usages.length) {
+        return '<div class="empty">자재사용 상세 내역이 없습니다.</div>';
+      }
+
+      return `
+        <table>
+          <thead>
+            <tr>
+              <th style="width:46px">No</th>
+              <th>자재</th>
+              <th style="width:100px">구분</th>
+              <th style="width:80px">수량</th>
+              <th style="width:110px">단가</th>
+              <th style="width:120px">금액</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${usages.map((usage, index) => `
+              <tr>
+                <td class="center">${index + 1}</td>
+                <td>${escapeHtml(usage.materialName || usage.title || '')}</td>
+                <td class="center">${escapeHtml(usage.materialCategory || '-')}</td>
+                <td class="right">${formatNumber(usage.quantity)}</td>
+                <td class="right">₩ ${formatNumber(usage.unitPrice)}</td>
+                <td class="right">₩ ${formatNumber(usage.materialCost)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url, {
+        method: 'GET',
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        throw new Error(`웹앱 호출 실패: ${response.status}`);
+      }
+
+      return response.json();
+    }
+
+    function setBusy(nextBusy) {
+      state.busy = nextBusy;
+      els.prevBtn.disabled = nextBusy;
+      els.nextBtn.disabled = nextBusy;
+    }
+
+    function setStatus(message, type = '') {
+      els.status.textContent = message;
+      els.status.className = `status ${type}`;
+    }
+
+    function showError(error) {
+      setBusy(false);
+      setStatus(error && error.message ? error.message : String(error), 'error');
+    }
+
+    function getCurrentMonth() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    function formatNumber(value) {
+      const number = Number(value || 0);
+      return number.toLocaleString('ko-KR');
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+  </script>
+</body>
+</html>
