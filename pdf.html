@@ -125,8 +125,10 @@
     }
 
     .fit-text {
-      font-size: 10.5px;
-      letter-spacing: 0;
+      font-size: 10px;
+      line-height: 1.25;
+      white-space: normal;
+      word-break: keep-all;
     }
 
     .message {
@@ -272,7 +274,7 @@
     <button onclick="window.print()">PDF 다운로드 받기</button>
   </div>
 
-  <div id="status" class="status">월을 선택한 뒤 파일 생성하기를 눌러줘.</div>
+  <div id="status" class="status">월을 선택한 뒤 파일 생성하기를 눌러주세요.</div>
 
   <div class="paper-wrap">
     <div id="paper" class="paper">
@@ -315,12 +317,12 @@
       state.month = $('monthInput').value;
 
       if (!state.month) {
-        setStatus('월을 먼저 선택해줘.');
+        setStatus('월을 먼저 선택해 주세요.');
         return;
       }
 
-      setStatus('노션 데이터를 불러오는 중...');
-      $('paper').innerHTML = '<div class="empty">불러오는 중...</div>';
+      setStatus('노션 데이터를 불러오는 중입니다...');
+      $('paper').innerHTML = '<div class="empty">불러오는 중입니다...</div>';
 
       try {
         const data = await fetchJson(`${WEB_APP_URL}?action=sites&month=${encodeURIComponent(state.month)}`);
@@ -400,7 +402,7 @@
       const group = state.groups.find((item) => item.key === $('groupSelect').value);
 
       if (!group) {
-        $('paper').innerHTML = '<div class="empty">거래처/담당자를 선택해줘.</div>';
+        $('paper').innerHTML = '<div class="empty">거래처/담당자를 선택해 주세요.</div>';
         return;
       }
 
@@ -507,7 +509,7 @@
 
         return {
           no: index + 1,
-          content: site.title || '',
+          content: getSiteContent(site),
           supply,
           vat,
           total: supply + vat,
@@ -515,18 +517,44 @@
       });
     }
 
+    function getSiteContent(site) {
+      return firstText(
+        site.content,
+        site.title,
+        site.name,
+        site.siteName,
+        site.companyName,
+        site.customerName,
+        site['내용'],
+        site['업체명'],
+        site['현장명']
+      );
+    }
+
     function getGroupItems(sites) {
       const set = new Set();
 
       sites.forEach((site) => {
-        if (Array.isArray(site.items)) {
-          site.items.forEach((item) => {
-            if (item) set.add(item);
-          });
-        }
+        const values = Array.isArray(site.items)
+          ? site.items
+          : String(site.items || '').split(',');
+
+        values.forEach((item) => {
+          const cleaned = String(item || '').trim();
+          if (cleaned) set.add(cleaned);
+        });
       });
 
       return Array.from(set).join(', ');
+    }
+
+    function firstText(...values) {
+      for (const value of values) {
+        if (value === null || value === undefined) continue;
+        const text = String(value).trim();
+        if (text) return text;
+      }
+      return '';
     }
 
     function renderRows(rows) {
