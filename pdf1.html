@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>거래 대금 결제요청서</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #f3f4f6;
+      color: #111;
+      font-family: Arial, "Malgun Gothic", sans-serif;
+      font-size: 14px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 12px;
+      background: #fff;
+      border-bottom: 1px solid #d1d5db;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .toolbar input,
+    .toolbar select,
+    .toolbar button {
+      height: 34px;
+      border: 1px solid #aaa;
+      background: #fff;
+      padding: 0 10px;
+      font-size: 13px;
+    }
+
+    .toolbar button {
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .toolbar .primary {
+      background: #111;
+      color: #fff;
+      border-color: #111;
+    }
+
+    .status {
+      padding: 8px 12px;
+      color: #555;
+      font-size: 12px;
+    }
+
+    .paper-wrap {
+      padding: 18px;
+      overflow-x: auto;
+    }
+
+    .paper {
+      width: 190mm;
+      min-height: 270mm;
+      margin: 0 auto;
+      padding: 18mm 16mm 14mm;
+      background: #fff;
+      border: 1px solid #ddd;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 30px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      margin: 0 0 14mm;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      border: 1px solid #9b9b9b;
+      height: 30px;
+      padding: 4px 8px;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .outer {
+      border: 2px solid #111;
+    }
+
+    .supplier td {
+      text-align: center;
+    }
+
+    .supplier .vertical {
+      width: 42px;
+      border-right: 1px solid #999;
+      font-weight: 700;
+      line-height: 2.2;
+      white-space: pre-line;
+    }
+
+    .supplier .label {
+      width: 115px;
+      font-weight: 700;
+      background: #fff;
+    }
+
+    .supplier .value {
+      text-align: left;
+    }
+
+    .supplier .center-value {
+      text-align: center;
+    }
+
+    .message {
+      text-align: center;
+      margin: 12mm 0 10mm;
+      font-size: 16px;
+      letter-spacing: 0.2px;
+    }
+
+    .section-title {
+      margin: 0 0 6px 2px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .section {
+      margin-top: 12mm;
+    }
+
+    .amount-table {
+      border: 2px solid #111;
+    }
+
+    .amount-table td {
+      height: 38px;
+      border-color: #aaa;
+      font-size: 16px;
+    }
+
+    .soft {
+      background: #f4e6dc;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .amount-text {
+      font-weight: 700;
+      text-align: left;
+      padding-left: 18px;
+    }
+
+    .details {
+      border: 2px solid #111;
+    }
+
+    .details th {
+      background: #f4e6dc;
+      text-align: center;
+      font-weight: 700;
+      height: 34px;
+    }
+
+    .details td {
+      height: 32px;
+      text-align: center;
+    }
+
+    .details .content {
+      text-align: left;
+      padding-left: 14px;
+    }
+
+    .details .money {
+      text-align: right;
+      padding-right: 12px;
+    }
+
+    .details .sum-label {
+      background: #f4e6dc;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .bank {
+      border: 2px solid #111;
+    }
+
+    .bank th {
+      background: #f4e6dc;
+      height: 34px;
+      text-align: center;
+    }
+
+    .bank td {
+      text-align: center;
+      height: 36px;
+      font-weight: 700;
+    }
+
+    .empty {
+      padding: 44px 0;
+      text-align: center;
+      color: #777;
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 8mm;
+      }
+
+      body {
+        background: #fff;
+      }
+
+      .toolbar,
+      .status {
+        display: none !important;
+      }
+
+      .paper-wrap {
+        padding: 0;
+        overflow: visible;
+      }
+
+      .paper {
+        width: 194mm;
+        min-height: auto;
+        margin: 0;
+        padding: 14mm 12mm 10mm;
+        border: 0;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .paper-wrap {
+        padding: 10px;
+      }
+
+      .paper {
+        width: 190mm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <input id="monthInput" type="month" />
+    <button class="primary" onclick="loadMonth()">파일 생성하기</button>
+    <select id="groupSelect" onchange="renderDocument()">
+      <option value="">거래처/담당자 선택</option>
+    </select>
+    <button onclick="window.print()">PDF 다운로드 받기</button>
+  </div>
+
+  <div id="status" class="status">월을 선택한 뒤 파일 생성하기를 눌러줘.</div>
+
+  <div class="paper-wrap">
+    <div id="paper" class="paper">
+      <div class="empty">결제요청서가 여기에 표시됩니다.</div>
+    </div>
+  </div>
+
+  <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxIjy992knS4x3_pRks1F_aZIrLU1GfyDVQsomsPG4anq0Rf6rclj0V-VurTYBQJz69/exec';
+
+    const COMPANY = {
+      name: '보양의신',
+      ceo: '신주현',
+      businessNumber: '630-23-02531',
+      address: '대구광역시 달서구 와룡로 49길 104-15 1층',
+      businessType: '건설업',
+      businessItem: '승강기보양시공, 실내보양시공',
+      manager: '신주현',
+      phone: '010-8244-2777',
+      bank: '카카오뱅크',
+      account: '3333-35-2977357',
+      depositor: '보양의 신',
+    };
+
+    const state = {
+      month: '',
+      sites: [],
+      groups: [],
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    init();
+
+    function init() {
+      const now = new Date();
+      $('monthInput').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    async function loadMonth() {
+      state.month = $('monthInput').value;
+
+      if (!state.month) {
+        setStatus('월을 먼저 선택해줘.');
+        return;
+      }
+
+      setStatus('노션 데이터를 불러오는 중...');
+      $('paper').innerHTML = '<div class="empty">불러오는 중...</div>';
+
+      try {
+        const data = await fetchJson(`${WEB_APP_URL}?action=sites&month=${encodeURIComponent(state.month)}`);
+        if (!data.ok) throw new Error(data.error || '데이터를 불러오지 못했습니다.');
+
+        state.sites = (data.sites || []).filter((site) => site.paid !== true);
+        state.groups = buildGroups(state.sites);
+
+        renderGroupOptions();
+
+        if (!state.groups.length) {
+          $('paper').innerHTML = '<div class="empty">해당 월의 미결제 데이터가 없습니다.</div>';
+          setStatus('해당 월의 미결제 데이터가 없습니다.');
+          return;
+        }
+
+        $('groupSelect').value = state.groups[0].key;
+        renderDocument();
+        setStatus(`${state.month} / 미결제 ${state.sites.length}건 / ${state.groups.length}개 그룹`);
+      } catch (err) {
+        $('paper').innerHTML = '<div class="empty">오류가 발생했습니다.</div>';
+        setStatus(err.message || String(err));
+      }
+    }
+
+    async function fetchJson(url) {
+      const res = await fetch(url);
+      const text = await res.text();
+
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        throw new Error('Apps Script 응답이 JSON이 아닙니다: ' + text.slice(0, 120));
+      }
+    }
+
+    function buildGroups(sites) {
+      const map = new Map();
+
+      sites.forEach((site) => {
+        const contacts = Array.isArray(site.contacts) && site.contacts.length
+          ? site.contacts
+          : [{ id: 'none', name: '미지정', type: '', phone: '' }];
+
+        contacts.forEach((contact) => {
+          const key = contact.id || contact.name || 'none';
+
+          if (!map.has(key)) {
+            map.set(key, {
+              key,
+              contact,
+              sites: [],
+            });
+          }
+
+          map.get(key).sites.push(site);
+        });
+      });
+
+      return Array.from(map.values()).sort((a, b) => {
+        return String(a.contact.name || '').localeCompare(String(b.contact.name || ''), 'ko');
+      });
+    }
+
+    function renderGroupOptions() {
+      const options = ['<option value="">거래처/담당자 선택</option>'];
+
+      state.groups.forEach((group) => {
+        const label = `${group.contact.name || '미지정'}${group.contact.type ? ' / ' + group.contact.type : ''}`;
+        options.push(`<option value="${escapeHtml(group.key)}">${escapeHtml(label)}</option>`);
+      });
+
+      $('groupSelect').innerHTML = options.join('');
+    }
+
+    function renderDocument() {
+      const group = state.groups.find((item) => item.key === $('groupSelect').value);
+
+      if (!group) {
+        $('paper').innerHTML = '<div class="empty">거래처/담당자를 선택해줘.</div>';
+        return;
+      }
+
+      const rows = buildRows(group.sites);
+      const supply = rows.reduce((sum, row) => sum + row.supply, 0);
+      const vat = Math.round(supply * 0.1);
+      const total = supply + vat;
+
+      $('paper').innerHTML = `
+        <div class="title">거래 대금 결제요청서</div>
+
+        <table class="supplier outer">
+          <tr>
+            <td class="vertical" rowspan="5">공<br>급<br>자</td>
+            <td class="label">상호</td>
+            <td class="value">${escapeHtml(COMPANY.name)}</td>
+            <td class="label">대표자</td>
+            <td class="center-value">${escapeHtml(COMPANY.ceo)}</td>
+          </tr>
+          <tr>
+            <td class="label">사업자번호</td>
+            <td class="value" colspan="3">${escapeHtml(COMPANY.businessNumber)}</td>
+          </tr>
+          <tr>
+            <td class="label">주소</td>
+            <td class="value" colspan="3">${escapeHtml(COMPANY.address)}</td>
+          </tr>
+          <tr>
+            <td class="label">업태</td>
+            <td class="center-value">${escapeHtml(COMPANY.businessType)}</td>
+            <td class="label">종목</td>
+            <td class="center-value">${escapeHtml(COMPANY.businessItem)}</td>
+          </tr>
+          <tr>
+            <td class="label">담당자</td>
+            <td class="value">${escapeHtml(COMPANY.manager)}</td>
+            <td class="label">연락처</td>
+            <td class="center-value">${escapeHtml(COMPANY.phone)}</td>
+          </tr>
+        </table>
+
+        <div class="message">시공대금을 다음과 같이 청구하오니 결제하여 주시기 바랍니다.</div>
+
+        <div class="section-title">1. 청구금액</div>
+        <table class="amount-table">
+          <tr>
+            <td class="soft" style="width: 18%;">합계금액</td>
+            <td class="amount-text">₩ ${formatMoney(total)}(부가세포함)</td>
+          </tr>
+        </table>
+
+        <div class="section">
+          <div class="section-title">2. 거래내역</div>
+          <table class="details">
+            <thead>
+              <tr>
+                <th style="width: 15%;">NO</th>
+                <th>내용</th>
+                <th style="width: 14%;">공급가</th>
+                <th style="width: 14%;">부가세</th>
+                <th style="width: 14%;">합계</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${renderRows(rows)}
+              <tr>
+                <td class="sum-label">합계</td>
+                <td></td>
+                <td class="money">${formatMoney(supply)}</td>
+                <td class="money">${formatMoney(vat)}</td>
+                <td class="money">${formatMoney(total)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <div class="section-title">3. 입금계좌번호</div>
+          <table class="bank">
+            <thead>
+              <tr>
+                <th style="width: 20%;">은행</th>
+                <th>계좌번호</th>
+                <th style="width: 34%;">예금주</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>${escapeHtml(COMPANY.bank)}</td>
+                <td>${escapeHtml(COMPANY.account)}</td>
+                <td>${escapeHtml(COMPANY.depositor)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function buildRows(sites) {
+      return sites.map((site, index) => {
+        const supply = Number(site.totalAmount || 0);
+        const vat = Math.round(supply * 0.1);
+
+        return {
+          no: index + 1,
+          content: buildContent(site),
+          supply,
+          vat,
+          total: supply + vat,
+        };
+      });
+    }
+
+    function buildContent(site) {
+      const title = site.title || '';
+      const items = Array.isArray(site.items) ? site.items.join(', ') : '';
+      const type = site.constructionType || '';
+      return [title, items || type].filter(Boolean).join(' / ');
+    }
+
+    function renderRows(rows) {
+      const lines = rows.slice();
+
+      while (lines.length < 4) {
+        lines.push(null);
+      }
+
+      return lines.map((row) => {
+        if (!row) {
+          return `
+            <tr>
+              <td></td>
+              <td class="content"></td>
+              <td class="money"></td>
+              <td class="money"></td>
+              <td class="money"></td>
+            </tr>
+          `;
+        }
+
+        return `
+          <tr>
+            <td>${row.no}</td>
+            <td class="content">${escapeHtml(row.content)}</td>
+            <td class="money">${formatMoney(row.supply)}</td>
+            <td class="money">${formatMoney(row.vat)}</td>
+            <td class="money">${formatMoney(row.total)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function formatMoney(value) {
+      return Math.round(Number(value || 0)).toLocaleString('ko-KR');
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function setStatus(message) {
+      $('status').textContent = message;
+    }
+  </script>
+</body>
+</html>
