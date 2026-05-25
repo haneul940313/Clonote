@@ -12,7 +12,7 @@
       background: #f3f4f6;
       color: #111;
       font-family: Arial, "Malgun Gothic", sans-serif;
-      font-size: 14px;
+      font-size: 12px;
     }
 
     .toolbar {
@@ -64,17 +64,17 @@
       width: 190mm;
       min-height: 270mm;
       margin: 0 auto;
-      padding: 18mm 16mm 14mm;
+      padding: 17mm 14mm 12mm;
       background: #fff;
       border: 1px solid #ddd;
     }
 
     .title {
       text-align: center;
-      font-size: 30px;
+      font-size: 27px;
       font-weight: 900;
       letter-spacing: 3px;
-      margin: 0 0 14mm;
+      margin: 0 0 13mm;
     }
 
     table {
@@ -86,8 +86,8 @@
     th,
     td {
       border: 1px solid #9b9b9b;
-      height: 30px;
-      padding: 4px 8px;
+      height: 28px;
+      padding: 3px 6px;
       vertical-align: middle;
       white-space: nowrap;
       overflow: hidden;
@@ -111,7 +111,7 @@
     }
 
     .supplier .label {
-      width: 115px;
+      width: 112px;
       font-weight: 700;
       background: #fff;
     }
@@ -124,21 +124,26 @@
       text-align: center;
     }
 
+    .fit-text {
+      font-size: 10.5px;
+      letter-spacing: 0;
+    }
+
     .message {
       text-align: center;
-      margin: 12mm 0 10mm;
-      font-size: 16px;
-      letter-spacing: 0.2px;
+      margin: 11mm 0 9mm;
+      font-size: 14px;
+      letter-spacing: 0;
     }
 
     .section-title {
       margin: 0 0 6px 2px;
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 700;
     }
 
     .section {
-      margin-top: 12mm;
+      margin-top: 11mm;
     }
 
     .amount-table {
@@ -146,9 +151,9 @@
     }
 
     .amount-table td {
-      height: 38px;
+      height: 36px;
       border-color: #aaa;
-      font-size: 16px;
+      font-size: 14px;
     }
 
     .soft {
@@ -160,7 +165,7 @@
     .amount-text {
       font-weight: 700;
       text-align: left;
-      padding-left: 18px;
+      padding-left: 16px;
     }
 
     .details {
@@ -171,22 +176,22 @@
       background: #f4e6dc;
       text-align: center;
       font-weight: 700;
-      height: 34px;
+      height: 32px;
     }
 
     .details td {
-      height: 32px;
+      height: 30px;
       text-align: center;
     }
 
     .details .content {
       text-align: left;
-      padding-left: 14px;
+      padding-left: 12px;
     }
 
     .details .money {
       text-align: right;
-      padding-right: 12px;
+      padding-right: 10px;
     }
 
     .details .sum-label {
@@ -201,13 +206,13 @@
 
     .bank th {
       background: #f4e6dc;
-      height: 34px;
+      height: 32px;
       text-align: center;
     }
 
     .bank td {
       text-align: center;
-      height: 36px;
+      height: 34px;
       font-weight: 700;
     }
 
@@ -284,7 +289,6 @@
       businessNumber: '630-23-02531',
       address: '대구광역시 달서구 와룡로 49길 104-15 1층',
       businessType: '건설업',
-      businessItem: '승강기보양시공, 실내보양시공',
       manager: '신주현',
       phone: '010-8244-2777',
       bank: '카카오뱅크',
@@ -404,6 +408,7 @@
       const supply = rows.reduce((sum, row) => sum + row.supply, 0);
       const vat = Math.round(supply * 0.1);
       const total = supply + vat;
+      const items = getGroupItems(group.sites);
 
       $('paper').innerHTML = `
         <div class="title">거래 대금 결제요청서</div>
@@ -428,7 +433,7 @@
             <td class="label">업태</td>
             <td class="center-value">${escapeHtml(COMPANY.businessType)}</td>
             <td class="label">종목</td>
-            <td class="center-value">${escapeHtml(COMPANY.businessItem)}</td>
+            <td class="center-value fit-text">${escapeHtml(items)}</td>
           </tr>
           <tr>
             <td class="label">담당자</td>
@@ -502,7 +507,7 @@
 
         return {
           no: index + 1,
-          content: buildContent(site),
+          content: site.title || '',
           supply,
           vat,
           total: supply + vat,
@@ -510,11 +515,18 @@
       });
     }
 
-    function buildContent(site) {
-      const title = site.title || '';
-      const items = Array.isArray(site.items) ? site.items.join(', ') : '';
-      const type = site.constructionType || '';
-      return [title, items || type].filter(Boolean).join(' / ');
+    function getGroupItems(sites) {
+      const set = new Set();
+
+      sites.forEach((site) => {
+        if (Array.isArray(site.items)) {
+          site.items.forEach((item) => {
+            if (item) set.add(item);
+          });
+        }
+      });
+
+      return Array.from(set).join(', ');
     }
 
     function renderRows(rows) {
