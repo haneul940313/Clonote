@@ -1,214 +1,145 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>거래명세표 PDF</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>거래명세서</title>
   <style>
-    :root {
-      --ink: #202020;
-      --line: #404040;
-      --bg: #f5f6f8;
-      --white: #ffffff;
-      --muted: #6b7280;
-      --accent: #2563eb;
-      --dark: #374151;
-      --danger: #c2410c;
-      --ok: #047857;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
-      background: var(--bg);
-      color: var(--ink);
+      background: #f3f4f6;
+      color: #111;
       font-family: Arial, "Malgun Gothic", sans-serif;
-      letter-spacing: 0;
-    }
-
-    button,
-    select {
-      font: inherit;
-    }
-
-    button {
-      border: 0;
-      border-radius: 6px;
-      color: #fff;
-      font-weight: 700;
-      min-height: 42px;
-      padding: 0 16px;
-      cursor: pointer;
-    }
-
-    button:disabled {
-      cursor: wait;
-      opacity: .55;
-    }
-
-    .primary {
-      background: var(--accent);
-    }
-
-    .secondary {
-      background: var(--dark);
-    }
-
-    .wrap {
-      max-width: 1060px;
-      margin: 0 auto;
-      padding: 32px 16px 48px;
+      font-size: 12px;
     }
 
     .toolbar {
       display: flex;
-      gap: 10px;
-      margin-bottom: 12px;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 12px;
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
-    .status {
-      min-height: 24px;
-      margin: 0 0 14px;
-      color: var(--muted);
+    .toolbar input,
+    .toolbar select,
+    .toolbar button {
+      height: 34px;
+      border: 1px solid #bbb;
+      background: #fff;
+      padding: 0 10px;
       font-size: 13px;
     }
 
-    .status.error {
-      color: var(--danger);
+    .toolbar button {
+      cursor: pointer;
+      font-weight: 700;
     }
 
-    .status.ok {
-      color: var(--ok);
+    .toolbar button.primary {
+      background: #111;
+      color: #fff;
+      border-color: #111;
     }
 
-    .empty {
-      padding: 54px 16px;
-      text-align: center;
-      color: var(--muted);
-      border: 1px dashed #d1d5db;
-      border-radius: 8px;
-      background: #fff;
+    .status {
+      padding: 8px 12px;
+      color: #555;
+      font-size: 12px;
     }
 
-    .statement {
-      width: 100%;
-      max-width: 940px;
-      margin: 0 auto;
-      background: var(--white);
-      border: 2px solid var(--line);
-      padding: 8px;
+    .paper-wrap {
+      padding: 18px;
       overflow-x: auto;
-      box-shadow: 0 16px 34px rgba(15, 23, 42, .08);
     }
 
     .paper {
-      width: 900px;
-      min-width: 900px;
+      width: 190mm;
+      min-height: 277mm;
       margin: 0 auto;
+      background: #fff;
+      padding: 7mm;
+      border: 1px solid #ddd;
     }
 
     .title {
-      margin: 8px 0 20px;
       text-align: center;
-      font-size: 30px;
-      font-weight: 700;
+      font-size: 28px;
+      font-weight: 800;
       letter-spacing: 8px;
+      margin: 2mm 0 8mm;
       text-decoration: underline;
-      text-underline-offset: 6px;
+      text-underline-offset: 7px;
     }
 
-    .site-line,
-    .date-line {
-      margin: 0 0 8px;
-      font-weight: 700;
-      font-size: 14px;
-    }
-
-    .date-line {
-      margin-bottom: 12px;
-    }
-
-    .top-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    .top-line {
+      display: flex;
+      justify-content: space-between;
       gap: 12px;
-      margin-bottom: 8px;
+      margin-bottom: 5mm;
+      font-weight: 700;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       table-layout: fixed;
-      border-spacing: 0;
     }
 
     th,
     td {
-      border: 1px solid var(--line);
-      padding: 5px 6px;
-      height: 28px;
-      font-size: 13px;
-      line-height: 1.15;
+      border: 1px solid #222;
+      height: 26px;
+      padding: 3px 6px;
       vertical-align: middle;
-      word-break: keep-all;
-      background: #fff;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     th {
       text-align: center;
-      font-weight: 700;
+      font-weight: 800;
     }
 
-    .party td {
-      height: 30px;
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 8px;
     }
 
-    .party-title {
-      height: 30px;
+    .info-title {
       text-align: center;
-      font-weight: 700;
-      font-size: 14px;
+      font-weight: 800;
+      height: 26px;
     }
 
     .label {
+      width: 26%;
       text-align: center;
-      font-weight: 700;
-    }
-
-    .seal-cell {
-      position: relative;
-      text-align: center;
-      color: #555;
-      overflow: visible;
-    }
-
-    .seal-img {
-      position: absolute;
-      right: 0;
-      top: 50%;
-      width: 84px;
-      height: 84px;
-      object-fit: contain;
-      transform: translateY(-50%);
-      opacity: .88;
-      pointer-events: none;
-      z-index: 5;
+      font-weight: 800;
+      background: #fff;
     }
 
     .amount-bar {
+      margin-top: 8px;
       margin-bottom: 0;
     }
 
     .amount-bar td {
-      height: 34px;
-      font-weight: 700;
-      font-size: 14px;
+      height: 30px;
+      font-weight: 800;
     }
 
-    .amount-title {
+    .amount-label {
+      width: 22%;
       text-align: center;
     }
 
@@ -217,595 +148,449 @@
       padding-right: 12px;
     }
 
-    .amount-money {
+    .amount-number {
+      width: 26%;
       text-align: right;
-      padding-right: 10px;
-      white-space: nowrap;
+      padding-right: 8px;
     }
 
     .items th,
     .items td {
-      height: 26px;
+      height: 24px;
     }
 
-    .right {
-      text-align: right;
+    .items .no { width: 6%; text-align: center; }
+    .items .date { width: 13%; text-align: center; }
+    .items .name { width: 31%; }
+    .items .type { width: 12%; text-align: center; }
+    .items .qty { width: 8%; text-align: right; }
+    .items .money { width: 15%; text-align: right; }
+
+    .summary-wrap {
+      display: grid;
+      grid-template-columns: 1fr 64mm;
+      margin-top: -1px;
     }
 
-    .center {
+    .summary-empty {
+      border: 1px solid #222;
+      border-top: 0;
+      min-height: 58px;
+    }
+
+    .summary td {
+      height: 25px;
+      font-weight: 800;
+    }
+
+    .summary .sum-label {
+      width: 38%;
       text-align: center;
     }
 
-    .totals-wrap {
-      display: flex;
-      justify-content: flex-end;
-      width: 100%;
+    .summary .sum-money {
+      text-align: right;
+      padding-right: 8px;
     }
 
-    .totals {
-      width: 260px;
-      border-top: 0;
-    }
-
-    .totals td {
-      height: 26px;
-      font-weight: 700;
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      background: rgba(15, 23, 42, .45);
-      z-index: 20;
-    }
-
-    .modal-backdrop.open {
-      display: flex;
-    }
-
-    .modal {
-      width: min(420px, 100%);
-      background: #fff;
-      border-radius: 8px;
-      padding: 18px;
-      box-shadow: 0 24px 60px rgba(15, 23, 42, .25);
-    }
-
-    .modal h2 {
-      margin: 0 0 12px;
-      font-size: 18px;
-    }
-
-    .modal select {
-      width: 100%;
-      min-height: 42px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      padding: 0 10px;
-      margin-bottom: 14px;
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-    }
-
-    @media (max-width: 760px) {
-      .toolbar {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
-
-      .statement {
-        padding: 6px;
-      }
+    .empty {
+      text-align: center;
+      color: #777;
+      padding: 40px 0;
     }
 
     @media print {
+      @page {
+        size: A4 portrait;
+        margin: 7mm;
+      }
+
       body {
         background: #fff;
       }
 
       .toolbar,
-      .status,
-      .modal-backdrop {
+      .status {
         display: none !important;
       }
 
-      .wrap {
-        width: 100%;
-        max-width: none;
+      .paper-wrap {
         padding: 0;
-        margin: 0;
-      }
-
-      .statement {
-        width: 100%;
-        max-width: none;
-        margin: 0;
-        border: 0;
-        padding: 0;
-        box-shadow: none;
         overflow: visible;
       }
 
       .paper {
         width: 196mm;
-        min-width: 196mm;
-        max-width: 196mm;
-        margin: 0 auto;
+        min-height: auto;
+        margin: 0;
+        padding: 0;
+        border: 0;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .paper-wrap {
+        padding: 10px;
       }
 
-      th,
-      td {
-        font-size: 9.2px;
-        padding: 2px 3px;
-        height: 19px;
-        line-height: 1.08;
-      }
-
-      .title {
-        font-size: 22px;
-        margin: 0 0 9px;
-      }
-
-      .site-line,
-      .date-line {
-        font-size: 10px;
-        margin-bottom: 4px;
-      }
-
-      .date-line {
-        margin-bottom: 7px;
-      }
-
-      .top-grid {
-        gap: 7px;
-        margin-bottom: 6px;
-      }
-
-      .party-title {
-        font-size: 10px;
-        height: 20px;
-      }
-
-      .party td {
-        height: 20px;
-      }
-
-      .amount-bar td {
-        font-size: 10px;
-        height: 22px;
-      }
-
-      .items th,
-      .items td {
-        height: 18px;
-      }
-
-      .totals {
-        width: 220px;
-      }
-
-      .totals td {
-        height: 20px;
-      }
-
-      .seal-img {
-        width: 68px;
-        height: 68px;
-      }
-
-      @page {
-        size: A4 portrait;
-        margin: 7mm;
+      .paper {
+        width: 190mm;
       }
     }
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <div class="toolbar">
-      <button id="createBtn" class="primary" type="button">파일 생성하기</button>
-      <button id="pdfBtn" class="secondary" type="button" disabled>PDF 다운로드 받기</button>
-    </div>
+  <div class="toolbar">
+    <input id="monthInput" type="month" />
+    <button class="primary" onclick="loadMonth()">파일 생성하기</button>
+    <select id="groupSelect" onchange="renderStatement()">
+      <option value="">거래처/담당자 선택</option>
+    </select>
+    <button onclick="window.print()">PDF 다운로드 받기</button>
+  </div>
 
-    <p id="status" class="status">파일 생성하기 버튼을 눌러주세요.</p>
+  <div id="status" class="status">월을 선택한 뒤 파일 생성하기를 눌러줘.</div>
 
-    <section id="preview" class="empty">
-      아직 생성된 거래명세표가 없습니다.
-    </section>
-  </main>
-
-  <div id="siteModal" class="modal-backdrop">
-    <div class="modal">
-      <h2>현장 선택</h2>
-      <select id="siteSelect"></select>
-      <div class="modal-actions">
-        <button id="cancelSiteBtn" class="secondary" type="button">취소</button>
-        <button id="confirmSiteBtn" class="primary" type="button">선택</button>
-      </div>
+  <div class="paper-wrap">
+    <div id="paper" class="paper">
+      <div class="empty">거래명세서가 여기에 표시됩니다.</div>
     </div>
   </div>
 
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxKVqHqEnPLmhMP1-Pp1fE-g9egc-nkRuUrfLan67ev9jPmNESvCL9i-20AxSqVNHTi/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxIjy992knS4x3_pRks1F_aZIrLU1GfyDVQsomsPG4anq0Rf6rclj0V-VurTYBQJz69/exec';
 
     const state = {
-      statement: null,
-      selectedSite: '',
-      busy: false,
+      month: '',
+      sites: [],
+      groups: [],
     };
 
-    const els = {
-      createBtn: document.querySelector('#createBtn'),
-      pdfBtn: document.querySelector('#pdfBtn'),
-      status: document.querySelector('#status'),
-      preview: document.querySelector('#preview'),
-      modal: document.querySelector('#siteModal'),
-      siteSelect: document.querySelector('#siteSelect'),
-      cancelSiteBtn: document.querySelector('#cancelSiteBtn'),
-      confirmSiteBtn: document.querySelector('#confirmSiteBtn'),
-    };
+    const $ = (id) => document.getElementById(id);
 
-    els.createBtn.addEventListener('click', openSitePicker);
-    els.pdfBtn.addEventListener('click', downloadPdf);
-    els.cancelSiteBtn.addEventListener('click', closeSitePicker);
-    els.confirmSiteBtn.addEventListener('click', confirmSite);
+    init();
 
-    async function openSitePicker() {
-      setBusy(true);
-      setStatus('현장 목록을 불러오는 중입니다.');
-
-      try {
-        const data = await fetchJson(`${WEB_APP_URL}?action=sites`);
-
-        if (!data.ok) {
-          throw new Error(data.error || '현장 목록을 불러오지 못했습니다.');
-        }
-
-        renderSiteOptions(data.sites || []);
-        els.modal.classList.add('open');
-        setBusy(false);
-        setStatus('현장을 선택해주세요.');
-      } catch (error) {
-        showError(error);
-      }
+    function init() {
+      const now = new Date();
+      $('monthInput').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     }
 
-    function renderSiteOptions(sites) {
-      if (!sites.length) {
-        els.siteSelect.innerHTML = '<option value="">현장 없음</option>';
+    async function loadMonth() {
+      state.month = $('monthInput').value;
+      if (!state.month) {
+        setStatus('월을 먼저 선택해줘.');
         return;
       }
 
-      els.siteSelect.innerHTML = sites.map((site) => {
-        const label = `${site.name || '현장 없음'} (${site.count || 0}건)`;
-        return `<option value="${escapeHtml(site.name || '')}">${escapeHtml(label)}</option>`;
-      }).join('');
-    }
-
-    function closeSitePicker() {
-      els.modal.classList.remove('open');
-      setStatus('파일 생성하기 버튼을 눌러주세요.');
-    }
-
-    async function confirmSite() {
-      const siteName = els.siteSelect.value;
-      els.modal.classList.remove('open');
-      await createFile(siteName);
-    }
-
-    async function createFile(siteName) {
-      setBusy(true);
-      setStatus('노션 DB 내용을 불러오는 중입니다.');
+      setStatus('노션 데이터를 불러오는 중...');
+      $('groupSelect').innerHTML = '<option value="">거래처/담당자 선택</option>';
+      $('paper').innerHTML = '<div class="empty">불러오는 중...</div>';
 
       try {
-        const url = `${WEB_APP_URL}?site=${encodeURIComponent(siteName || '')}`;
+        const url = `${WEB_APP_URL}?action=sites&month=${encodeURIComponent(state.month)}`;
         const data = await fetchJson(url);
 
-        if (!data.ok) {
-          throw new Error(data.error || '데이터를 불러오지 못했습니다.');
+        if (!data.ok) throw new Error(data.error || '데이터를 불러오지 못했습니다.');
+
+        state.sites = Array.isArray(data.sites) ? data.sites : [];
+        state.groups = buildGroups(state.sites);
+
+        renderGroupOptions();
+
+        if (state.groups.length) {
+          $('groupSelect').value = state.groups[0].key;
+          renderStatement();
+          setStatus(`${state.month} / ${state.groups.length}개 거래처·담당자 그룹`);
+        } else {
+          $('paper').innerHTML = '<div class="empty">해당 월 데이터가 없습니다.</div>';
+          setStatus('해당 월 데이터가 없습니다.');
         }
-
-        state.statement = data.statement;
-        state.selectedSite = siteName || '';
-        renderStatement(data.statement);
-
-        setBusy(false);
-        setStatus(`${data.statement.rows.length.toLocaleString()}개 항목으로 거래명세표를 생성했습니다.`, 'ok');
-      } catch (error) {
-        showError(error);
+      } catch (err) {
+        $('paper').innerHTML = '<div class="empty">오류가 발생했습니다.</div>';
+        setStatus(err.message || String(err));
       }
-    }
-
-    function downloadPdf() {
-      if (!state.statement) {
-        setStatus('먼저 파일을 생성해주세요.', 'error');
-        return;
-      }
-
-      window.print();
     }
 
     async function fetchJson(url) {
-      const response = await fetch(url, {
-        method: 'GET',
-        cache: 'no-store',
-      });
-
-      if (!response.ok) {
-        throw new Error(`웹앱 호출 실패: ${response.status}`);
+      const res = await fetch(url);
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        throw new Error('Apps Script 응답이 JSON이 아닙니다: ' + text.slice(0, 120));
       }
-
-      return response.json();
     }
 
-    function renderStatement(statement) {
-      const rows = buildRows(statement.rows || [], 15);
-      const supplyAmount = Number(statement.totals?.supplyAmount || 0);
-      const taxAmount = Number(statement.totals?.taxAmount || 0);
-      const totalAmount = Number(statement.totals?.totalAmount || 0);
-      const supplier = statement.supplier || {};
-      const recipient = statement.recipient || {};
+    function buildGroups(sites) {
+      const map = new Map();
 
-      els.preview.className = 'statement';
-      els.preview.innerHTML = `
-        <div class="paper">
-          <h1 class="title">거 래 명 세 서</h1>
+      sites.forEach((site) => {
+        const contacts = Array.isArray(site.contacts) ? site.contacts : [];
+        const targets = contacts.length ? contacts : [{ id: 'none', name: '미지정', type: '', phone: '' }];
 
-          <div class="site-line">현장번호 : ${escapeHtml(statement.siteName || '-')}</div>
-          <div class="date-line">날짜 : ${formatTodayKorean()}</div>
+        targets.forEach((contact) => {
+          const key = contact.id || contact.name || 'none';
 
-          <div class="top-grid">
-            <table class="party">
-              <colgroup>
-                <col style="width:18%">
-                <col style="width:32%">
-                <col style="width:18%">
-                <col style="width:32%">
-              </colgroup>
-              <tr>
-                <td class="party-title" colspan="4">공급받는자</td>
-              </tr>
-              <tr>
-                <td class="label">상호</td>
-                <td colspan="3">${escapeHtml(recipient.companyName || '-')}</td>
-              </tr>
-              <tr>
-                <td class="label">담당자</td>
-                <td>${escapeHtml(recipient.manager || '-')}</td>
-                <td class="label">전화번호</td>
-                <td>${escapeHtml(recipient.phone || '-')}</td>
-              </tr>
-              <tr>
-                <td class="label">주소</td>
-                <td colspan="3">${escapeHtml(recipient.address || '-')}</td>
-              </tr>
-              <tr>
-                <td class="label">현장</td>
-                <td colspan="3">${escapeHtml(statement.workName || statement.siteName || '-')}</td>
-              </tr>
-            </table>
+          if (!map.has(key)) {
+            map.set(key, {
+              key,
+              contact,
+              sites: [],
+            });
+          }
 
-            <table class="party">
-              <colgroup>
-                <col style="width:18%">
-                <col style="width:32%">
-                <col style="width:18%">
-                <col style="width:32%">
-              </colgroup>
-              <tr>
-                <td class="party-title" colspan="4">공급자</td>
-              </tr>
-              <tr>
-                <td class="label">사업자번호</td>
-                <td colspan="3">${escapeHtml(supplier.businessNumber || '-')}</td>
-              </tr>
-              <tr>
-                <td class="label">공급자명</td>
-                <td>${escapeHtml(supplier.companyName || '-')}</td>
-                <td class="label">대표자</td>
-                <td class="seal-cell">
-                  ${escapeHtml(supplier.representative || '-')} &nbsp; (인)
-                  ${supplier.sealUrl ? `<img class="seal-img" src="${escapeHtml(supplier.sealUrl)}" alt="인감">` : ''}
-                </td>
-              </tr>
-              <tr>
-                <td class="label">전화번호</td>
-                <td colspan="3">${escapeHtml(supplier.phone || '-')}</td>
-              </tr>
-              <tr>
-                <td class="label">주소</td>
-                <td colspan="3">${escapeHtml(supplier.address || '-')}</td>
-              </tr>
-            </table>
-          </div>
+          map.get(key).sites.push(site);
+        });
+      });
 
-          <table class="amount-bar">
-            <colgroup>
-              <col style="width:14%">
-              <col style="width:68%">
-              <col style="width:18%">
-            </colgroup>
+      return Array.from(map.values()).sort((a, b) => {
+        return String(a.contact.name || '').localeCompare(String(b.contact.name || ''), 'ko');
+      });
+    }
+
+    function renderGroupOptions() {
+      const options = ['<option value="">거래처/담당자 선택</option>'];
+
+      state.groups.forEach((group) => {
+        const label = `${group.contact.name || '미지정'}${group.contact.type ? ' / ' + group.contact.type : ''}`;
+        options.push(`<option value="${escapeHtml(group.key)}">${escapeHtml(label)}</option>`);
+      });
+
+      $('groupSelect').innerHTML = options.join('');
+    }
+
+    function renderStatement() {
+      const key = $('groupSelect').value;
+      const group = state.groups.find((item) => item.key === key);
+
+      if (!group) {
+        $('paper').innerHTML = '<div class="empty">거래처/담당자를 선택해줘.</div>';
+        return;
+      }
+
+      const rows = buildRows(group.sites);
+      const supply = rows.reduce((sum, row) => sum + row.supplyAmount, 0);
+      const vat = Math.round(supply * 0.1);
+      const total = supply + vat;
+
+      const customerName = group.contact.name || '';
+      const customerPhone = group.contact.phone || '';
+
+      $('paper').innerHTML = `
+        <div class="title">거래명세서</div>
+
+        <div class="top-line">
+          <div>날짜 : ${formatKoreanDate(new Date())}</div>
+          <div>정산월 : ${escapeHtml(state.month)}</div>
+        </div>
+
+        <div class="info-grid">
+          <table>
+            <tr><th class="info-title" colspan="4">공급받는자</th></tr>
             <tr>
-              <td class="amount-title">합계금액 :</td>
-              <td class="amount-korean">${escapeHtml(numberToKoreanAmount(totalAmount))}</td>
-              <td class="amount-money">₩ ${formatNumber(totalAmount)}</td>
+              <td class="label">상호</td>
+              <td colspan="3">${escapeHtml(customerName)}</td>
+            </tr>
+            <tr>
+              <td class="label">담당자</td>
+              <td>${escapeHtml(customerName)}</td>
+              <td class="label">전화번호</td>
+              <td>${escapeHtml(customerPhone)}</td>
+            </tr>
+            <tr>
+              <td class="label">주소</td>
+              <td colspan="3"></td>
             </tr>
           </table>
 
-          <table class="items">
-            <colgroup>
-              <col style="width:5%">
-              <col style="width:32%">
-              <col style="width:10%">
-              <col style="width:7%">
-              <col style="width:10%">
-              <col style="width:12%">
-              <col style="width:12%">
-              <col style="width:12%">
-            </colgroup>
-            <thead>
-              <tr>
-                <th>No</th>
-                <th>청구내역</th>
-                <th>작업구분</th>
-                <th>수량</th>
-                <th>단가</th>
-                <th>공급가</th>
-                <th>부가세</th>
-                <th>총금액</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows}
-            </tbody>
+          <table>
+            <tr><th class="info-title" colspan="4">공급자</th></tr>
+            <tr>
+              <td class="label">사업자번호</td>
+              <td colspan="3"></td>
+            </tr>
+            <tr>
+              <td class="label">상호</td>
+              <td>보양의 신</td>
+              <td class="label">대표자</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td class="label">전화번호</td>
+              <td colspan="3"></td>
+            </tr>
+            <tr>
+              <td class="label">주소</td>
+              <td colspan="3"></td>
+            </tr>
           </table>
+        </div>
 
-          <div class="totals-wrap">
-            <table class="totals">
-              <colgroup>
-                <col style="width:40%">
-                <col style="width:60%">
-              </colgroup>
-              <tr>
-                <td class="label">공급가</td>
-                <td class="right">₩ ${formatNumber(supplyAmount)}</td>
-              </tr>
-              <tr>
-                <td class="label">부가세</td>
-                <td class="right">₩ ${formatNumber(taxAmount)}</td>
-              </tr>
-              <tr>
-                <td class="label">합계금액</td>
-                <td class="right">₩ ${formatNumber(totalAmount)}</td>
-              </tr>
-            </table>
-          </div>
+        <table class="amount-bar">
+          <tr>
+            <td class="amount-label">합계금액 :</td>
+            <td class="amount-korean">${escapeHtml(numberToKorean(total))} 원 정</td>
+            <td class="amount-number">₩ ${formatMoney(total)}</td>
+          </tr>
+        </table>
+
+        <table class="items">
+          <thead>
+            <tr>
+              <th class="no">No</th>
+              <th class="date">날짜</th>
+              <th class="name">청구내역</th>
+              <th class="type">작업구분</th>
+              <th class="qty">수량</th>
+              <th class="money">공급가</th>
+              <th class="money">부가세</th>
+              <th class="money">총금액</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${renderRows(rows)}
+          </tbody>
+        </table>
+
+        <div class="summary-wrap">
+          <div class="summary-empty"></div>
+          <table class="summary">
+            <tr>
+              <td class="sum-label">공급가</td>
+              <td class="sum-money">₩ ${formatMoney(supply)}</td>
+            </tr>
+            <tr>
+              <td class="sum-label">부가세</td>
+              <td class="sum-money">₩ ${formatMoney(vat)}</td>
+            </tr>
+            <tr>
+              <td class="sum-label">합계금액</td>
+              <td class="sum-money">₩ ${formatMoney(total)}</td>
+            </tr>
+          </table>
         </div>
       `;
     }
 
-    function buildRows(items, minRows) {
-      const filledRows = items.map((row, index) => {
-        const supplyAmount = Number(row.supplyAmount || 0);
-        const taxAmount = Number(row.taxAmount || 0);
-        const totalAmount = Number(row.totalAmount || supplyAmount + taxAmount);
+    function buildRows(sites) {
+      return sites.map((site, index) => {
+        const supplyAmount = Number(site.totalAmount || 0);
+        const vat = Math.round(supplyAmount * 0.1);
+
+        return {
+          no: index + 1,
+          date: site.slipDate || site.startDate || '',
+          name: site.title || '',
+          type: arrayText(site.items) || site.constructionType || '',
+          quantity: 1,
+          supplyAmount,
+          vat,
+          total: supplyAmount + vat,
+        };
+      });
+    }
+
+    function renderRows(rows) {
+      const visibleRows = rows.slice();
+      while (visibleRows.length < 14) {
+        visibleRows.push(null);
+      }
+
+      return visibleRows.map((row) => {
+        if (!row) {
+          return `
+            <tr>
+              <td class="no"></td>
+              <td class="date"></td>
+              <td class="name"></td>
+              <td class="type"></td>
+              <td class="qty"></td>
+              <td class="money">-</td>
+              <td class="money">-</td>
+              <td class="money">-</td>
+            </tr>
+          `;
+        }
 
         return `
           <tr>
-            <td class="center">${index + 1}</td>
-            <td>${escapeHtml(row.title || '')}</td>
-            <td class="center">${escapeHtml(row.workType || '')}</td>
-            <td class="right">${formatNumber(row.quantity)}</td>
-            <td class="right">₩ ${formatNumber(row.unitPrice)}</td>
-            <td class="right">₩ ${formatNumber(supplyAmount)}</td>
-            <td class="right">₩ ${formatNumber(taxAmount)}</td>
-            <td class="right">₩ ${formatNumber(totalAmount)}</td>
+            <td class="no">${row.no}</td>
+            <td class="date">${escapeHtml(formatShortDate(row.date))}</td>
+            <td class="name">${escapeHtml(row.name)}</td>
+            <td class="type">${escapeHtml(row.type)}</td>
+            <td class="qty">${row.quantity}</td>
+            <td class="money">₩ ${formatMoney(row.supplyAmount)}</td>
+            <td class="money">₩ ${formatMoney(row.vat)}</td>
+            <td class="money">₩ ${formatMoney(row.total)}</td>
           </tr>
         `;
-      });
-
-      while (filledRows.length < minRows) {
-        filledRows.push(`
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td class="right">-</td>
-            <td class="right">-</td>
-            <td class="right">-</td>
-          </tr>
-        `);
-      }
-
-      return filledRows.join('');
+      }).join('');
     }
 
-    function setBusy(nextBusy) {
-      state.busy = nextBusy;
-      els.createBtn.disabled = nextBusy;
-
-      if (nextBusy) {
-        els.pdfBtn.disabled = true;
-      } else {
-        els.pdfBtn.disabled = !state.statement;
-      }
+    function arrayText(value) {
+      return Array.isArray(value) ? value.join(', ') : String(value || '');
     }
 
-    function setStatus(message, type = '') {
-      els.status.textContent = message;
-      els.status.className = `status ${type}`;
+    function formatMoney(value) {
+      return Math.round(Number(value || 0)).toLocaleString('ko-KR');
     }
 
-    function showError(error) {
-      setBusy(false);
-      setStatus(error && error.message ? error.message : String(error), 'error');
+    function formatShortDate(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return `${date.getMonth() + 1}/${date.getDate()}`;
     }
 
-    function formatTodayKorean() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      return `${year}년 ${month}월 ${day}일`;
+    function formatKoreanDate(date) {
+      return `${date.getFullYear()}년 ${String(date.getMonth() + 1).padStart(2, '0')}월 ${String(date.getDate()).padStart(2, '0')}일`;
     }
 
-    function formatNumber(value) {
-      const number = Number(value || 0);
-      if (!number) return '';
-      return number.toLocaleString('ko-KR');
-    }
-
-    function numberToKoreanAmount(value) {
-      const number = Math.floor(Number(value || 0));
-      if (!number) return '영원 정';
+    function numberToKorean(value) {
+      const num = Math.round(Number(value || 0));
+      if (!num) return '영';
 
       const digits = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구'];
-      const smallUnits = ['', '십', '백', '천'];
-      const largeUnits = ['', '만', '억', '조'];
-      const groups = [];
-      let remaining = number;
+      const small = ['', '십', '백', '천'];
+      const big = ['', '만', '억', '조'];
+      const parts = [];
+      let source = String(num);
+      let groupIndex = 0;
 
-      while (remaining > 0) {
-        groups.push(remaining % 10000);
-        remaining = Math.floor(remaining / 10000);
+      while (source.length > 0) {
+        const chunk = source.slice(-4);
+        source = source.slice(0, -4);
+
+        let text = '';
+        const padded = chunk.padStart(4, '0');
+
+        for (let i = 0; i < 4; i++) {
+          const n = Number(padded[i]);
+          if (!n) continue;
+          text += digits[n] + small[3 - i];
+        }
+
+        if (text) {
+          parts.unshift(text + big[groupIndex]);
+        }
+
+        groupIndex++;
       }
 
-      const text = groups.map((group, groupIndex) => {
-        if (!group) return '';
-
-        let groupText = '';
-        const chars = String(group).padStart(4, '0').split('').map(Number);
-
-        chars.forEach((digit, index) => {
-          if (!digit) return;
-          const unitIndex = 3 - index;
-          const omitOne = digit === 1 && unitIndex > 0;
-          groupText += (omitOne ? '' : digits[digit]) + smallUnits[unitIndex];
-        });
-
-        return groupText + largeUnits[groupIndex];
-      }).reverse().join('');
-
-      return `${text}원 정`;
+      return parts.join('');
     }
 
     function escapeHtml(value) {
       return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function setStatus(message) {
+      $('status').textContent = message;
     }
   </script>
 </body>
