@@ -472,23 +472,25 @@
       `;
     }
 
-    function buildRows(sites) {
-      return sites.map((site, index) => {
-        const supplyAmount = Number(site.totalAmount || 0);
-        const vat = Math.round(supplyAmount * 0.1);
+function buildRows(sites) {
+  return sites
+    .filter((site) => site.paid !== true)
+    .map((site, index) => {
+      const supplyAmount = Number(site.totalAmount || 0);
+      const vat = Math.round(supplyAmount * 0.1);
 
-        return {
-          no: index + 1,
-          date: site.slipDate || site.startDate || '',
-          name: site.title || '',
-          type: arrayText(site.items) || site.constructionType || '',
-          quantity: 1,
-          supplyAmount,
-          vat,
-          total: supplyAmount + vat,
-        };
-      });
-    }
+      return {
+        no: index + 1,
+        date: site.slipDate || site.startDate || '',
+        name: site.title || '',
+        type: arrayText(site.items) || site.constructionType || '',
+        quantity: 1,
+        supplyAmount,
+        vat,
+        total: supplyAmount + vat,
+      };
+    });
+}
 
     function renderRows(rows) {
       const visibleRows = rows.slice();
