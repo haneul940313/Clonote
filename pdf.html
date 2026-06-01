@@ -135,7 +135,6 @@
       text-align: center;
       margin: 11mm 0 9mm;
       font-size: 14px;
-      letter-spacing: 0;
     }
 
     .section-title {
@@ -269,7 +268,7 @@
     <input id="monthInput" type="month" />
     <button class="primary" onclick="loadMonth()">파일 생성하기</button>
     <select id="groupSelect" onchange="renderDocument()">
-      <option value="">거래처/담당자 선택</option>
+      <option value="">거래처 선택</option>
     </select>
     <button onclick="window.print()">PDF 다운로드 받기</button>
   </div>
@@ -326,22 +325,25 @@
 
       try {
         const data = await fetchJson(`${WEB_APP_URL}?action=sites&month=${encodeURIComponent(state.month)}`);
-        if (!data.ok) throw new Error(data.error || '데이터를 불러오지 못했습니다.');
 
-        state.sites = (data.sites || []).filter((site) => site.paid !== true);
+        if (!data.ok) {
+          throw new Error(data.error || '데이터를 불러오지 못했습니다.');
+        }
+
+        state.sites = Array.isArray(data.sites) ? data.sites : [];
         state.groups = buildGroups(state.sites);
 
         renderGroupOptions();
 
         if (!state.groups.length) {
           $('paper').innerHTML = '<div class="empty">해당 월의 미결제 데이터가 없습니다.</div>';
-          setStatus('해당 월의 미결제 데이터가 없습니다.');
+          setStatus(`해당 월의 미결제 데이터가 없습니다. 응답 ${state.sites.length}건`);
           return;
         }
 
         $('groupSelect').value = state.groups[0].key;
         renderDocument();
-        setStatus(`${state.month} / 미결제 ${state.sites.length}건 / ${state.groups.length}개 그룹`);
+        setStatus(`${state.month} / 미결제 ${state.sites.length}건 / ${state.groups.length}개 거래처`);
       } catch (err) {
         $('paper').innerHTML = '<div class="empty">오류가 발생했습니다.</div>';
         setStatus(err.message || String(err));
@@ -365,15 +367,21 @@
       sites.forEach((site) => {
         const contacts = Array.isArray(site.contacts) && site.contacts.length
           ? site.contacts
-          : [{ id: 'none', name: '미지정', type: '', phone: '' }];
+          : [{ id: firstText(site.customer, site.customerName, site.content, site.title, '미지정'), name: firstText(site.customer, site.customerName, '미지정'), type: '', phone: '' }];
 
         contacts.forEach((contact) => {
-          const key = contact.id || contact.name || 'none';
+          const name = firstText(contact.name, site.customer, site.customerName, '미지정');
+          const key = contact.id || name;
 
           if (!map.has(key)) {
             map.set(key, {
               key,
-              contact,
+              contact: {
+                id: key,
+                name,
+                type: contact.type || '',
+                phone: contact.phone || '',
+              },
               sites: [],
             });
           }
@@ -388,10 +396,10 @@
     }
 
     function renderGroupOptions() {
-      const options = ['<option value="">거래처/담당자 선택</option>'];
+      const options = ['<option value="">거래처 선택</option>'];
 
       state.groups.forEach((group) => {
-        const label = `${group.contact.name || '미지정'}${group.contact.type ? ' / ' + group.contact.type : ''}`;
+        const label = group.contact.name || '미지정';
         options.push(`<option value="${escapeHtml(group.key)}">${escapeHtml(label)}</option>`);
       });
 
@@ -402,7 +410,7 @@
       const group = state.groups.find((item) => item.key === $('groupSelect').value);
 
       if (!group) {
-        $('paper').innerHTML = '<div class="empty">거래처/담당자를 선택해 주세요.</div>';
+        $('paper').innerHTML = '<div class="empty">거래처를 선택해 주세요.</div>';
         return;
       }
 
@@ -504,7 +512,7 @@
 
     function buildRows(sites) {
       return sites.map((site, index) => {
-        const supply = Number(site.totalAmount || 0);
+        const supply = Number(site.totalAmount || site.constructionCost || site.amount || 0);
         const vat = Math.round(supply * 0.1);
 
         return {
@@ -525,9 +533,10 @@
         site.siteName,
         site.companyName,
         site.customerName,
+        site.customer,
         site['내용'],
         site['업체명'],
-        site['현장명']
+        site['거래처']
       );
     }
 
@@ -537,7 +546,7 @@
       sites.forEach((site) => {
         const values = Array.isArray(site.items)
           ? site.items
-          : String(site.items || '').split(',');
+          : String(site.items || site.itemText || '').split(',');
 
         values.forEach((item) => {
           const cleaned = String(item || '').trim();
