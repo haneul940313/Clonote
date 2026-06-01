@@ -1,382 +1,581 @@
-const CONFIG = {
-  notionVersion: '2022-06-28',
-  timeZone: 'Asia/Seoul',
-  pageSize: 100,
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>거래 대금 결제요청서</title>
+  <style>
+    * { box-sizing: border-box; }
 
-  props: {
-    token: 'NOTION_TOKEN',
-    permitDatabaseId: 'PERMIT_DATABASE_ID',
-    protectionDatabaseId: 'PROTECTION_DATABASE_ID',
-    defaultMonth: 'DEFAULT_MONTH',
-  },
+    body {
+      margin: 0;
+      background: #f3f4f6;
+      color: #111;
+      font-family: Arial, "Malgun Gothic", sans-serif;
+      font-size: 12px;
+    }
 
-  permitFields: {
-    date: ['전표일자'],
-    manager: ['담당자'],
-    customer: ['거래처'],
-    address: ['현장주소'],
-    item: ['거래품목'],
-    constructionCost: ['시공비'],
-    totalAmount: ['총합계', '합계', '시공비'],
-    paymentStatus: ['결제'],
-  },
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 12px;
+      background: #fff;
+      border-bottom: 1px solid #d1d5db;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
 
-  protectionFields: {
-    date: ['전표일자'],
-    manager: ['담당자'],
-    customer: ['거래처'],
-    address: ['현장주소'],
-    item: ['거래품목'],
-    constructionCost: ['시공비'],
-    totalAmount: ['총합계', '합계', '시공비'],
-    paymentStatus: ['결제'],
-  },
-};
+    .toolbar input,
+    .toolbar select,
+    .toolbar button {
+      height: 34px;
+      border: 1px solid #aaa;
+      background: #fff;
+      padding: 0 10px;
+      font-size: 13px;
+    }
 
-function doGet(e) {
-  try {
-    const params = (e && e.parameter) || {};
-    const action = String(params.action || 'health').toLowerCase();
+    .toolbar button {
+      cursor: pointer;
+      font-weight: 700;
+    }
 
-    if (action === 'health') {
-      return json_({
-        ok: true,
-        message: 'Apps Script is running',
-        actions: ['health', 'sites'],
+    .toolbar .primary {
+      background: #111;
+      color: #fff;
+      border-color: #111;
+    }
+
+    .status {
+      padding: 8px 12px;
+      color: #555;
+      font-size: 12px;
+    }
+
+    .paper-wrap {
+      padding: 18px;
+      overflow-x: auto;
+    }
+
+    .paper {
+      width: 190mm;
+      min-height: 270mm;
+      margin: 0 auto;
+      padding: 17mm 14mm 12mm;
+      background: #fff;
+      border: 1px solid #ddd;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 27px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      margin: 0 0 13mm;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      border: 1px solid #9b9b9b;
+      height: 28px;
+      padding: 3px 6px;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .outer { border: 2px solid #111; }
+
+    .supplier td { text-align: center; }
+
+    .supplier .vertical {
+      width: 42px;
+      border-right: 1px solid #999;
+      font-weight: 700;
+      line-height: 2.2;
+      white-space: pre-line;
+    }
+
+    .supplier .label {
+      width: 112px;
+      font-weight: 700;
+      background: #fff;
+    }
+
+    .supplier .value { text-align: left; }
+    .supplier .center-value { text-align: center; }
+
+    .fit-text {
+      font-size: 10px;
+      line-height: 1.25;
+      white-space: normal;
+      word-break: keep-all;
+    }
+
+    .message {
+      text-align: center;
+      margin: 11mm 0 9mm;
+      font-size: 14px;
+    }
+
+    .section-title {
+      margin: 0 0 6px 2px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .section { margin-top: 11mm; }
+
+    .amount-table { border: 2px solid #111; }
+
+    .amount-table td {
+      height: 36px;
+      border-color: #aaa;
+      font-size: 14px;
+    }
+
+    .soft {
+      background: #f4e6dc;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .amount-text {
+      font-weight: 700;
+      text-align: left;
+      padding-left: 16px;
+    }
+
+    .details { border: 2px solid #111; }
+
+    .details th {
+      background: #f4e6dc;
+      text-align: center;
+      font-weight: 700;
+      height: 32px;
+    }
+
+    .details td {
+      height: 30px;
+      text-align: center;
+    }
+
+    .details .content {
+      text-align: left;
+      padding-left: 12px;
+    }
+
+    .details .money {
+      text-align: right;
+      padding-right: 10px;
+    }
+
+    .details .sum-label {
+      background: #f4e6dc;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .bank { border: 2px solid #111; }
+
+    .bank th {
+      background: #f4e6dc;
+      height: 32px;
+      text-align: center;
+    }
+
+    .bank td {
+      text-align: center;
+      height: 34px;
+      font-weight: 700;
+    }
+
+    .empty {
+      padding: 44px 0;
+      text-align: center;
+      color: #777;
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 8mm;
+      }
+
+      body { background: #fff; }
+
+      .toolbar,
+      .status {
+        display: none !important;
+      }
+
+      .paper-wrap {
+        padding: 0;
+        overflow: visible;
+      }
+
+      .paper {
+        width: 194mm;
+        min-height: auto;
+        margin: 0;
+        padding: 14mm 12mm 10mm;
+        border: 0;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .paper-wrap { padding: 10px; }
+      .paper { width: 190mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <input id="monthInput" type="month" />
+    <button class="primary" onclick="loadMonth()">파일 생성하기</button>
+    <select id="groupSelect" onchange="renderDocument()">
+      <option value="">거래처 선택</option>
+    </select>
+    <button onclick="window.print()">PDF 다운로드 받기</button>
+  </div>
+
+  <div id="status" class="status">월을 선택한 뒤 파일 생성하기를 눌러주세요.</div>
+
+  <div class="paper-wrap">
+    <div id="paper" class="paper">
+      <div class="empty">결제요청서가 여기에 표시됩니다.</div>
+    </div>
+  </div>
+
+  <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyz3rWvneVgtR0yER5_DtFpX3AVi_t-FHsCbaEPPmSvql--VMNYV0KI4fdx0siOooRm/exec';
+
+    const COMPANY = {
+      name: '보양의신',
+      ceo: '신주현',
+      businessNumber: '630-23-02531',
+      address: '대구광역시 달서구 와룡로 49길 104-15 1층',
+      businessType: '건설업',
+      manager: '신주현',
+      phone: '010-8244-2777',
+      bank: '카카오뱅크',
+      account: '3333-35-2977357',
+      depositor: '보양의 신',
+    };
+
+    const state = {
+      month: '',
+      sites: [],
+      groups: [],
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    init();
+
+    function init() {
+      const now = new Date();
+      $('monthInput').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    async function loadMonth() {
+      state.month = $('monthInput').value;
+
+      if (!state.month) {
+        setStatus('월을 먼저 선택해 주세요.');
+        return;
+      }
+
+      setStatus('노션 데이터를 불러오는 중입니다...');
+      $('paper').innerHTML = '<div class="empty">불러오는 중입니다...</div>';
+
+      try {
+        const data = await fetchJson(`${WEB_APP_URL}?action=sites&month=${encodeURIComponent(state.month)}`);
+
+        if (!data.ok) {
+          throw new Error(data.error || '데이터를 불러오지 못했습니다.');
+        }
+
+        state.sites = Array.isArray(data.sites) ? data.sites : [];
+        state.groups = buildGroups(state.sites);
+
+        renderGroupOptions();
+
+        if (!state.groups.length) {
+          $('paper').innerHTML = '<div class="empty">해당 월의 미결제 데이터가 없습니다.</div>';
+          setStatus(`해당 월의 미결제 데이터가 없습니다. 응답 ${state.sites.length}건`);
+          return;
+        }
+
+        $('groupSelect').value = state.groups[0].key;
+        renderDocument();
+        setStatus(`${state.month} / 미결제 ${state.sites.length}건 / ${state.groups.length}개 거래처`);
+      } catch (err) {
+        $('paper').innerHTML = '<div class="empty">오류가 발생했습니다.</div>';
+        setStatus(err.message || String(err));
+      }
+    }
+
+    async function fetchJson(url) {
+      const res = await fetch(url);
+      const text = await res.text();
+
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        throw new Error('Apps Script 응답이 JSON이 아닙니다: ' + text.slice(0, 120));
+      }
+    }
+
+    function buildGroups(sites) {
+      const map = new Map();
+
+      sites.forEach((site) => {
+        const customer = firstText(site.customer, site.customerName, site.title, site.content, '미지정');
+        const key = `customer:${customer}`;
+
+        if (!map.has(key)) {
+          map.set(key, {
+            key,
+            contact: {
+              id: key,
+              name: customer,
+              type: '거래처',
+              phone: '',
+            },
+            sites: [],
+          });
+        }
+
+        map.get(key).sites.push(site);
+      });
+
+      return Array.from(map.values()).sort((a, b) => {
+        return String(a.contact.name || '').localeCompare(String(b.contact.name || ''), 'ko');
       });
     }
 
-    if (action === 'sites') {
-      return json_(loadSites_(params));
+    function renderGroupOptions() {
+      const options = ['<option value="">거래처 선택</option>'];
+
+      state.groups.forEach((group) => {
+        options.push(`<option value="${escapeHtml(group.key)}">${escapeHtml(group.contact.name)}</option>`);
+      });
+
+      $('groupSelect').innerHTML = options.join('');
     }
 
-    throw new Error('알 수 없는 action입니다: ' + action);
-  } catch (err) {
-    return json_({
-      ok: false,
-      error: String(err && err.message ? err.message : err),
-      stack: String(err && err.stack ? err.stack : ''),
-    });
-  }
-}
+    function renderDocument() {
+      const group = state.groups.find((item) => item.key === $('groupSelect').value);
 
-function doPost(e) {
-  return doGet(e);
-}
-
-function loadSites_(params) {
-  const month = params.month || prop_('defaultMonth') || '';
-
-  const permitPages = queryAllDatabase_(
-    prop_('permitDatabaseId'),
-    buildMonthAndUnpaidFilter_(month, '전표일자', '결제')
-  );
-
-  const protectionPages = queryAllDatabase_(
-    prop_('protectionDatabaseId'),
-    buildMonthAndUnpaidFilter_(month, '전표일자', '결제')
-  );
-
-  const permitRows = permitPages.map(function(page) {
-    return mapBillingRow_(page, CONFIG.permitFields, 'permit');
-  });
-
-  const protectionRows = protectionPages.map(function(page) {
-    return mapBillingRow_(page, CONFIG.protectionFields, 'protection');
-  });
-
-  const rows = permitRows.concat(protectionRows)
-    .filter(function(row) {
-      return row.customer &&
-        row.content &&
-        row.totalAmount > 0 &&
-        row.paymentStatus.indexOf('미결제') > -1;
-    })
-    .sort(function(a, b) {
-      return String(a.slipDate || '').localeCompare(String(b.slipDate || '')) ||
-        String(a.customer || '').localeCompare(String(b.customer || ''), 'ko') ||
-        String(a.content || '').localeCompare(String(b.content || ''), 'ko');
-    });
-
-  return {
-    ok: true,
-    month: month || null,
-    count: rows.length,
-    sites: rows,
-  };
-}
-
-function buildMonthAndUnpaidFilter_(month, dateProperty, paymentProperty) {
-  const filters = [
-    {
-      property: paymentProperty,
-      multi_select: {
-        contains: '미결제',
-      },
-    },
-  ];
-
-  if (month) {
-    filters.push(
-      {
-        property: dateProperty,
-        date: {
-          on_or_after: month + '-01',
-        },
-      },
-      {
-        property: dateProperty,
-        date: {
-          before: nextMonth_(month) + '-01',
-        },
+      if (!group) {
+        $('paper').innerHTML = '<div class="empty">거래처를 선택해 주세요.</div>';
+        return;
       }
-    );
-  }
 
-  return { and: filters };
-}
+      const rows = buildRows(group.sites);
+      const supply = rows.reduce((sum, row) => sum + row.supply, 0);
+      const vat = Math.round(supply * 0.1);
+      const total = supply + vat;
+      const items = getGroupItems(group.sites);
 
-function mapBillingRow_(page, fields, source) {
-  const props = page.properties || {};
+      $('paper').innerHTML = `
+        <div class="title">거래 대금 결제요청서</div>
 
-  const customer = readTextAny_(props, fields.customer);
-  const manager = readTextAny_(props, fields.manager);
-  const address = readTextAny_(props, fields.address);
-  const itemText = readTextAny_(props, fields.item);
-  const items = splitItems_(itemText);
-  const paymentStatus = readMultiSelectText_(props, fields.paymentStatus);
-  const constructionCost = readFirstPositiveNumber_(props, fields.constructionCost);
-  const totalAmount = readFirstPositiveNumber_(props, fields.totalAmount);
+        <table class="supplier outer">
+          <tr>
+            <td class="vertical" rowspan="5">공<br>급<br>자</td>
+            <td class="label">상호</td>
+            <td class="value">${escapeHtml(COMPANY.name)}</td>
+            <td class="label">대표자</td>
+            <td class="center-value">${escapeHtml(COMPANY.ceo)}</td>
+          </tr>
+          <tr>
+            <td class="label">사업자번호</td>
+            <td class="value" colspan="3">${escapeHtml(COMPANY.businessNumber)}</td>
+          </tr>
+          <tr>
+            <td class="label">주소</td>
+            <td class="value" colspan="3">${escapeHtml(COMPANY.address)}</td>
+          </tr>
+          <tr>
+            <td class="label">업태</td>
+            <td class="center-value">${escapeHtml(COMPANY.businessType)}</td>
+            <td class="label">종목</td>
+            <td class="center-value fit-text">${escapeHtml(items)}</td>
+          </tr>
+          <tr>
+            <td class="label">담당자</td>
+            <td class="value">${escapeHtml(COMPANY.manager)}</td>
+            <td class="label">연락처</td>
+            <td class="center-value">${escapeHtml(COMPANY.phone)}</td>
+          </tr>
+        </table>
 
-  return {
-    source: source,
-    id: page.id,
-    url: page.url || '',
+        <div class="message">시공대금을 다음과 같이 청구하오니 결제하여 주시기 바랍니다.</div>
 
-    customer: customer,
-    title: customer,
-    content: customer,
-    name: customer,
+        <div class="section-title">1. 청구금액</div>
+        <table class="amount-table">
+          <tr>
+            <td class="soft" style="width: 18%;">합계금액</td>
+            <td class="amount-text">₩ ${formatMoney(total)}(부가세포함)</td>
+          </tr>
+        </table>
 
-    slipDate: readDate_(props, fields.date),
-    address: address,
+        <div class="section">
+          <div class="section-title">2. 거래내역</div>
+          <table class="details">
+            <thead>
+              <tr>
+                <th style="width: 15%;">NO</th>
+                <th>내용</th>
+                <th style="width: 14%;">공급가</th>
+                <th style="width: 14%;">부가세</th>
+                <th style="width: 14%;">합계</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${renderRows(rows)}
+              <tr>
+                <td class="sum-label">합계</td>
+                <td></td>
+                <td class="money">${formatMoney(supply)}</td>
+                <td class="money">${formatMoney(vat)}</td>
+                <td class="money">${formatMoney(total)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-    manager: manager,
+        <div class="section">
+          <div class="section-title">3. 입금계좌번호</div>
+          <table class="bank">
+            <thead>
+              <tr>
+                <th style="width: 20%;">은행</th>
+                <th>계좌번호</th>
+                <th style="width: 34%;">예금주</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>${escapeHtml(COMPANY.bank)}</td>
+                <td>${escapeHtml(COMPANY.account)}</td>
+                <td>${escapeHtml(COMPANY.depositor)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
 
-    contacts: customer ? [
-      {
-        id: 'customer:' + customer,
-        name: customer,
-        type: '거래처',
-        phone: '',
-      },
-    ] : [],
-    contactIds: customer ? ['customer:' + customer] : [],
-    hasContact: !!customer,
+    function buildRows(sites) {
+      return sites.map((site, index) => {
+        const supply = Number(site.totalAmount || site.constructionCost || site.amount || 0);
+        const vat = Math.round(supply * 0.1);
 
-    items: items,
-    itemText: itemText,
+        return {
+          no: index + 1,
+          content: getSiteContent(site),
+          supply,
+          vat,
+          total: supply + vat,
+        };
+      });
+    }
 
-    constructionCost: constructionCost,
-    totalAmount: totalAmount,
+    function getSiteContent(site) {
+      const address = firstText(site.address, site.siteAddress, site['현장주소']);
+      const item = firstText(site.itemText, Array.isArray(site.items) ? site.items.join(', ') : site.items, site['거래품목']);
+      const fallback = firstText(site.content, site.title, site.name, site.customer, site['거래처']);
 
-    paymentStatus: paymentStatus,
-    paid: paymentStatus.indexOf('미결제') === -1,
-  };
-}
+      return [address, item].filter(Boolean).join(' / ') || fallback;
+    }
 
-function queryAllDatabase_(databaseId, filter) {
-  if (!databaseId) throw new Error('데이터베이스 ID가 비어 있습니다.');
+    function getGroupItems(sites) {
+      const set = new Set();
 
-  const results = [];
-  let cursor = null;
+      sites.forEach((site) => {
+        const values = Array.isArray(site.items)
+          ? site.items
+          : String(site.items || site.itemText || '').split(',');
 
-  do {
-    const payload = {
-      page_size: CONFIG.pageSize,
-    };
+        values.forEach((item) => {
+          const cleaned = String(item || '').trim();
+          if (cleaned) set.add(cleaned);
+        });
+      });
 
-    if (cursor) payload.start_cursor = cursor;
-    if (filter) payload.filter = filter;
+      return Array.from(set).join(', ');
+    }
 
-    const res = notionFetch_('/databases/' + normalizeId_(databaseId) + '/query', 'post', payload);
+    function firstText(...values) {
+      for (const value of values) {
+        if (value === null || value === undefined) continue;
+        const text = String(value).trim();
+        if (text) return text;
+      }
+      return '';
+    }
 
-    (res.results || []).forEach(function(page) {
-      results.push(page);
-    });
+    function renderRows(rows) {
+      const lines = rows.slice();
 
-    cursor = res.has_more ? res.next_cursor : null;
-  } while (cursor);
+      while (lines.length < 4) {
+        lines.push(null);
+      }
 
-  return results;
-}
+      return lines.map((row) => {
+        if (!row) {
+          return `
+            <tr>
+              <td></td>
+              <td class="content"></td>
+              <td class="money"></td>
+              <td class="money"></td>
+              <td class="money"></td>
+            </tr>
+          `;
+        }
 
-function notionFetch_(path, method, payload) {
-  const token = prop_('token');
-  if (!token) throw new Error('스크립트 속성 NOTION_TOKEN이 비어 있습니다.');
+        return `
+          <tr>
+            <td>${row.no}</td>
+            <td class="content">${escapeHtml(row.content)}</td>
+            <td class="money">${formatMoney(row.supply)}</td>
+            <td class="money">${formatMoney(row.vat)}</td>
+            <td class="money">${formatMoney(row.total)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
 
-  const options = {
-    method: method || 'get',
-    muteHttpExceptions: true,
-    headers: {
-      Authorization: 'Bearer ' + token,
-      'Notion-Version': CONFIG.notionVersion,
-      'Content-Type': 'application/json',
-    },
-  };
+    function formatMoney(value) {
+      return Math.round(Number(value || 0)).toLocaleString('ko-KR');
+    }
 
-  if (payload) {
-    options.payload = JSON.stringify(payload);
-  }
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
 
-  const response = UrlFetchApp.fetch('https://api.notion.com/v1' + path, options);
-  const status = response.getResponseCode();
-  const text = response.getContentText();
-  const data = text ? JSON.parse(text) : {};
-
-  if (status < 200 || status >= 300) {
-    throw new Error('Notion API error ' + status + ': ' + (data.message || text));
-  }
-
-  return data;
-}
-
-function prop_(key) {
-  const propName = CONFIG.props[key] || key;
-  return PropertiesService.getScriptProperties().getProperty(propName);
-}
-
-function normalizeId_(id) {
-  return String(id || '')
-    .replace(/^collection:\/\//, '')
-    .replace(/-/g, '')
-    .trim();
-}
-
-function nextMonth_(yyyyMm) {
-  const parts = String(yyyyMm).split('-');
-  const year = Number(parts[0]);
-  const month = Number(parts[1]);
-  const date = new Date(year, month, 1);
-  return Utilities.formatDate(date, CONFIG.timeZone, 'yyyy-MM');
-}
-
-function getProp_(props, names) {
-  for (let i = 0; i < names.length; i++) {
-    if (props[names[i]]) return props[names[i]];
-  }
-  return null;
-}
-
-function readTextAny_(props, names) {
-  const prop = getProp_(props, names);
-  if (!prop) return '';
-
-  if (prop.title) {
-    return prop.title.map(function(t) {
-      return t.plain_text || '';
-    }).join('').trim();
-  }
-
-  if (prop.rich_text) {
-    return prop.rich_text.map(function(t) {
-      return t.plain_text || '';
-    }).join('').trim();
-  }
-
-  if (prop.select && prop.select.name) {
-    return prop.select.name.trim();
-  }
-
-  if (prop.multi_select) {
-    return prop.multi_select.map(function(item) {
-      return item.name;
-    }).join(', ').trim();
-  }
-
-  if (prop.formula) {
-    if (typeof prop.formula.string === 'string') return prop.formula.string.trim();
-    if (typeof prop.formula.number === 'number') return String(prop.formula.number);
-  }
-
-  if (prop.phone_number) return prop.phone_number.trim();
-  if (prop.email) return prop.email.trim();
-  if (prop.url) return prop.url.trim();
-
-  return '';
-}
-
-function readMultiSelectText_(props, names) {
-  const prop = getProp_(props, names);
-  if (!prop) return '';
-
-  if (prop.multi_select) {
-    return prop.multi_select.map(function(item) {
-      return item.name;
-    }).join(', ');
-  }
-
-  if (prop.select && prop.select.name) {
-    return prop.select.name;
-  }
-
-  if (prop.status && prop.status.name) {
-    return prop.status.name;
-  }
-
-  return readTextAny_(props, names);
-}
-
-function readFirstPositiveNumber_(props, names) {
-  for (let i = 0; i < names.length; i++) {
-    const value = readNumber_(props, [names[i]]);
-    if (value > 0) return value;
-  }
-
-  return 0;
-}
-
-function readNumber_(props, names) {
-  const prop = getProp_(props, names);
-  if (!prop) return 0;
-
-  if (typeof prop.number === 'number') return prop.number;
-
-  if (prop.formula) {
-    if (typeof prop.formula.number === 'number') return prop.formula.number;
-    if (typeof prop.formula.string === 'string') return toNumber_(prop.formula.string);
-  }
-
-  return toNumber_(readTextAny_(props, names));
-}
-
-function readDate_(props, names) {
-  const prop = getProp_(props, names);
-  if (!prop || !prop.date || !prop.date.start) return '';
-  return prop.date.start;
-}
-
-function splitItems_(text) {
-  return String(text || '')
-    .split(',')
-    .map(function(item) {
-      return item.trim();
-    })
-    .filter(Boolean);
-}
-
-function toNumber_(value) {
-  if (typeof value === 'number') return value;
-  if (value === null || value === undefined || value === '') return 0;
-
-  const cleaned = String(value).replace(/[^\d.-]/g, '');
-  const number = Number(cleaned);
-
-  return isNaN(number) ? 0 : number;
-}
-
-function json_(data) {
-  return ContentService
-    .createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON);
-}
+    function setStatus(message) {
+      $('status').textContent = message;
+    }
+  </script>
+</body>
+</html>
