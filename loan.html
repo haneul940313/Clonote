@@ -358,26 +358,26 @@
       gallery.innerHTML = '<div class="state">' + escapeHtml(message) + '</div>';
     }
 
-   let lastPayload = '';
+    let lastPayload = '';
 
-async function loadLoans() {
-  try {
-    const url = API_URL + '&t=' + Date.now();
-    const response = await fetch(url, { cache: 'no-store' });
-    const data = await response.json();
-    const payload = JSON.stringify(data);
+    async function loadLoans() {
+      try {
+        const separator = API_URL.includes('?') ? '&' : '?';
+        const response = await fetch(API_URL + separator + 't=' + Date.now(), { cache: 'no-store' });
+        const data = await response.json();
+        const payload = JSON.stringify(data);
 
-    if (payload !== lastPayload) {
-      lastPayload = payload;
-      renderLoans(data);
+        if (payload !== lastPayload) {
+          lastPayload = payload;
+          renderLoans(data);
+        }
+      } catch (error) {
+        renderError('Cloudflare Worker 응답을 불러오지 못했어요.');
+      }
     }
-  } catch (error) {
-    renderError('Cloudflare Worker 응답을 불러오지 못했어요.');
-  }
-}
 
-loadLoans();
-setInterval(loadLoans, 15000);
+    loadLoans();
+    setInterval(loadLoans, 5000);
   </script>
 </body>
 </html>
