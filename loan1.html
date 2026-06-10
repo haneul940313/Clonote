@@ -7,7 +7,6 @@
   <style>
     :root {
       color-scheme: light;
-      --bg: #f6f8fb;
       --card: #ffffff;
       --ink: #202533;
       --muted: #70798b;
@@ -40,7 +39,7 @@
 
     .header {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: flex-start;
       gap: 16px;
       margin-bottom: 18px;
@@ -53,18 +52,18 @@
       font-weight: 700;
     }
 
-    h1 {
-      margin: 0;
-      font-size: 24px;
-      line-height: 1.25;
-      letter-spacing: 0;
-    }
-
     .title-row {
       display: flex;
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.25;
+      letter-spacing: 0;
     }
 
     .total {
@@ -221,6 +220,7 @@
     }
 
     .state {
+      grid-column: 1 / -1;
       padding: 28px;
       border: 1px solid var(--line);
       border-radius: 24px;
@@ -239,14 +239,6 @@
     }
 
     @media (max-width: 640px) {
-      body {
-        padding: 10px;
-      }
-
-      .header {
-        align-items: flex-start;
-      }
-
       .gallery {
         grid-template-columns: 1fr;
       }
@@ -285,7 +277,7 @@
   </main>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyiiW6DlActZORtfLVe9-zA7_78O6P5eUDYTktcEuo4dFBawr7eJQnC7fmV1RYUrqH6/exec';
+    const API_URL = 'https://clonote.clonote-tube.workers.dev/summary?key=lemon-loan-2026';
     const ACCENTS = ['#2dbb6f', '#5d8df7', '#f4b942', '#ef6f8f', '#7a6ff0', '#2fb8b8'];
 
     const gallery = document.getElementById('gallery');
@@ -326,12 +318,11 @@
       gallery.innerHTML = loans.map((loan, index) => {
         const accent = ACCENTS[index % ACCENTS.length];
         const progress = Math.max(0, Math.min(Number(loan.progressPercent || 0), 100));
-        const method = loan.method || loan.term || '대출';
         return `
           <article class="loan-card" style="--progress: ${progress}; --accent: ${accent};">
             <div class="card-top">
               <h2 class="loan-name">${escapeHtml(loan.name)}</h2>
-              <div class="method">${escapeHtml(method)}</div>
+              <div class="method">${escapeHtml(loan.method || '대출')}</div>
             </div>
             <div class="main">
               <div class="ring" aria-label="${progress}% 상환 완료">
@@ -367,39 +358,14 @@
       gallery.innerHTML = '<div class="state">' + escapeHtml(message) + '</div>';
     }
 
-    function loadLoans() {
-      const callbackName = '__loanRepaymentWidget_' + Date.now();
-      const script = document.createElement('script');
-      const separator = APPS_SCRIPT_URL.includes('?') ? '&' : '?';
-      let completed = false;
-      const timeout = window.setTimeout(() => {
-        if (completed) return;
-        completed = true;
-        renderError('Apps Script 응답 시간이 초과됐어요. 브라우저가 script.google.com을 차단했거나 배포 URL이 바뀌었을 수 있어요.');
-        script.remove();
-        delete window[callbackName];
-      }, 10000);
-
-      window[callbackName] = function (data) {
-        if (completed) return;
-        completed = true;
-        window.clearTimeout(timeout);
+    async function loadLoans() {
+      try {
+        const response = await fetch(API_URL, { cache: 'no-store' });
+        const data = await response.json();
         renderLoans(data);
-        script.remove();
-        delete window[callbackName];
-      };
-
-      script.onerror = function () {
-        if (completed) return;
-        completed = true;
-        window.clearTimeout(timeout);
-        renderError('Apps Script 응답을 불러오지 못했어요.');
-        script.remove();
-        delete window[callbackName];
-      };
-
-      script.src = APPS_SCRIPT_URL + separator + 'action=loans&callback=' + encodeURIComponent(callbackName);
-      document.head.appendChild(script);
+      } catch (error) {
+        renderError('Cloudflare Worker 응답을 불러오지 못했어요.');
+      }
     }
 
     loadLoans();
