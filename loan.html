@@ -367,18 +367,25 @@
       gallery.innerHTML = '<div class="state">' + escapeHtml(message) + '</div>';
     }
 
-async function loadLoans() {
-  try {
-    const res = await fetch(
-      APPS_SCRIPT_URL + '?action=loans',
-      { redirect: 'follow', credentials: 'include' }
-    );
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
+function loadLoans() {
+  const callbackName = '__loanRepaymentWidget_' + Date.now();
+  const script = document.createElement('script');
+  const separator = APPS_SCRIPT_URL.includes('?') ? '&' : '?';
+
+  window[callbackName] = function (data) {
     renderLoans(data);
-  } catch (e) {
-    renderError('Apps Script 응답을 불러오지 못했어요. (' + e.message + ')');
-  }
+    script.remove();
+    delete window[callbackName];
+  };
+
+  script.onerror = function () {
+    renderError('Apps Script 응답을 불러오지 못했어요.');
+    script.remove();
+    delete window[callbackName];
+  };
+
+  script.src = APPS_SCRIPT_URL + separator + 'action=loans&callback=' + encodeURIComponent(callbackName);
+  document.head.appendChild(script);
 }
 loadLoans();
   </script>
