@@ -354,22 +354,27 @@
       }).join('');
     }
 
-    function renderError(message) {
-      totalRemaining.textContent = '불러오기 실패';
-      gallery.innerHTML = '<div class="state">' + escapeHtml(message) + '</div>';
-    }
+    function loadLoans() {
+  const callbackName = '__loanWidget_' + Date.now();
+  const script = document.createElement('script');
 
-  async function loadLoans() {
-  try {
-    const res = await fetch(APPS_SCRIPT_URL, { redirect: 'follow' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
+  window[callbackName] = function (data) {
     renderLoans(data);
-  } catch (e) {
-    renderError('불러오지 못했어요. (' + e.message + ')');
-  }
+    script.remove();
+    delete window[callbackName];
+  };
+
+  script.onerror = function () {
+    renderError('Apps Script 응답을 불러오지 못했어요.');
+    script.remove();
+    delete window[callbackName];
+  };
+
+  script.src = APPS_SCRIPT_URL + '?callback=' + encodeURIComponent(callbackName);
+  document.head.appendChild(script);
 }
 loadLoans();
+    
   </script>
 </body>
 </html>
