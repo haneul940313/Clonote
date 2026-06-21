@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -20,7 +20,7 @@
 
   body {
     margin: 0;
-    background: var(--paper);
+    background: transparent;
     color: var(--ink);
     font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
     min-height: 100vh;
@@ -212,7 +212,7 @@
 
   <div class="tabs" role="tablist">
     <button class="tab" data-type="assignment" role="tab">메인 과제</button>
-    <button class="tab" data-type="attendance" role="tab">출석부</button>
+    <button class="tab" data-type="attendance" role="tab">시간표(출석)</button>
     <button class="tab" data-type="notice" role="tab">메인 공지</button>
   </div>
 
@@ -232,11 +232,9 @@
   </div>
 </div>
 
-<p class="footer-note">중복 생성은 자동으로 건너뜁니다. 결과가 뜰 때까지 페이지를 닫지 마세요.</p>
-
 <script>
- 
-  const WORKER_URL = 'https://student.clonote-tube.workers.dev/';
+  // ⚠️ 실제 배포한 Cloudflare Worker 주소로 교체하세요
+  const WORKER_URL = 'https://student.clonote-tube.workers.dev/run';
 
   const TAB_CONFIG = {
     assignment: {
