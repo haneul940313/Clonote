@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>아날로그 시계 위젯</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --black: #111111;
+        --red: #e53935;
+        --paper: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        background: var(--paper);
+        font-family: Arial, sans-serif;
+      }
+
+      .clock {
+        width: min(78vw, 360px);
+        aspect-ratio: 1;
+      }
+
+      .tick {
+        stroke: var(--black);
+      }
+
+      .tick--hour {
+        stroke-width: 4;
+      }
+
+      .tick--five-minute {
+        stroke-width: 2;
+      }
+
+      .hand {
+        fill: none;
+        stroke: var(--black);
+        stroke-linecap: round;
+      }
+
+      .hand--tapered {
+        fill: var(--black);
+        stroke: none;
+      }
+
+      .hour-hand {
+        stroke-width: 8;
+      }
+
+      .minute-hand {
+        stroke-width: 5.5;
+      }
+
+      .second-hand {
+        stroke: var(--red);
+        stroke-width: 2.5;
+      }
+
+      .center-cap {
+        fill: var(--black);
+      }
+
+      .center-cap--inner {
+        fill: var(--red);
+      }
+    </style>
+  </head>
+  <body>
+    <svg class="clock" viewBox="0 0 300 300" role="img" aria-label="현재 시간을 표시하는 아날로그 시계">
+      <g id="ticks" aria-hidden="true"></g>
+
+      <path id="hourHand" class="hand hand--tapered hour-hand" d="M 142,150 C 144,132 146,107 147,92 C 147.4,87 152.6,87 153,92 C 154,107 156,132 158,150 Z" />
+      <path id="minuteHand" class="hand hand--tapered minute-hand" d="M 145,150 C 146.5,124 148,82 148.7,56 C 149,51 151,51 151.3,56 C 152,82 153.5,124 155,150 Z" />
+      <line id="secondHand" class="hand second-hand" x1="150" y1="164" x2="150" y2="42" />
+      <circle class="center-cap" cx="150" cy="150" r="8" />
+      <circle class="center-cap--inner" cx="150" cy="150" r="3" />
+    </svg>
+
+    <script>
+      const center = 150;
+      const ticks = document.getElementById('ticks');
+      const svgNamespace = 'http://www.w3.org/2000/svg';
+
+      for (let index = 0; index < 60; index += 5) {
+        const isQuarter = index % 15 === 0;
+        const tick = document.createElementNS(svgNamespace, 'line');
+        const angle = (index * 6 * Math.PI) / 180;
+        const outerRadius = 130;
+        const innerRadius = isQuarter ? 112 : 118;
+
+        tick.setAttribute('x1', center + Math.sin(angle) * innerRadius);
+        tick.setAttribute('y1', center - Math.cos(angle) * innerRadius);
+        tick.setAttribute('x2', center + Math.sin(angle) * outerRadius);
+        tick.setAttribute('y2', center - Math.cos(angle) * outerRadius);
+        tick.setAttribute('class', isQuarter ? 'tick tick--hour' : 'tick tick--five-minute');
+        ticks.appendChild(tick);
+      }
+
+      const hands = {
+        hour: document.getElementById('hourHand'),
+        minute: document.getElementById('minuteHand'),
+        second: document.getElementById('secondHand'),
+      };
+
+      function setHandRotation(hand, degrees) {
+        hand.setAttribute('transform', `rotate(${degrees} ${center} ${center})`);
+      }
+
+      function updateClock() {
+        const now = new Date();
+        const milliseconds = now.getMilliseconds();
+        const seconds = now.getSeconds() + milliseconds / 1000;
+        const minutes = now.getMinutes() + seconds / 60;
+        const hours = (now.getHours() % 12) + minutes / 60;
+
+        setHandRotation(hands.hour, hours * 30);
+        setHandRotation(hands.minute, minutes * 6);
+        setHandRotation(hands.second, seconds * 6);
+        requestAnimationFrame(updateClock);
+      }
+
+      updateClock();
+    </script>
+  </body>
+</html>
