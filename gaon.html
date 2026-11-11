@@ -116,8 +116,7 @@
     const disabled = { track() {} };
     try {
       if (!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(GAS_WEB_APP_URL)) return disabled;
-      // 로컬 파일 및 다른 경로의 미리보기는 운영 통계에서 제외합니다.
-      if (location.protocol !== 'https:' || location.hostname !== 'haneul940313.github.io' || location.pathname !== '/Clonote/gaon.html') return disabled;
+      // 로컬 파일·앱 미리보기에서도 같은 GAS로 전송합니다.
 
       function randomId() {
         if (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function') return globalThis.crypto.randomUUID();
