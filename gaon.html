@@ -95,17 +95,99 @@
   <!-- 운영 전 실제 사업자명, 수집 필요성 및 보유·파기 운영 기준을 확인하세요. -->
   <dl>
     <dt>수집·이용자</dt><dd>가온태권도장</dd>
-    <dt>수집·이용 목적</dt><dd>성인 태권도 수련 상담 신청 확인, 상담 및 답변</dd>
+    <dt>수집·이용 목적</dt><dd>성인 태권도 수련 상담 신청 확인, 상담 및 답변, 문의 진행자의 성별·나이대별 통계 작성</dd>
     <dt>수집 항목 (모두 필수)</dt><dd>이름, 성별, 나이대, 휴대전화번호(문자 발신번호), 상담 내용</dd>
     <dt>보유 및 이용 기간</dt><dd>상담 종료 후 지체 없이 파기합니다.</dd>
     <dt>동의 거부 권리 및 불이익</dt><dd>개인정보 수집·이용에 동의하지 않을 수 있습니다. 동의를 거부하면 이 양식을 통한 문자 상담 신청을 이용할 수 없습니다.</dd>
     <dt>개인정보 관련 문의</dt><dd>010-8984-3725</dd>
   </dl>
-  <p>입력 내용은 이 페이지의 서버에 저장하지 않습니다. 문의하기를 누르면 문자 앱으로 전달되며, 사용자가 문자를 전송한 시점에 도장에 접수됩니다.</p>
+  <p>이름·휴대전화번호·문자 본문은 웹 통계에 저장하지 않습니다. 문의하기를 누르면 작성 내용이 문자 앱으로 전달되며, 사용자가 문자를 전송한 시점에 도장에 접수됩니다.</p>
+  <p>페이지 조회·버튼 클릭 통계에는 무작위 브라우저·세션 ID, 접속 시각, 페이지 경로, 유입경로, 캠페인 정보, 기기 종류를 기록합니다. 입력과 동의를 마쳐 문자 앱으로 이동을 요청할 때에만 성별·나이대를 함께 기록합니다. 브라우저 ID는 반복 문의를 구분하기 위해 브라우저에 저장됩니다.</p>
   <form method="dialog"><button class="close" autofocus>확인하고 닫기</button></form>
 </dialog>
 <script>
   'use strict';
+  // ★ 이 한 곳에 GAS 웹 앱의 /exec 배포 URL을 붙여넣으세요.
+  // 예: https://script.google.com/macros/s/배포ID/exec
+  // 빈 문자열이면 통계 전송만 중지되고 상담 기능은 그대로 작동합니다.
+  const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwH-miJwdQQo8V4lffu-mnqr60kiCoC8fDOMMWpL39-y2mjBgkbOpZN3LNFR1y_dFttaA/exec';
+
+  const analytics = (() => {
+    const disabled = { track() {} };
+    try {
+      if (!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(GAS_WEB_APP_URL)) return disabled;
+      // 로컬 파일 및 다른 경로의 미리보기는 운영 통계에서 제외합니다.
+      if (location.protocol !== 'https:' || location.hostname !== 'haneul940313.github.io' || location.pathname !== '/Clonote/gaon.html') return disabled;
+
+      function randomId() {
+        if (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function') return globalThis.crypto.randomUUID();
+        return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2) + '_' + Math.random().toString(36).slice(2);
+      }
+      function storedId(storageName, key) {
+        const fallback = randomId();
+        try {
+          const storage = window[storageName];
+          let id = storage.getItem(key);
+          if (!id || !/^[A-Za-z0-9_-]{8,100}$/.test(id)) {
+            id = fallback; storage.setItem(key, id);
+          }
+          return id;
+        } catch { return fallback; }
+      }
+      const clientId = storedId('localStorage', 'gaon_analytics_client_v1');
+      const sessionId = storedId('sessionStorage', 'gaon_analytics_session_v1');
+      const params = new URLSearchParams(location.search);
+      let referrer = '';
+      try {
+        if (document.referrer) {
+          const source = new URL(document.referrer);
+          if (/^https?:$/.test(source.protocol)) referrer = (source.origin + source.pathname).slice(0, 1000);
+        }
+      } catch { /* 유입경로를 파싱하지 못하면 비워 둠 */ }
+      const ua = navigator.userAgent;
+      const device = /iPad|Tablet/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+        ? 'tablet' : /Mobi|Android|iPhone|iPod/i.test(ua) ? 'mobile' : 'desktop';
+      const base = {
+        clientId, sessionId, pagePath: '/Clonote/gaon.html', referrer,
+        utmSource: (params.get('utm_source') || '').slice(0, 120),
+        utmMedium: (params.get('utm_medium') || '').slice(0, 120),
+        utmCampaign: (params.get('utm_campaign') || '').slice(0, 200), device
+      };
+      // 최근 이벤트는 메모리에만 보관. 이름/번호/문자 본문은 읽지 않습니다.
+      const recent = [];
+      function transmit(events) {
+        try {
+          const body = JSON.stringify({ events });
+          if (typeof navigator.sendBeacon === 'function') {
+            const queued = navigator.sendBeacon(GAS_WEB_APP_URL, new Blob([body], { type: 'text/plain;charset=UTF-8' }));
+            if (queued) return;
+          }
+          // CORS 응답은 읽지 않음. 전송 완료를 기다리지 않아 문자 앱 이동을 막지 않음.
+          if (typeof fetch === 'function') fetch(GAS_WEB_APP_URL, {
+            method: 'POST', mode: 'no-cors', credentials: 'omit', keepalive: true,
+            headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body
+          }).catch(() => {});
+        } catch { /* 통계 실패가 폼 제출에 영향을 주지 않게 함 */ }
+      }
+      function track(eventType, demographics) {
+        try {
+          const item = { ...base, eventId: randomId(), eventType, clientTime: new Date().toISOString() };
+          if (eventType === 'inquiry_submit' && demographics) {
+            item.gender = demographics.gender; item.ageGroup = demographics.ageGroup;
+          }
+          recent.push(item);
+          if (recent.length > 8) recent.shift();
+          transmit([item]);
+        } catch { /* 상담 기능 유지 */ }
+      }
+      document.addEventListener('visibilitychange', () => {
+        // 문자 앱 이동/탭 닫기 직전에 같은 eventId로 재전송. GAS에서 중복 제거.
+        if (document.visibilityState === 'hidden' && recent.length) transmit(recent.slice());
+      });
+      return { track };
+    } catch { return disabled; }
+  })();
+
   const PHONE = '01089843725';
   const form = document.getElementById('consultation');
   const nameInput = document.getElementById('applicant-name');
@@ -116,6 +198,11 @@
   const preview = document.getElementById('message-preview');
   const privacyDialog = document.getElementById('privacy-dialog');
   const privacyOpen = document.getElementById('privacy-open');
+
+  // click을 직접 수집해야 필수 입력 검증에 막힌 클릭도 집계됩니다.
+  document.querySelector('.poster-button').addEventListener('click', () => analytics.track('image_click'));
+  document.querySelector('.submit').addEventListener('click', () => analytics.track('inquiry_click'));
+  analytics.track('page_view');
 
   function buildMessage(name, genderValue, ageValue) {
     return `성인태권도 수련 상담신청합니다.\n이름 : ${name}\n성별 : ${genderValue}\n나이대 : ${ageValue}\n\n개인정보 수집·이용 안내를 확인하고 동의합니다.`;
@@ -139,6 +226,7 @@
   form.addEventListener('submit', (event) => {
     event.preventDefault();
     if (!form.reportValidity() || !updatePreview()) return;
+    analytics.track('inquiry_submit', { gender: gender.value, ageGroup: age.value });
     status.textContent = '문자 앱으로 이동합니다. 작성 내용을 확인하고 직접 전송해 주세요. 앱이 열리지 않으면 아래에서 내용을 복사할 수 있습니다.';
     window.location.href = buildSmsUrl(preview.value, navigator.userAgent, navigator.platform, navigator.maxTouchPoints);
   });
